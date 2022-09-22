@@ -1,0 +1,6 @@
+[submodule "test"]
+	path = test
+	url = https://github.com/OpenZeppelin/openzeppelin-contracts.git
+[submodule "tests"]
+	path = tests
+	url = https://github.com/OpenZeppelin/openzeppelin-contracts.git
