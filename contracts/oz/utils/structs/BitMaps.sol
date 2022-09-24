@@ -17,10 +17,12 @@ library BitMaps {
     function get(BitMap storage bitmap, uint256 index)
         internal
         view
-        returns (bool)
+        returns (bool isSet)
     {
-        unchecked {
-            return bitmap._data[index >> 8] & (1 << (index & 0xff)) != 0;
+        assembly {
+            mstore(0x00, shr(8, index))
+            mstore(0x20, bitmap.slot)
+            isSet := and(sload(keccak256(0x00, 0x40)), shl(and(index, 0xff), 1))
         }
     }
 
@@ -40,8 +42,30 @@ library BitMaps {
      * @dev Sets the bit at `index`.
      */
     function set(BitMap storage bitmap, uint256 index) internal {
-        unchecked {
-            bitmap._data[index >> 8] |= 1 << (index & 0xff);
+        assembly {
+            mstore(0x00, shr(8, index))
+            mstore(0x20, bitmap.slot)
+            let key := keccak256(0x00, 0x40)
+            sstore(key, or(sload(key), shl(and(index, 0xff), 1)))
+        }
+    }
+
+    function setBatch(BitMap storage bitmap_, uint256[] memory values_)
+        internal
+    {
+        assembly {
+            let length := mload(values_)
+            let i := add(values_, 0x20)
+            mstore(0x20, bitmap_.slot)
+            for {
+                let end := add(i, mul(length, 0x20))
+            } lt(i, end) {
+                i := add(i, 0x20)
+            } {
+                mstore(0x00, shr(8, mload(i)))
+                let key := keccak256(0x00, 0x40)
+                sstore(key, or(sload(key), shl(and(mload(i), 0xff), 1)))
+            }
         }
     }
 
@@ -51,6 +75,13 @@ library BitMaps {
     function unset(BitMap storage bitmap, uint256 index) internal {
         unchecked {
             bitmap._data[index >> 8] &= ~(1 << (index & 0xff));
+        }
+
+        assembly {
+            mstore(0x00, shr(8, index))
+            mstore(0x20, bitmap.slot)
+            let key := keccak256(0x00, 0x40)
+            sstore(key, and(sload(key), shl(and(index, 0xff), 1)))
         }
     }
 }

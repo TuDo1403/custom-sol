@@ -240,11 +240,10 @@ abstract contract ERC721Upgradeable is
         _beforeTokenTransfer(from, to, tokenId);
 
         bytes32 _to = to.fillLast12Bytes();
-        
+
         unchecked {
             --_balanceOf[from.fillLast12Bytes()];
             ++_balanceOf[_to];
-            
         }
         _ownerOf[tokenId] = _to;
 

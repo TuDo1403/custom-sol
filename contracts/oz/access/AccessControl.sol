@@ -7,7 +7,7 @@ import "./IAccessControl.sol";
 import "../utils/Context.sol";
 import "../utils/introspection/ERC165.sol";
 
-import "../utils/structs/BitMaps.sol";
+import "../../libraries/BitMap256.sol";
 import "../../libraries/Bytes32Address.sol";
 
 /**
@@ -50,12 +50,14 @@ import "../../libraries/Bytes32Address.sol";
  */
 abstract contract AccessControl is Context, IAccessControl, ERC165 {
     using Bytes32Address for address;
-    using BitMaps for BitMaps.BitMap;
+    using BitMap256 for BitMap256.BitMap;
 
     bytes32 public constant DEFAULT_ADMIN_ROLE = 0x00;
 
-    mapping(bytes32 => bytes32) private _adminRoles;
-    mapping(bytes32 => BitMaps.BitMap) private _roles;
+    // role => admin
+    mapping(bytes32 => bytes32) internal _adminRoles;
+    // user => roles
+    mapping(bytes32 => BitMap256.BitMap) internal _roles;
 
     /**
      * @dev Modifier that checks that an account has a specific role. Reverts
@@ -68,7 +70,7 @@ abstract contract AccessControl is Context, IAccessControl, ERC165 {
      * _Available since v4.1._
      */
     modifier onlyRole(bytes32 role) {
-        _checkRole(role, _msgSender());
+        _checkRole(role);
         _;
     }
 
@@ -97,7 +99,16 @@ abstract contract AccessControl is Context, IAccessControl, ERC165 {
         override
         returns (bool)
     {
-        return _roles[role].get(account.fillLast96Bits());
+        return _hasRole(uint256(role), account.fillLast12Bytes());
+    }
+
+    function _hasRole(uint256 role, bytes32 bytes32Addr)
+        internal
+        view
+        virtual
+        returns (bool)
+    {
+        return _roles[bytes32Addr].get(role);
     }
 
     /**
@@ -248,10 +259,20 @@ abstract contract AccessControl is Context, IAccessControl, ERC165 {
      * May emit a {RoleGranted} event.
      */
     function _grantRole(bytes32 role, address account) internal virtual {
-        if (!hasRole(role, account)) {
-            _roles[role].set(account.fillLast96Bits());
+        if (_grantRole(uint256(role), account.fillLast12Bytes()))
             emit RoleGranted(role, account, _msgSender());
+    }
+
+    function _grantRole(uint256 role, bytes32 account)
+        internal
+        virtual
+        returns (bool)
+    {
+        if (!_hasRole(role, account)) {
+            _roles[account].set(role);
+            return true;
         }
+        return false;
     }
 
     /**
@@ -262,9 +283,20 @@ abstract contract AccessControl is Context, IAccessControl, ERC165 {
      * May emit a {RoleRevoked} event.
      */
     function _revokeRole(bytes32 role, address account) internal virtual {
-        if (hasRole(role, account)) {
-            _roles[role].unset(account.fillLast96Bits());
+        if (_revokeRole(uint256(role), account.fillLast12Bytes())) {
             emit RoleRevoked(role, account, _msgSender());
         }
+    }
+
+    function _revokeRole(uint256 role, bytes32 account)
+        internal
+        virtual
+        returns (bool)
+    {
+        if (_hasRole(role, account)) {
+            _roles[account].unset(role);
+            return true;
+        }
+        return false;
     }
 }

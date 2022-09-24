@@ -10,7 +10,7 @@ library BitMap256 {
     function get(BitMap storage bitmap_, uint256 value_)
         internal
         view
-        returns (bool)
+        returns (bool isSet)
     {
         assembly {
             mstore(0x00, value_)
@@ -19,7 +19,13 @@ library BitMap256 {
                 0x00,
                 and(sload(bitmap_.slot), shl(and(mload(0x00), 0xff), 1))
             )
-            return(0x00, 32)
+            isSet := mload(0x0)
+        }
+    }
+
+    function setData(BitMap storage bitmap_, uint256 value) internal {
+        assembly {
+            sstore(bitmap_.slot, value)
         }
     }
 
@@ -38,7 +44,7 @@ library BitMap256 {
             mstore(0x00, keccak256(0x00, 32))
             sstore(
                 bitmap_.slot,
-                or(sload(bitmap_.slot), shl(and(mload(0x00), 0xff), 1))
+                or(bitmap_.slot, shl(and(mload(0x00), 0xff), 1))
             )
         }
     }
@@ -49,7 +55,7 @@ library BitMap256 {
             mstore(0x00, keccak256(0x00, 32))
             sstore(
                 bitmap_.slot,
-                and(sload(bitmap_.slot), not(shl(and(mload(0x00), 0xff), 1)))
+                and(bitmap_.slot, not(shl(and(mload(0x00), 0xff), 1)))
             )
         }
     }

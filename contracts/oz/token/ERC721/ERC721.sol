@@ -22,7 +22,6 @@ abstract contract ERC721 is Context, ERC165, IERC721, IERC721Metadata {
     //////////////////////////////////////////////////////////////*/
 
     string public name;
-
     string public symbol;
 
     function _baseURI() internal view virtual returns (string memory);
@@ -34,7 +33,6 @@ abstract contract ERC721 is Context, ERC165, IERC721, IERC721Metadata {
     //////////////////////////////////////////////////////////////*/
 
     mapping(uint256 => bytes32) internal _ownerOf;
-
     mapping(bytes32 => uint256) internal _balanceOf;
 
     function ownerOf(uint256 id)
@@ -244,11 +242,10 @@ abstract contract ERC721 is Context, ERC165, IERC721, IERC721Metadata {
         _beforeTokenTransfer(from, to, tokenId);
 
         bytes32 _to = to.fillLast12Bytes();
-        
+
         unchecked {
             --_balanceOf[from.fillLast12Bytes()];
             ++_balanceOf[_to];
-            
         }
         _ownerOf[tokenId] = _to;
 
@@ -310,7 +307,6 @@ abstract contract ERC721 is Context, ERC165, IERC721, IERC721Metadata {
         }
 
         delete _ownerOf[id];
-
         delete _getApproved[id];
 
         emit Transfer(owner, address(0), id);

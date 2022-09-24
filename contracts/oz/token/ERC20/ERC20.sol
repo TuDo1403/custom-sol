@@ -102,9 +102,8 @@ abstract contract ERC20 is Context, IERC20 {
     ) public virtual returns (bool) {
         _beforeTokenTransfer(from, to, amount);
 
-        bytes32 sender = _msgSender().fillLast12Bytes();
         bytes32 _from = from.fillLast12Bytes();
-        _spendAllowance(_from, sender, amount);
+        _spendAllowance(_from, _msgSender().fillLast12Bytes(), amount);
 
         _balanceOf[_from] -= amount;
 

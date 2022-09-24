@@ -64,8 +64,10 @@ abstract contract Pausable is Context {
     /**
      * @dev Returns true if the contract is paused, and false otherwise.
      */
-    function paused() public view virtual returns (bool) {
-        return _paused == 1 ? false : true;
+    function paused() public view virtual returns (bool isPaused) {
+        assembly {
+            isPaused := eq(2, sload(_paused.slot))
+        }
     }
 
     /**

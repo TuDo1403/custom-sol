@@ -14,9 +14,10 @@ abstract contract AccessControlEnumerable is
     IAccessControlEnumerable,
     AccessControl
 {
+    using BitMap256 for BitMap256.BitMap;
     using EnumerableSet for EnumerableSet.AddressSet;
 
-    mapping(bytes32 => EnumerableSet.AddressSet) private _roleMembers;
+    EnumerableSet.AddressSet internal _roleMembers;
 
     /**
      * @dev See {IERC165-supportsInterface}.
@@ -38,9 +39,28 @@ abstract contract AccessControlEnumerable is
         view
         virtual
         override
-        returns (address[] memory)
+        returns (address[] memory membersOfRole)
     {
-        return _roleMembers[role_].values();
+        bytes32[] memory allMembers = _roleMembers._inner._values;
+        assembly {
+            membersOfRole := allMembers
+        }
+        uint256 length = allMembers.length;
+        uint256 counter;
+        for (uint256 i; i < length; ) {
+            unchecked {
+                if (!_roles[allMembers[i]].get(uint256(role_))) {
+                    membersOfRole[i] = membersOfRole[length - 1];
+                    ++counter;
+                }
+                ++i;
+            }
+        }
+        if (counter != 0) {
+            assembly {
+                mstore(membersOfRole, sub(mload(membersOfRole), counter))
+            }
+        }
     }
 
     /**
@@ -62,7 +82,7 @@ abstract contract AccessControlEnumerable is
         override
         returns (address)
     {
-        return _roleMembers[role].at(index);
+        return getAllRoleMembers(role)[index];
     }
 
     /**
@@ -76,7 +96,7 @@ abstract contract AccessControlEnumerable is
         override
         returns (uint256)
     {
-        return _roleMembers[role].length();
+        return getAllRoleMembers(role).length;
     }
 
     /**
@@ -88,7 +108,7 @@ abstract contract AccessControlEnumerable is
         override
     {
         super._grantRole(role, account);
-        _roleMembers[role].add(account);
+        _roleMembers.add(account);
     }
 
     /**
@@ -100,6 +120,6 @@ abstract contract AccessControlEnumerable is
         override
     {
         super._revokeRole(role, account);
-        _roleMembers[role].remove(account);
+        _roleMembers.remove(account);
     }
 }

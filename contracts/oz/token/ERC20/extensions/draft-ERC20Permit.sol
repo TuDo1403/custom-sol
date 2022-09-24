@@ -83,7 +83,12 @@ abstract contract ERC20Permit is ERC20, IERC20Permit, Signable {
      * @dev See {IERC20Permit-DOMAIN_SEPARATOR}.
      */
     // solhint-disable-next-line func-name-mixedcase
-    function DOMAIN_SEPARATOR() external view override(IERC20Permit, Signable) returns (bytes32) {
+    function DOMAIN_SEPARATOR()
+        external
+        view
+        override(IERC20Permit, Signable)
+        returns (bytes32)
+    {
         return _domainSeparatorV4();
     }
 
