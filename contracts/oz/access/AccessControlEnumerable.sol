@@ -5,7 +5,7 @@ pragma solidity ^0.8.17;
 
 import "./IAccessControlEnumerable.sol";
 import "./AccessControl.sol";
-import "../utils/structs/EnumerableSet.sol";
+import "../../libraries/EnumerableSet256.sol";
 
 /**
  * @dev Extension of {AccessControl} that allows enumerating the members of each role.
@@ -15,9 +15,9 @@ abstract contract AccessControlEnumerable is
     AccessControl
 {
     using BitMap256 for BitMap256.BitMap;
-    using EnumerableSet for EnumerableSet.AddressSet;
+    using EnumerableSet256 for EnumerableSet256.AddressSet;
 
-    EnumerableSet.AddressSet internal _roleMembers;
+    mapping(bytes32 => EnumerableSet256.AddressSet) internal _roleMembers;
 
     /**
      * @dev See {IERC165-supportsInterface}.
@@ -39,28 +39,9 @@ abstract contract AccessControlEnumerable is
         view
         virtual
         override
-        returns (address[] memory membersOfRole)
+        returns (address[] memory)
     {
-        bytes32[] memory allMembers = _roleMembers._inner._values;
-        assembly {
-            membersOfRole := allMembers
-        }
-        uint256 length = allMembers.length;
-        uint256 counter;
-        for (uint256 i; i < length; ) {
-            unchecked {
-                if (!_roles[allMembers[i]].get(uint256(role_))) {
-                    membersOfRole[i] = membersOfRole[length - 1];
-                    ++counter;
-                }
-                ++i;
-            }
-        }
-        if (counter != 0) {
-            assembly {
-                mstore(membersOfRole, sub(mload(membersOfRole), counter))
-            }
-        }
+        return _roleMembers[role_].values();
     }
 
     /**
@@ -82,7 +63,7 @@ abstract contract AccessControlEnumerable is
         override
         returns (address)
     {
-        return getAllRoleMembers(role)[index];
+        return _roleMembers[role].at(index);
     }
 
     /**
@@ -96,7 +77,7 @@ abstract contract AccessControlEnumerable is
         override
         returns (uint256)
     {
-        return getAllRoleMembers(role).length;
+        return _roleMembers[role].length();
     }
 
     /**
@@ -108,8 +89,9 @@ abstract contract AccessControlEnumerable is
         override
     {
         super._grantRole(role, account);
-        _roleMembers.add(account);
+        _roleMembers[role].add(account);
     }
+
 
     /**
      * @dev Overload {_revokeRole} to track enumerable memberships
@@ -120,6 +102,6 @@ abstract contract AccessControlEnumerable is
         override
     {
         super._revokeRole(role, account);
-        _roleMembers.remove(account);
+        _roleMembers[role].remove(account);
     }
 }

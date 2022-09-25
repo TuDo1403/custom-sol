@@ -102,4 +102,6 @@ interface IAccessControl {
      * - the caller must be `account`.
      */
     function renounceRole(bytes32 role, address account) external;
+
+    function DEFAULT_ADMIN_ROLE() external pure returns (bytes32);
 }
