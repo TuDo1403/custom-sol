@@ -7,6 +7,37 @@ library BitMap256 {
         uint256 data;
     }
 
+    function index(uint256 value_) internal pure returns (uint256) {
+        return value_ & 0xff;
+    }
+
+    function indexHash(uint256 value) internal pure returns (uint256 idx) {
+        assembly {
+            mstore(0x00, value)
+            idx := keccak256(0x00, 32)
+        }
+    }
+
+    function unsafeGet(BitMap storage bitmap_, uint256 value_)
+        internal
+        view
+        returns (bool isSet)
+    {
+        assembly {
+            isSet := and(sload(bitmap_.slot), shl(and(value_, 0xff), 1))
+        }
+    }
+
+    function unsafeGet(uint256 bitmap_, uint256 value_)
+        internal
+        pure
+        returns (bool isSet)
+    {
+        assembly {
+            isSet := and(bitmap_, shl(and(value_, 0xff), 1))
+        }
+    }
+
     function get(BitMap storage bitmap_, uint256 value_)
         internal
         view
@@ -14,12 +45,21 @@ library BitMap256 {
     {
         assembly {
             mstore(0x00, value_)
-            mstore(0x00, keccak256(0x00, 32))
-            mstore(
-                0x00,
-                and(sload(bitmap_.slot), shl(and(mload(0x00), 0xff), 1))
+            isSet := and(
+                sload(bitmap_.slot),
+                shl(and(keccak256(0x00, 32), 0xff), 1)
             )
-            isSet := mload(0x0)
+        }
+    }
+
+    function get(uint256 bitmap_, uint256 value_)
+        internal
+        pure
+        returns (bool isSet)
+    {
+        assembly {
+            mstore(0x00, value_)
+            isSet := and(bitmap_, shl(and(keccak256(0x00, 32), 0xff), 1))
         }
     }
 
@@ -38,25 +78,86 @@ library BitMap256 {
         else unset(bitmap_, value_);
     }
 
+    function unsafeSet(BitMap storage bitmap_, uint256 value_) internal {
+        assembly {
+            sstore(
+                bitmap_.slot,
+                or(sload(bitmap_.slot), shl(and(value_, 0xff), 1))
+            )
+        }
+    }
+
+    function unsafeSet(uint256 bitmap_, uint256 value_)
+        internal
+        pure
+        returns (uint256 bitmap)
+    {
+        assembly {
+            bitmap := or(bitmap_, shl(and(value_, 0xff), 1))
+        }
+    }
+
     function set(BitMap storage bitmap_, uint256 value_) internal {
         assembly {
             mstore(0x00, value_)
-            mstore(0x00, keccak256(0x00, 32))
             sstore(
                 bitmap_.slot,
-                or(bitmap_.slot, shl(and(mload(0x00), 0xff), 1))
+                or(sload(bitmap_.slot), shl(and(keccak256(0x00, 32), 0xff), 1))
             )
+        }
+    }
+
+    function set(uint256 bitmap_, uint256 value_)
+        internal
+        pure
+        returns (uint256 bitmap)
+    {
+        assembly {
+            mstore(0x00, value_)
+            bitmap := or(bitmap_, shl(and(keccak256(0x00, 32), 0xff), 1))
+        }
+    }
+
+    function unsafeUnset(BitMap storage bitmap_, uint256 value_) internal {
+        assembly {
+            sstore(
+                bitmap_.slot,
+                and(sload(bitmap_.slot), not(shl(and(value_, 0xff), 1)))
+            )
+        }
+    }
+
+    function unsafeUnset(uint256 bitmap_, uint256 value_)
+        internal
+        pure
+        returns (uint256 bitmap)
+    {
+        assembly {
+            bitmap := and(bitmap_, not(shl(and(value_, 0xff), 1)))
         }
     }
 
     function unset(BitMap storage bitmap_, uint256 value_) internal {
         assembly {
             mstore(0x00, value_)
-            mstore(0x00, keccak256(0x00, 32))
             sstore(
                 bitmap_.slot,
-                and(bitmap_.slot, not(shl(and(mload(0x00), 0xff), 1)))
+                and(
+                    sload(bitmap_.slot),
+                    not(shl(and(keccak256(0x00, 32), 0xff), 1))
+                )
             )
+        }
+    }
+
+    function unset(uint256 bitmap_, uint256 value_)
+        internal
+        pure
+        returns (uint256 bitmap)
+    {
+        assembly {
+            mstore(0x00, value_)
+            bitmap := and(bitmap_, not(shl(and(keccak256(0x00, 32), 0xff), 1)))
         }
     }
 }
