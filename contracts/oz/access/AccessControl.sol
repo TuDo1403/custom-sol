@@ -108,7 +108,7 @@ abstract contract AccessControl is Context, IAccessControl, ERC165 {
         virtual
         returns (bool)
     {
-        return _roles[bytes32Addr].get(role);
+        return _roles[bytes32Addr].unsafeGet(role);
     }
 
     /**
@@ -269,7 +269,7 @@ abstract contract AccessControl is Context, IAccessControl, ERC165 {
         returns (bool)
     {
         if (!_hasRole(role, account)) {
-            _roles[account].set(role);
+            _roles[account].unsafeSet(role);
             return true;
         }
         return false;
@@ -294,7 +294,7 @@ abstract contract AccessControl is Context, IAccessControl, ERC165 {
         returns (bool)
     {
         if (_hasRole(role, account)) {
-            _roles[account].unset(role);
+            _roles[account].unsafeUnset(role);
             return true;
         }
         return false;
