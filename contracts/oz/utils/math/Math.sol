@@ -8,7 +8,7 @@ error Math__Overflow();
 /**
  * @dev Standard math utilities missing in the Solidity language.
  */
-library MathUpgradeable {
+library Math {
     enum Rounding {
         Down, // Toward negative infinity
         Up, // Toward infinity

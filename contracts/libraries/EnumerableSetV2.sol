@@ -98,4 +98,15 @@ library EnumerableSetV2 {
     function length(AddressSet storage set) internal view returns (uint256) {
         return _length(set._inner);
     }
+
+    function values(AddressSet storage set)
+        internal
+        view
+        returns (address[] memory res)
+    {
+        uint256[] memory val = _values(set._inner);
+        assembly {
+            res := val
+        }
+    }
 }
