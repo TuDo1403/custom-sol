@@ -7,7 +7,7 @@ import "./IAccessControlUpgradeable.sol";
 import "../utils/ContextUpgradeable.sol";
 import "../utils/introspection/ERC165Upgradeable.sol";
 
-import "../utils/structs/BitMapsUpgradeable.sol";
+import "../../libraries/BitMap256.sol";
 import "../../libraries/Bytes32Address.sol";
 
 /**
@@ -54,14 +54,14 @@ abstract contract AccessControlUpgradeable is
     ERC165Upgradeable
 {
     using Bytes32Address for address;
-    using BitMapsUpgradeable for BitMapsUpgradeable.BitMap;
+    using BitMap256 for BitMap256.BitMap;
 
     function __AccessControl_init() internal onlyInitializing {}
 
     function __AccessControl_init_unchained() internal onlyInitializing {}
 
     mapping(bytes32 => bytes32) private _adminRoles;
-    mapping(bytes32 => BitMapsUpgradeable.BitMap) private _roles;
+    mapping(bytes32 => BitMap256.BitMap) private _roles;
 
     bytes32 public constant DEFAULT_ADMIN_ROLE = 0x00;
 
@@ -105,7 +105,16 @@ abstract contract AccessControlUpgradeable is
         override
         returns (bool)
     {
-        return _roles[role].get(account.fillLast96Bits());
+        return _hasRole(uint256(role), account.fillLast12Bytes());
+    }
+
+    function _hasRole(uint256 role, bytes32 bytes32Addr)
+        internal
+        view
+        virtual
+        returns (bool)
+    {
+        return _roles[bytes32Addr].unsafeGet(role);
     }
 
     /**
@@ -256,10 +265,20 @@ abstract contract AccessControlUpgradeable is
      * May emit a {RoleGranted} event.
      */
     function _grantRole(bytes32 role, address account) internal virtual {
-        if (!hasRole(role, account)) {
-            _roles[role].set(account.fillLast96Bits());
+        if (_grantRole(uint256(role), account.fillLast12Bytes()))
             emit RoleGranted(role, account, _msgSender());
+    }
+
+    function _grantRole(uint256 role, bytes32 account)
+        internal
+        virtual
+        returns (bool)
+    {
+        if (!_hasRole(role, account)) {
+            _roles[account].unsafeSet(role);
+            return true;
         }
+        return false;
     }
 
     /**
@@ -270,10 +289,21 @@ abstract contract AccessControlUpgradeable is
      * May emit a {RoleRevoked} event.
      */
     function _revokeRole(bytes32 role, address account) internal virtual {
-        if (hasRole(role, account)) {
-            _roles[role].unset(account.fillLast96Bits());
+        if (_revokeRole(uint256(role), account.fillLast12Bytes())) {
             emit RoleRevoked(role, account, _msgSender());
         }
+    }
+
+    function _revokeRole(uint256 role, bytes32 account)
+        internal
+        virtual
+        returns (bool)
+    {
+        if (_hasRole(role, account)) {
+            _roles[account].unsafeUnset(role);
+            return true;
+        }
+        return false;
     }
 
     /**

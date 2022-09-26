@@ -1,9 +1,16 @@
 {
   "name": "custom-sol",
+  "version": "1.0.0",
+  "description": "Custom OpenZeppelin Contracts for minimal gas cost",
+  "author": "tudo <[minhtu@bacoor.co](mailto:minhtu@bacoor.co)>",
+  "license": "MIT",
   "packageManager": "yarn@3.2.3",
   "dependencies": {
     "hardhat": "^2.11.2"
   },
+  "files": [
+    "/contracts/**/*.sol"
+  ],
   "devDependencies": {
     "@ethersproject/abi": "^5.4.7",
     "@ethersproject/providers": "^5.4.7",

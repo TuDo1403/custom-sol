@@ -5,7 +5,7 @@ pragma solidity ^0.8.0;
 
 import "./IAccessControlEnumerableUpgradeable.sol";
 import "./AccessControlUpgradeable.sol";
-import "../utils/structs/EnumerableSetUpgradeable.sol";
+import "../../libraries/EnumerableSet256.sol";
 
 /**
  * @dev Extension of {AccessControl} that allows enumerating the members of each role.
@@ -21,9 +21,9 @@ abstract contract AccessControlEnumerableUpgradeable is
         onlyInitializing
     {}
 
-    using EnumerableSetUpgradeable for EnumerableSetUpgradeable.AddressSet;
+    using EnumerableSet256 for EnumerableSet256.AddressSet;
 
-    mapping(bytes32 => EnumerableSetUpgradeable.AddressSet)
+    mapping(bytes32 => EnumerableSet256.AddressSet)
         private _roleMembers;
 
     /**

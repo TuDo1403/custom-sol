@@ -68,8 +68,10 @@ abstract contract PausableUpgradeable is ContextUpgradeable {
     /**
      * @dev Returns true if the contract is paused, and false otherwise.
      */
-    function paused() public view virtual returns (bool) {
-        return _paused == 1 ? false : true;
+    function paused() public view virtual returns (bool isPaused) {
+        assembly {
+            isPaused := eq(2, sload(_paused.slot))
+        }
     }
 
     /**
