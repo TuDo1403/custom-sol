@@ -13,11 +13,9 @@ import "../ERC20Upgradeable.sol";
 abstract contract ERC20BurnableUpgradeable is ERC20Upgradeable {
     using Bytes32Address for address;
 
-    function __ERC20Burnable_init() internal onlyInitializing {
-    }
+    function __ERC20Burnable_init() internal onlyInitializing {}
 
-    function __ERC20Burnable_init_unchained() internal onlyInitializing {
-    }
+    function __ERC20Burnable_init_unchained() internal onlyInitializing {}
 
     /**
      * @dev Destroys `amount` tokens from the caller.

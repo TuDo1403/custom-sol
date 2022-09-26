@@ -13,6 +13,7 @@ pragma solidity ^0.8.0;
  */
 interface IERC20PermitUpgradeable {
     error ERC20Permit__Expired();
+
     /**
      * @dev Sets `value` as the allowance of `spender` over ``owner``'s tokens,
      * given ``owner``'s signed approval.

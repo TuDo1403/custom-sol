@@ -16,9 +16,7 @@ library EnumerableSetV2 {
         BitMaps.BitMap indexes;
     }
 
-    function _add(Set storage set_, uint256[] memory values_)
-        private
-    {
+    function _add(Set storage set_, uint256[] memory values_) private {
         set_.ptr = abi.encode(values_).write();
         uint256 length_ = values_.length;
         for (uint256 i; i < length_; ) {
@@ -54,19 +52,15 @@ library EnumerableSetV2 {
         return _values(set).length;
     }
 
-
     function _values(Set storage set) private view returns (uint256[] memory) {
         return abi.decode(set.ptr.read(), (uint256[]));
     }
-
 
     struct AddressSet {
         Set _inner;
     }
 
-    function add(AddressSet storage set, address[] memory value)
-        internal
-    {
+    function add(AddressSet storage set, address[] memory value) internal {
         uint256[] memory store;
         assembly {
             store := value
@@ -74,9 +68,7 @@ library EnumerableSetV2 {
         _add(set._inner, store);
     }
 
-    function remove(AddressSet storage set)
-        internal
-    {
+    function remove(AddressSet storage set) internal {
         _remove(set._inner);
     }
 

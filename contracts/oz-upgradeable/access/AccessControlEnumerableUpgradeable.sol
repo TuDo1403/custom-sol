@@ -23,8 +23,7 @@ abstract contract AccessControlEnumerableUpgradeable is
 
     using EnumerableSet256 for EnumerableSet256.AddressSet;
 
-    mapping(bytes32 => EnumerableSet256.AddressSet)
-        private _roleMembers;
+    mapping(bytes32 => EnumerableSet256.AddressSet) private _roleMembers;
 
     /**
      * @dev See {IERC165-supportsInterface}.

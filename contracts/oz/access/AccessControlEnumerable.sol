@@ -92,7 +92,6 @@ abstract contract AccessControlEnumerable is
         _roleMembers[role].add(account);
     }
 
-
     /**
      * @dev Overload {_revokeRole} to track enumerable memberships
      */
