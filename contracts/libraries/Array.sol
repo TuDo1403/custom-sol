@@ -42,7 +42,6 @@ library Array {
         for (uint256 i; i < length; ) {
             unchecked {
                 if (arr_[i] != 0) res[counter++] = arr_[i];
-
                 ++i;
             }
         }
@@ -62,7 +61,6 @@ library Array {
         for (uint256 i; i < length; ) {
             unchecked {
                 if (arr_[i] != 0) res[counter++] = arr_[i];
-
                 ++i;
             }
         }
