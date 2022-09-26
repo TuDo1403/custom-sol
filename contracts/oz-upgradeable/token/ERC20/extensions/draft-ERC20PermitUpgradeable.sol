@@ -42,7 +42,11 @@ abstract contract ERC20PermitUpgradeable is
      *
      * It's a good idea to use the same `name` that is defined as the ERC20 token name.
      */
-    constructor(string memory name) EIP712(name, "1") {}
+    function __ERC20Permit_init(string memory name) internal onlyInitializing {
+        __EIP712_init_unchained(name, "1");
+    }
+
+    function __ERC20Permit_init_unchained(string memory) internal onlyInitializing {}
 
     /**
      * @dev See {IERC20Permit-permit}.
@@ -90,7 +94,7 @@ abstract contract ERC20PermitUpgradeable is
     function DOMAIN_SEPARATOR()
         external
         view
-        override(IERC20Permit, Signable)
+        override(IERC20PermitUpgradeable, SignableUpgradeable)
         returns (bytes32)
     {
         return _domainSeparatorV4();
@@ -99,10 +103,10 @@ abstract contract ERC20PermitUpgradeable is
     function nonces(address account_)
         external
         view
-        override(Signable, IERC20Permit)
+        override(SignableUpgradeable, IERC20PermitUpgradeable)
         returns (uint256)
     {
-        return Signable._nonce(account_);
+        return SignableUpgradeable._nonce(account_);
     }
 
     uint256[49] private __gap;

@@ -21,7 +21,7 @@ abstract contract ERC20Upgradeable is ContextUpgradeable, IERC20Upgradeable {
 
     string public symbol;
 
-    uint8 public immutable decimals;
+    uint256 public decimals;
 
     /*//////////////////////////////////////////////////////////////
                               ERC20 STORAGE
@@ -36,6 +36,24 @@ abstract contract ERC20Upgradeable is ContextUpgradeable, IERC20Upgradeable {
     /*//////////////////////////////////////////////////////////////
                                CONSTRUCTOR
     //////////////////////////////////////////////////////////////*/
+
+    function __ERC20_init(
+        string memory name_,
+        string memory symbol_,
+        uint256 decimals_
+    ) internal onlyInitializing {
+        __ERC20_init_unchained(name_, symbol_, decimals_);
+    }
+
+    function __ERC20_init_unchained(
+        string memory name_,
+        string memory symbol_,
+        uint256 decimals_
+    ) internal onlyInitializing {
+        name = name_;
+        symbol = symbol_;
+        decimals = decimals_ & ~uint8(0);
+    }
 
     constructor(
         string memory name_,
@@ -193,5 +211,5 @@ abstract contract ERC20Upgradeable is ContextUpgradeable, IERC20Upgradeable {
         _afterTokenTransfer(from, address(0), amount);
     }
 
-    uint256[45] private __gap;
+    uint256[44] private __gap;
 }
