@@ -63,9 +63,69 @@ library SSTORE2 {
         }
     }
 
+    function writeFromAddr(bytes memory data)
+        internal
+        returns (address pointer)
+    {
+        // Note: The assembly block below does not expand the memory.
+        assembly {
+            let originalDataLength := mload(data)
+
+            // Add 1 to data size since we are prefixing it with a STOP opcode.
+            let dataSize := add(originalDataLength, 1)
+
+            /**
+             * ------------------------------------------------------------------------------------+
+             *   Opcode  | Opcode + Arguments  | Description       | Stack View                    |
+             * ------------------------------------------------------------------------------------|
+             *   0x61    | 0x61XXXX            | PUSH2 codeSize    | codeSize                      |
+             *   0x80    | 0x80                | DUP1              | codeSize codeSize             |
+             *   0x60    | 0x600A              | PUSH1 10          | 10 codeSize codeSize          |
+             *   0x3D    | 0x3D                | RETURNDATASIZE    | 0 10 codeSize codeSize        |
+             *   0x39    | 0x39                | CODECOPY          | codeSize                      |
+             *   0x3D    | 0x3D                | RETURNDATASZIE    | 0 codeSize                    |
+             *   0xF3    | 0xF3                | RETURN            |                               |
+             *   0x00    | 0x00                | STOP              |                               |
+             * ------------------------------------------------------------------------------------+
+             * @dev Prefix the bytecode with a STOP opcode to ensure it cannot be called. Also PUSH2 is
+             * used since max contract size cap is 24,576 bytes which is less than 2 ** 16.
+             */
+            mstore(
+                data,
+                or(
+                    0x61000080600a3d393df300,
+                    shl(64, dataSize) // shift `dataSize` so that it lines up with the 0000 after PUSH2
+                )
+            )
+
+            // Deploy a new contract with the generated creation code.
+            pointer := create(0, add(data, 21), add(dataSize, 10))
+
+            // Restore original length of the variable size `data`
+            mstore(data, originalDataLength)
+        }
+
+        if (pointer == address(0)) {
+            revert SSTORE2_DEPLOYMENT_FAILED();
+        }
+    }
+
     /*//////////////////////////////////////////////////////////////
                                READ LOGIC
     //////////////////////////////////////////////////////////////*/
+
+    function read(address ptr) internal view returns (bytes memory) {
+        address pointer;
+        assembly {
+            pointer := ptr
+        }
+        return
+            readBytecode(
+                pointer,
+                DATA_OFFSET,
+                pointer.code.length - DATA_OFFSET
+            );
+    }
 
     function read(bytes32 ptr) internal view returns (bytes memory) {
         address pointer;
