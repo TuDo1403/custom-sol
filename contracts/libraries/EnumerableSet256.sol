@@ -67,23 +67,14 @@ library EnumerableSet256 {
      * already present.
      */
     function _add(Set storage set, uint256 value) private returns (bool) {
-        (bool exists, bool hash) = _contains(set, value);
-        if (!exists) {
-            set._indexes.unsafeSet(value);
-            set._values[value.indexHash()] = value;
-            unchecked {
-                ++set.length;
-            }
-            return true;
-        } else if (exists && !hash) {
-            set._indexes.unsafeSet(value);
+        if (!_contains(set, value)) {
             set._values[value.index()] = value;
-            unchecked {
-                ++set.length;
-            }
+            // The value is stored at length-1, but we add 1 to all indexes
+            // and use 0 as a sentinel value
+            //set._indexes[value] = set._values.length;
+            ++set.length;
             return true;
-        }
-        return false;
+        } else return false;
     }
 
     /**
@@ -94,24 +85,40 @@ library EnumerableSet256 {
      */
     function _remove(Set storage set, uint256 value) private returns (bool) {
         // We read and store the value's index to prevent multiple reads from the same storage slot
-        uint256 bitmap = set._indexes.data;
-        uint256 valueIndex;
-        bool hash;
-        if (bitmap.unsafeGet(value)) valueIndex = value.index();
-        else if (bitmap.get(value)) {
-            valueIndex = value.indexHash();
-            hash = true;
-        }
+        uint256 valueIndex = set._values[value.index()] == value ? value.index() : 0;
 
         if (valueIndex != 0) {
-            delete set._values[valueIndex];
-            unchecked {
-                --set.length;
-            }
-            if (hash) set._indexes.unset(value);
-            else set._indexes.unsafeUnset(value);
+            // Equivalent to contains(set, value)
+            // To delete an element from the _values array in O(1), we swap the element to delete with the last one in
+            // the array, and then remove the last element (sometimes called as 'swap and pop').
+            // This modifies the order of the array, as noted in {at}.
+
+            //uint256 toDeleteIndex;
+            // uint256 lastIndex;
+            // unchecked {
+            //     //toDeleteIndex = valueIndex - 1;
+            //     lastIndex = --set.length;
+            // }
+
+            set._values[valueIndex] = 0;
+
+            // if (valueIndex != lastIndex) {
+            //     uint256 lastValue = set._values[lastIndex];
+
+            //     // Move the last value to the index where the value to delete is
+            //     set._values[valueIndex] = lastValue;
+            //     // Update the index for the moved value
+            //     //set._indexes[lastValue] = valueIndex; // Replace lastValue's index to valueIndex
+            // }
+
+            // Delete the slot where the moved value was stored
+            //set._values.pop();
+
+            // Delete the index for the deleted slot
             return true;
-        } else return false;
+        } else {
+            return false;
+        }
     }
 
     /**
@@ -120,13 +127,10 @@ library EnumerableSet256 {
     function _contains(Set storage set, uint256 value)
         private
         view
-        returns (bool exists, bool hash)
+        returns (bool)
     {
-        if (set._values[value.index()] == value) exists = true;
-        else if (set._values[value.indexHash()] == value) {
-            exists = true;
-            hash = true;
-        }
+        //return set._indexes[value] != 0;
+        return set._values[value.index()] == value;
     }
 
     /**
@@ -213,13 +217,13 @@ library EnumerableSet256 {
     function contains(Bytes32Set storage set, bytes32 value)
         internal
         view
-        returns (bool exists)
+        returns (bool)
     {
         uint256 val;
         assembly {
             val := value
         }
-        (exists, ) = _contains(set._inner, val);
+        return _contains(set._inner, val);
     }
 
     /**
@@ -266,6 +270,7 @@ library EnumerableSet256 {
         returns (bytes32[] memory res)
     {
         uint256[] memory val = _values(set._inner);
+        res = new bytes32[](val.length);
         assembly {
             res := val
         }
@@ -317,13 +322,13 @@ library EnumerableSet256 {
     function contains(AddressSet storage set, address value)
         internal
         view
-        returns (bool exists)
+        returns (bool)
     {
         uint256 store;
         assembly {
             store := value
         }
-        (exists, ) = _contains(set._inner, store);
+        return _contains(set._inner, store);
     }
 
     /**
@@ -368,7 +373,7 @@ library EnumerableSet256 {
         returns (address[] memory)
     {
         uint256[] memory store = _values(set._inner);
-        address[] memory result;
+        address[] memory result = new address[](store.length);
 
         /// @solidity memory-safe-assembly
         assembly {
@@ -413,9 +418,9 @@ library EnumerableSet256 {
     function contains(UintSet storage set, uint256 value)
         internal
         view
-        returns (bool exists)
+        returns (bool)
     {
-        (exists, ) = _contains(set._inner, value);
+        return _contains(set._inner, value);
     }
 
     /**

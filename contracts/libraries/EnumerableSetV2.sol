@@ -8,16 +8,17 @@ import "../oz/utils/structs/BitMaps.sol";
 library EnumerableSetV2 {
     using Array for uint256[];
     using SSTORE2 for bytes;
-    using SSTORE2 for bytes32;
+    using SSTORE2 for address;
     using BitMaps for BitMaps.BitMap;
 
     struct Set {
-        bytes32 ptr;
+        uint96 length;
+        address ptr;
         BitMaps.BitMap indexes;
     }
 
     function _add(Set storage set_, uint256[] memory values_) private {
-        set_.ptr = abi.encode(values_).write();
+        set_.ptr = abi.encode(values_).writeFromAddr();
         uint256 length_ = values_.length;
         for (uint256 i; i < length_; ) {
             set_.indexes.set(values_[i]);
@@ -25,11 +26,20 @@ library EnumerableSetV2 {
                 ++i;
             }
         }
+        set_.length = uint96(length_);
     }
 
     function _remove(Set storage set_) private {
         delete set_.ptr;
         delete set_.indexes;
+        delete set_.length;
+    }
+
+    function _remove(Set storage set_, uint256 value_) private {
+        set_.indexes.unset(value_);
+        unchecked {
+            --set_.length;
+        }
     }
 
     function _contains(Set storage set, uint256 value)
@@ -72,6 +82,14 @@ library EnumerableSetV2 {
         _remove(set._inner);
     }
 
+    function remove(AddressSet storage set, address value) internal {
+        uint256 val;
+        assembly {
+            val := value
+        }
+        _remove(set._inner, val);
+    }
+
     function contains(AddressSet storage set, address value)
         internal
         view
@@ -105,8 +123,19 @@ library EnumerableSetV2 {
         returns (address[] memory res)
     {
         uint256[] memory val = _values(set._inner);
+        uint256 length_ = val.length;
+        uint256[] memory tmp = new uint256[](length_);
+        BitMaps.BitMap storage bitmap = set._inner.indexes;
+        uint256 counter;
+        for (uint256 i; i < length_; ) {
+            unchecked {
+                if (bitmap.get(val[i])) tmp[counter++] = val[i];
+                ++i;
+            }
+        }
         assembly {
-            res := val
+            mstore(tmp, counter)
+            res := tmp
         }
     }
 }
