@@ -85,7 +85,9 @@ library EnumerableSet256 {
      */
     function _remove(Set storage set, uint256 value) private returns (bool) {
         // We read and store the value's index to prevent multiple reads from the same storage slot
-        uint256 valueIndex = set._values[value.index()] == value ? value.index() : 0;
+        uint256 valueIndex = set._values[value.index()] == value
+            ? value.index()
+            : 0;
 
         if (valueIndex != 0) {
             // Equivalent to contains(set, value)
