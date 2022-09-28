@@ -1,6 +1,6 @@
 {
   "name": "custom-sol",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Custom OpenZeppelin Contracts for minimal gas cost",
   "author": "tudo <[minhtu@bacoor.co](mailto:minhtu@bacoor.co)>",
   "license": "MIT",
