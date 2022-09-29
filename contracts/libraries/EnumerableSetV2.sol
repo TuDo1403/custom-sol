@@ -35,11 +35,15 @@ library EnumerableSetV2 {
         delete set_.length;
     }
 
-    function _remove(Set storage set_, uint256 value_) private {
-        set_.indexes.unset(value_);
-        unchecked {
-            --set_.length;
+    function _remove(Set storage set_, uint256 value_) private returns (bool) {
+        if (_contains(set_, value_)) {
+            set_.indexes.unset(value_);
+            unchecked {
+                --set_.length;
+            }
+            return true;
         }
+        return false;
     }
 
     function _contains(Set storage set, uint256 value)
@@ -82,12 +86,15 @@ library EnumerableSetV2 {
         _remove(set._inner);
     }
 
-    function remove(AddressSet storage set, address value) internal {
+    function remove(AddressSet storage set, address value)
+        internal
+        returns (bool removed)
+    {
         uint256 val;
         assembly {
             val := value
         }
-        _remove(set._inner, val);
+        removed = _remove(set._inner, val);
     }
 
     function contains(AddressSet storage set, address value)

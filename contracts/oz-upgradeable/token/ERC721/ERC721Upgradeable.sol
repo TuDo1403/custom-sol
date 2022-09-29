@@ -180,34 +180,16 @@ abstract contract ERC721Upgradeable is
         address to,
         uint256 id
     ) public virtual override {
-        if (from != _ownerOf[id].fromFirst20Bytes()) revert ERC721__WrongFrom();
-        if (to == address(0)) revert ERC721__InvalidRecipient();
-        _beforeTokenTransfer(from, to, id);
-
         address sender = _msgSender();
-        bytes32 _from = from.fillLast12Bytes();
         if (
             sender != from &&
-            !_isApprovedForAll[_from].get(sender.fillLast96Bits()) &&
+            !_isApprovedForAll[from.fillLast12Bytes()].get(
+                sender.fillLast96Bits()
+            ) &&
             sender.fillLast12Bytes() != _getApproved[id]
         ) revert ERC721__Unauthorized();
 
-        bytes32 _to = to.fillLast12Bytes();
-        // Underflow of the sender's balance is impossible because we check for
-        // ownership above and the recipient's balance can't realistically overflow.
-        unchecked {
-            --_balanceOf[_from];
-
-            ++_balanceOf[_to];
-        }
-
-        _ownerOf[id] = _to;
-
-        delete _getApproved[id];
-
-        emit Transfer(from, to, id);
-
-        _afterTokenTransfer(from, to, id);
+        _transfer(from, to, id);
     }
 
     function safeTransferFrom(
@@ -237,6 +219,7 @@ abstract contract ERC721Upgradeable is
         if (from != _ownerOf[tokenId].fromFirst20Bytes())
             revert ERC721__WrongFrom();
         if (to == address(0)) revert ERC721__InvalidRecipient();
+
         _beforeTokenTransfer(from, to, tokenId);
 
         bytes32 _to = to.fillLast12Bytes();
@@ -254,6 +237,15 @@ abstract contract ERC721Upgradeable is
         _afterTokenTransfer(from, to, tokenId);
     }
 
+    function _safeTransfer(
+        address from_,
+        address to_,
+        uint256 tokenId_
+    ) internal virtual {
+        _transfer(from_, to_, tokenId_);
+        __checkOnERC721Received(from_, to_, tokenId_, "");
+    }
+
     function safeTransferFrom(
         address from,
         address to,
@@ -261,14 +253,22 @@ abstract contract ERC721Upgradeable is
         bytes calldata data
     ) public virtual override {
         transferFrom(from, to, id);
+        __checkOnERC721Received(from, to, id, data);
+    }
 
+    function __checkOnERC721Received(
+        address from_,
+        address to_,
+        uint256 tokenId_,
+        bytes memory data_
+    ) private {
         if (
-            to.code.length != 0 &&
-            ERC721TokenReceiverUpgradeable(to).onERC721Received(
+            to_.code.length != 0 &&
+            ERC721TokenReceiverUpgradeable(to_).onERC721Received(
                 _msgSender(),
-                from,
-                id,
-                data
+                from_,
+                tokenId_,
+                data_
             ) !=
             ERC721TokenReceiverUpgradeable.onERC721Received.selector
         ) revert ERC721__UnsafeRecipient();

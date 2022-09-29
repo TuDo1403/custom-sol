@@ -70,7 +70,7 @@ abstract contract SignableUpgradeable is
         bytes32 r,
         bytes32 s
     ) internal view virtual {
-        if (digest_.recover(v, r, s) != verifier_)
+        if (_recoverSigner(digest_, v, r, s) != verifier_)
             revert Signable__InvalidSignature(sender_);
     }
 
@@ -80,8 +80,25 @@ abstract contract SignableUpgradeable is
         bytes32 digest_,
         bytes calldata signature_
     ) internal view virtual {
-        if (digest_.recover(signature_) != verifier_)
+        if (_recoverSigner(digest_, signature_) != verifier_)
             revert Signable__InvalidSignature(sender_);
+    }
+
+    function _recoverSigner(bytes32 digest_, bytes calldata signature_)
+        internal
+        view
+        returns (address)
+    {
+        return digest_.recover(signature_);
+    }
+
+    function _recoverSigner(
+        bytes32 digest_,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    ) internal view returns (address) {
+        return digest_.recover(v, r, s);
     }
 
     function _useNonce(address sender_) internal virtual returns (uint256) {
