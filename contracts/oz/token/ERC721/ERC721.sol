@@ -127,7 +127,7 @@ abstract contract ERC721 is Context, ERC165, IERC721, IERC721Metadata {
     {
         return
             _isApprovedForAll[owner.fillLast12Bytes()].get(
-                operator.fillFirst96Bits()
+                operator.fillLast96Bits()
             );
     }
 

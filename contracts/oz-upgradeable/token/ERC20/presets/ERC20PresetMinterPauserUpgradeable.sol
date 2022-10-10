@@ -42,11 +42,20 @@ abstract contract ERC20PresetMinterPauserUpgradeable is
      *
      * See {ERC20-constructor}.
      */
-    constructor(
-        string memory name,
-        string memory symbol,
-        uint8 decimals
-    ) ERC20Upgradeable(name, symbol, decimals) {
+
+    function __ERC20PresetMinterPauser_init(
+        string calldata name_,
+        string calldata symbol_,
+        uint8 decimals_
+    ) internal onlyInitializing {
+        __ERC20_init(name_, symbol_, decimals_);
+        __ERC20PresetMinterPauser_init_unchained();
+    }
+
+    function __ERC20PresetMinterPauser_init_unchained()
+        internal
+        onlyInitializing
+    {
         address sender = _msgSender();
 
         _grantRole(MINTER_ROLE, sender);

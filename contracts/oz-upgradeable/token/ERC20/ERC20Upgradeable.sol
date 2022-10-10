@@ -55,23 +55,6 @@ abstract contract ERC20Upgradeable is ContextUpgradeable, IERC20Upgradeable {
         decimals = decimals_ & ~uint8(0);
     }
 
-    constructor(
-        string memory name_,
-        string memory symbol_,
-        uint256 decimals_
-    ) payable {
-        if (bytes(symbol_).length > 32 || bytes(name_).length > 32)
-            revert ERC20__StringTooLong();
-
-        name = name_;
-        symbol = symbol_;
-        uint8 _decimals;
-        assembly {
-            _decimals := decimals_
-        }
-        decimals = _decimals;
-    }
-
     /*//////////////////////////////////////////////////////////////
                                ERC20 LOGIC
     //////////////////////////////////////////////////////////////*/

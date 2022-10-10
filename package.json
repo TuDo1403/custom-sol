@@ -1,5 +1,5 @@
 {
-  "name": "custom-sol",
+  "name": "oz-custom",
   "version": "1.0.2",
   "description": "Custom OpenZeppelin Contracts for minimal gas cost",
   "author": "tudo <[minhtu@bacoor.co](mailto:minhtu@bacoor.co)>",
@@ -51,7 +51,7 @@
     "sol:linter": "solhint -f table ./contracts/**/*.sol -f table ./contracts/*.sol",
     "lint": "yarn lint:sol && yarn lint:ts && yarn prettier:check",
     "ts:lint": "eslint --config ./.eslintrc.yml --ignore-path ./.eslintignore --ext .js,.ts .",
-    "_postinstall": "husky install && DOTENV_CONFIG_PATH=./.env yarn typechain",
+    "postinstall": "husky install && DOTENV_CONFIG_PATH=./.env yarn typechain",
     "postpublish": "pinst --enable",
     "prepublishOnly": "pinst --disable",
     "prettier": "prettier --config ./.prettierrc.yml --write \"**/*.{js,json,md,sol,ts,yml}\"",

@@ -145,7 +145,7 @@ abstract contract ERC721Upgradeable is
     {
         return
             _isApprovedForAll[owner.fillLast12Bytes()].get(
-                operator.fillFirst96Bits()
+                operator.fillLast96Bits()
             );
     }
 
