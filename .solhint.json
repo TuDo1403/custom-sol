@@ -1,6 +1,7 @@
 {
   "extends": "solhint:recommended",
   "rules": {
+    "func-name-mixedcase" : "off",
     "avoid-tx-origin": "off",
     "no-inline-assembly": "off",
     "avoid-low-level-calls": "off",

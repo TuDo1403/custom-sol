@@ -18,7 +18,7 @@ library EnumerableSetV2 {
     }
 
     function _add(Set storage set_, uint256[] memory values_) private {
-        set_.ptr = abi.encode(values_).writeFromAddr();
+        set_.ptr = abi.encode(values_).writeToAddr();
         uint256 length_ = values_.length;
         for (uint256 i; i < length_; ) {
             set_.indexes.set(values_[i]);

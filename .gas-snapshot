@@ -1,0 +1,8 @@
+ERC20Test:testRevert_ExpiredPermit() (gas: 27542)
+ERC20Test:testRevert_InvalidNonce() (gas: 50156)
+ERC20Test:testRevert_InvalidSigner() (gas: 51314)
+ERC20Test:testRevert_SignatureReplay() (gas: 77957)
+ERC20Test:test_Permit() (gas: 74925)
+ERC721EnumerableTest:testBurn() (gas: 50018)
+ERC721EnumerableTest:testMint() (gas: 123008)
+ERC721EnumerableTest:testMintWithCustomId() (gas: 133408)

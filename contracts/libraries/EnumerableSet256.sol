@@ -6,50 +6,10 @@ pragma solidity ^0.8.17;
 import "./Array.sol";
 import "./BitMap256.sol";
 
-/**
- * @dev Library for managing
- * https://en.wikipedia.org/wiki/Set_(abstract_data_type)[sets] of primitive
- * types.
- *
- * Sets have the following properties:
- *
- * - Elements are added, removed, and checked for existence in constant time
- * (O(1)).
- * - Elements are enumerated in O(n). No guarantees are made on the ordering.
- *
- * ```
- * contract Example {
- *     // Add the library methods
- *     using EnumerableSet for EnumerableSet.AddressSet;
- *
- *     // Declare a set state variable
- *     EnumerableSet.AddressSet private mySet;
- * }
- * ```
- *
- * As of v3.3.0, sets of type `bytes32` (`Bytes32Set`), `address` (`AddressSet`)
- * and `uint256` (`UintSet`) are supported.
- *
- * [WARNING]
- * ====
- *  Trying to delete such a structure from storage will likely result in data corruption, rendering the structure unusable.
- *  See https://github.com/ethereum/solidity/pull/11843[ethereum/solidity#11843] for more info.
- *
- *  In order to clean an EnumerableSet, you can either remove all elements one by one or create a fresh instance using an array of EnumerableSet.
- * ====
- */
 library EnumerableSet256 {
     using Array for uint256[256];
     using BitMap256 for uint256;
     using BitMap256 for BitMap256.BitMap;
-    // To implement this library for multiple types with as little code
-    // repetition as possible, we write it in terms of a generic Set type with
-    // bytes32 values.
-    // The Set implementation uses private functions, and user-facing
-    // implementations (such as AddressSet) are just wrappers around the
-    // underlying Set.
-    // This means that we can only create new EnumerableSets for types that fit
-    // in bytes32.
 
     struct Set {
         uint256 length;
@@ -60,19 +20,12 @@ library EnumerableSet256 {
         BitMap256.BitMap _indexes;
     }
 
-    /**
-     * @dev Add a value to a set. O(1).
-     *
-     * Returns true if the value was added to the set, that is if it was not
-     * already present.
-     */
     function _add(Set storage set, uint256 value) private returns (bool) {
         if (!_contains(set, value)) {
             set._values[value.index()] = value;
-            // The value is stored at length-1, but we add 1 to all indexes
-            // and use 0 as a sentinel value
-            //set._indexes[value] = set._values.length;
-            ++set.length;
+            unchecked {
+                ++set.length;
+            }
             return true;
         } else return false;
     }

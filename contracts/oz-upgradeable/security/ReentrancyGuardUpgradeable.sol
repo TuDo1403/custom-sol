@@ -52,7 +52,7 @@ abstract contract ReentrancyGuardUpgradeable is Initializable {
      * `private` function that does the actual work.
      */
     modifier nonReentrant() {
-        if (_locked != 1) revert ReentrancyGuard__Locked();
+        if (_locked == 2) revert ReentrancyGuard__Locked();
 
         _locked = 2;
 

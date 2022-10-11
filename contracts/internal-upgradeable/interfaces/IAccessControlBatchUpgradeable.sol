@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.15;
+pragma solidity ^0.8.17;
 
 interface IAccessControlBatchUpgradeable {
     error AccessControlBatch__RoleMissing(bytes32 role, address account);

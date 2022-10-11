@@ -1,0 +1,15 @@
+[profile.default]
+optimizer = true
+optimizer_runs = 1_000_000
+via_ir = false
+src = 'contracts'
+out = 'out'
+libs = ['lib', 'node_modules']
+test = 'tests/foundry'
+cache_path = 'forge-cache'
+gas_reports = ["*"]
+bytecode_hash = 'none'
+solc_version = '0.8.17'
+
+[profile.ci]
+verbosity = 4

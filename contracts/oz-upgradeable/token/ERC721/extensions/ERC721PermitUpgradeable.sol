@@ -48,7 +48,6 @@ abstract contract ERC721PermitUpgradeable is
         address owner = ownerOf(tokenId_);
         if (spender_ == owner) revert ERC721Permit__SelfApproving();
         _verify(
-            _msgSender(),
             owner,
             keccak256(
                 abi.encode(

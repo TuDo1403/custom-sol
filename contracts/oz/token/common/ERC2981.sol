@@ -6,7 +6,7 @@ pragma solidity ^0.8.10;
 import "../../interfaces/IERC2981.sol";
 import "../..//utils/introspection/ERC165.sol";
 
-import "@openzeppelin/contracts/utils/math/Math.sol";
+import "../../../libraries/FixedPointMathLib.sol";
 
 /**
  * @dev Implementation of the NFT Royalty Standard, a standardized way to retrieve royalty payment information.
@@ -24,7 +24,7 @@ import "@openzeppelin/contracts/utils/math/Math.sol";
  * _Available since v4.5._
  */
 abstract contract ERC2981 is IERC2981, ERC165 {
-    using Math for uint256;
+    using FixedPointMathLib for uint256;
 
     RoyaltyInfo internal _defaultRoyaltyInfo;
     mapping(uint256 => RoyaltyInfo) internal _tokenRoyaltyInfo;
@@ -60,7 +60,7 @@ abstract contract ERC2981 is IERC2981, ERC165 {
 
         return (
             royalty.receiver,
-            _salePrice.mulDiv(royalty.royaltyFraction, _feeDenominator())
+            _salePrice.mulDivDown(royalty.royaltyFraction, _feeDenominator())
         );
     }
 

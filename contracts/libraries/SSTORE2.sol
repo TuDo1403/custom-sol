@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-pragma solidity >=0.8.0;
+pragma solidity ^0.8.17;
 
 /// @notice Read and write to persistent storage at a fraction of the cost.
 /// @author Solmate (https://github.com/Rari-Capital/solmate/blob/main/src/utils/SSTORE2.sol)
 /// @author Modified from 0xSequence (https://github.com/0xSequence/sstore2/blob/master/contracts/SSTORE2.sol)
 library SSTORE2 {
-    error SSTORE2_DEPLOYMENT_FAILED();
-    error SSTORE2_READ_OUT_OF_BOUNDS();
+    error SSTORE2__DeploymentFailed();
+    error SSTORE2__ReadOutOfBounds();
 
     // We skip the first byte as it's a STOP opcode to ensure the contract can't be called.
     uint256 internal constant DATA_OFFSET = 1;
@@ -55,18 +55,14 @@ library SSTORE2 {
             mstore(data, originalDataLength)
         }
 
-        if (pointer == address(0)) {
-            revert SSTORE2_DEPLOYMENT_FAILED();
-        }
+        if (pointer == address(0)) revert SSTORE2__DeploymentFailed();
+
         assembly {
             ptr := pointer
         }
     }
 
-    function writeFromAddr(bytes memory data)
-        internal
-        returns (address pointer)
-    {
+    function writeToAddr(bytes memory data) internal returns (address pointer) {
         // Note: The assembly block below does not expand the memory.
         assembly {
             let originalDataLength := mload(data)
@@ -105,9 +101,7 @@ library SSTORE2 {
             mstore(data, originalDataLength)
         }
 
-        if (pointer == address(0)) {
-            revert SSTORE2_DEPLOYMENT_FAILED();
-        }
+        if (pointer == address(0)) revert SSTORE2__DeploymentFailed();
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -158,7 +152,7 @@ library SSTORE2 {
         end += DATA_OFFSET;
 
         if (pointer.code.length < end) {
-            revert SSTORE2_READ_OUT_OF_BOUNDS();
+            revert SSTORE2__ReadOutOfBounds();
         }
 
         return readBytecode(pointer, start, end - start);

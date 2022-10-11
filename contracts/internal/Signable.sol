@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.15;
+pragma solidity ^0.8.17;
 
 import "../oz/utils/cryptography/draft-EIP712.sol";
 
@@ -13,50 +13,29 @@ abstract contract Signable is EIP712, ISignable {
 
     mapping(bytes32 => uint256) internal _nonces;
 
-    function nonces(address sender_)
-        external
-        view
-        virtual
-        override
-        returns (uint256)
-    {
+    function nonces(address sender_) external view virtual returns (uint256) {
         return _nonce(sender_);
     }
 
     function _verify(
-        address sender_,
         address verifier_,
         bytes32 structHash_,
         bytes calldata signature_
     ) internal view virtual {
-        _checkVerifier(
-            sender_,
-            verifier_,
-            _hashTypedDataV4(structHash_),
-            signature_
-        );
+        _checkVerifier(verifier_, _hashTypedDataV4(structHash_), signature_);
     }
 
     function _verify(
-        address sender_,
-        address verifier_,
         bytes32 structHash_,
+        address verifier_,
         uint8 v,
         bytes32 r,
         bytes32 s
     ) internal view virtual {
-        _checkVerifier(
-            sender_,
-            verifier_,
-            _hashTypedDataV4(structHash_),
-            v,
-            r,
-            s
-        );
+        _checkVerifier(verifier_, _hashTypedDataV4(structHash_), v, r, s);
     }
 
     function _checkVerifier(
-        address sender_,
         address verifier_,
         bytes32 digest_,
         uint8 v,
@@ -64,17 +43,16 @@ abstract contract Signable is EIP712, ISignable {
         bytes32 s
     ) internal view virtual {
         if (digest_.recover(v, r, s) != verifier_)
-            revert Signable__InvalidSignature(sender_);
+            revert Signable__InvalidSignature();
     }
 
     function _checkVerifier(
-        address sender_,
         address verifier_,
         bytes32 digest_,
         bytes calldata signature_
     ) internal view virtual {
         if (digest_.recover(signature_) != verifier_)
-            revert Signable__InvalidSignature(sender_);
+            revert Signable__InvalidSignature();
     }
 
     function _useNonce(address sender_) internal virtual returns (uint256) {
@@ -104,13 +82,7 @@ abstract contract Signable is EIP712, ISignable {
         }
     }
 
-    function DOMAIN_SEPARATOR()
-        external
-        view
-        virtual
-        override
-        returns (bytes32)
-    {
+    function DOMAIN_SEPARATOR() external view virtual returns (bytes32) {
         return _domainSeparatorV4();
     }
 }

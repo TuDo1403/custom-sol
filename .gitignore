@@ -34,3 +34,6 @@ cache
 artifacts
 .pnp.cjs
 .pnp.loader.mjs
+
+out
+forge-cache

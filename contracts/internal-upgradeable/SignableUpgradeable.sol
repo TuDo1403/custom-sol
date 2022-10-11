@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.15;
+pragma solidity ^0.8.17;
 
 import "../oz-upgradeable/utils/cryptography/draft-EIP712Upgradeable.sol";
 
@@ -31,39 +31,24 @@ abstract contract SignableUpgradeable is
     }
 
     function _verify(
-        address sender_,
         address verifier_,
         bytes32 structHash_,
         bytes calldata signature_
     ) internal view virtual {
-        _checkVerifier(
-            sender_,
-            verifier_,
-            _hashTypedDataV4(structHash_),
-            signature_
-        );
+        _checkVerifier(verifier_, _hashTypedDataV4(structHash_), signature_);
     }
 
     function _verify(
-        address sender_,
         address verifier_,
         bytes32 structHash_,
         uint8 v,
         bytes32 r,
         bytes32 s
     ) internal view virtual {
-        _checkVerifier(
-            sender_,
-            verifier_,
-            _hashTypedDataV4(structHash_),
-            v,
-            r,
-            s
-        );
+        _checkVerifier(verifier_, _hashTypedDataV4(structHash_), v, r, s);
     }
 
     function _checkVerifier(
-        address sender_,
         address verifier_,
         bytes32 digest_,
         uint8 v,
@@ -71,17 +56,16 @@ abstract contract SignableUpgradeable is
         bytes32 s
     ) internal view virtual {
         if (_recoverSigner(digest_, v, r, s) != verifier_)
-            revert Signable__InvalidSignature(sender_);
+            revert Signable__InvalidSignature();
     }
 
     function _checkVerifier(
-        address sender_,
         address verifier_,
         bytes32 digest_,
         bytes calldata signature_
     ) internal view virtual {
         if (_recoverSigner(digest_, signature_) != verifier_)
-            revert Signable__InvalidSignature(sender_);
+            revert Signable__InvalidSignature();
     }
 
     function _recoverSigner(bytes32 digest_, bytes calldata signature_)

@@ -40,8 +40,6 @@ abstract contract ERC721Permit is ERC721, IERC721Permit, Signable {
         address owner = ownerOf(tokenId_);
         if (spender_ == owner) revert ERC721Permit__SelfApproving();
         _verify(
-            _msgSender(),
-            owner,
             keccak256(
                 abi.encode(
                     _PERMIT_TYPEHASH,
@@ -51,6 +49,7 @@ abstract contract ERC721Permit is ERC721, IERC721Permit, Signable {
                     deadline_
                 )
             ),
+            owner,
             v,
             r,
             s

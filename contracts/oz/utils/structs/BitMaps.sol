@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 // OpenZeppelin Contracts v4.4.1 (utils/structs/BitMaps.sol)
-pragma solidity ^0.8.15;
+pragma solidity ^0.8.17;
 
 /**
  * @dev Library for managing uint256 to bool mapping in a compact and efficient way, providing the keys are sequential.
@@ -8,7 +8,7 @@ pragma solidity ^0.8.15;
  */
 library BitMaps {
     struct BitMap {
-        mapping(uint256 => uint256) _data;
+        mapping(uint256 => uint256) map;
     }
 
     /**
@@ -19,10 +19,10 @@ library BitMaps {
         view
         returns (bool isSet)
     {
+        uint256 value = bitmap.map[index >> 8] & (1 << (index & 0xff));
+
         assembly {
-            mstore(0x00, shr(8, index))
-            mstore(0x20, bitmap.slot)
-            isSet := and(sload(keccak256(0x00, 0x40)), shl(and(index, 0xff), 1))
+            isSet := value // Assign isSet to whether the value is non zero.
         }
     }
 
@@ -32,22 +32,30 @@ library BitMaps {
     function setTo(
         BitMap storage bitmap,
         uint256 index,
-        bool value
+        bool shouldSet
     ) internal {
-        if (value) set(bitmap, index);
-        else unset(bitmap, index);
+        uint256 value = bitmap.map[index >> 8];
+
+        assembly {
+            // The following sets the bit at `shift` without branching.
+            let shift := and(index, 0xff)
+            // Isolate the bit at `shift`.
+            let x := and(shr(shift, value), 1)
+            // Xor it with `shouldSet`. Results in 1 if both are different, else 0.
+            x := xor(x, shouldSet)
+            // Shifts the bit back. Then, xor with value.
+            // Only the bit at `shift` will be flipped if they differ.
+            // Every other bit will stay the same, as they are xor'ed with zeroes.
+            value := xor(value, shl(shift, x))
+        }
+        bitmap.map[index >> 8] = value;
     }
 
     /**
      * @dev Sets the bit at `index`.
      */
     function set(BitMap storage bitmap, uint256 index) internal {
-        assembly {
-            mstore(0x00, shr(8, index))
-            mstore(0x20, bitmap.slot)
-            let key := keccak256(0x00, 0x40)
-            sstore(key, or(sload(key), shl(and(index, 0xff), 1)))
-        }
+        bitmap.map[index >> 8] |= (1 << (index & 0xff));
     }
 
     function setBatch(BitMap storage bitmap_, uint256[] memory values_)
@@ -73,15 +81,6 @@ library BitMaps {
      * @dev Unsets the bit at `index`.
      */
     function unset(BitMap storage bitmap, uint256 index) internal {
-        unchecked {
-            bitmap._data[index >> 8] &= ~(1 << (index & 0xff));
-        }
-
-        assembly {
-            mstore(0x00, shr(8, index))
-            mstore(0x20, bitmap.slot)
-            let key := keccak256(0x00, 0x40)
-            sstore(key, and(sload(key), shl(and(index, 0xff), 1)))
-        }
+        bitmap.map[index >> 8] &= ~(1 << (index & 0xff));
     }
 }

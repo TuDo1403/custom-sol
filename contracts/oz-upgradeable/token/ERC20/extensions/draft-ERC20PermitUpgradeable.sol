@@ -42,8 +42,8 @@ abstract contract ERC20PermitUpgradeable is
      *
      * It's a good idea to use the same `name` that is defined as the ERC20 token name.
      */
-    function __ERC20Permit_init(string memory name) internal onlyInitializing {
-        __EIP712_init_unchained(name, "1");
+    function __ERC20Permit_init(string memory name_) internal onlyInitializing {
+        __EIP712_init_unchained(name_, "1");
     }
 
     function __ERC20Permit_init_unchained(string memory)
@@ -66,7 +66,6 @@ abstract contract ERC20PermitUpgradeable is
         if (block.timestamp > deadline) revert ERC20Permit__Expired();
 
         _verify(
-            _msgSender(),
             owner,
             keccak256(
                 abi.encode(

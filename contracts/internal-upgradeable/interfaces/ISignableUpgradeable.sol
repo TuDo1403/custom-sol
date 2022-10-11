@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.15;
+pragma solidity ^0.8.17;
 
 interface ISignableUpgradeable {
-    error Signable__InvalidSignature(address sender);
+    error Signable__InvalidSignature();
 
     function nonces(address sender_) external view returns (uint256);
 
