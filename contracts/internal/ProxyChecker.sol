@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
+error ProxyChecker__EOAUnallowed();
+error ProxyChecker__ProxyUnallowed();
+
 abstract contract ProxyChecker {
     modifier onlyEOA() {
         _onlyEOA(msg.sender);
@@ -12,24 +15,18 @@ abstract contract ProxyChecker {
     }
 
     function _onlyEOA(address msgSender_, address txOrigin_) internal view {
-        require(
-            !_isProxyCall(msgSender_, txOrigin_) && !_isProxy(msgSender_),
-            "PROXY_CHECKER: PROXY_UNALLOWED"
-        );
+        if (_isProxyCall(msgSender_, txOrigin_) || _isProxy(msgSender_))
+            revert ProxyChecker__ProxyUnallowed();
     }
 
     function _onlyProxy(address sender_) internal view {
-        require(
-            _isProxyCall(sender_, _txOrigin()) || _isProxy(sender_),
-            "PROXY_CHECKER: EOA_UNALLOWED"
-        );
+        if (!_isProxyCall(sender_, _txOrigin()) && !_isProxy(sender_))
+            revert ProxyChecker__EOAUnallowed();
     }
 
     function _onlyProxy(address msgSender_, address txOrigin_) internal view {
-        require(
-            _isProxyCall(msgSender_, txOrigin_) || _isProxy(msgSender_),
-            "PROXY_CHECKER: EOA_UNALLOWED"
-        );
+        if (!_isProxyCall(msgSender_, txOrigin_) && !_isProxy(msgSender_))
+            revert ProxyChecker__EOAUnallowed();
     }
 
     function _isProxyCall(address msgSender_, address txOrigin_)

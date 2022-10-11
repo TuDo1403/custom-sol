@@ -4,6 +4,9 @@ pragma solidity ^0.8.17;
 import "../oz-upgradeable/proxy/utils/Initializable.sol";
 import "../oz-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 
+error Transferable__TransferFailed();
+error Transferable__InvalidArguments();
+
 abstract contract TransferableUpgradeable is Initializable {
     function __Transferable_init() internal onlyInitializing {}
 
@@ -41,7 +44,7 @@ abstract contract TransferableUpgradeable is Initializable {
             }
         }
 
-        require(success, "TRANSFERABLE: TRANSFER_FAILED");
+        if (!success) revert Transferable__TransferFailed();
     }
 
     function _safeTransfer(
@@ -76,7 +79,7 @@ abstract contract TransferableUpgradeable is Initializable {
             }
         }
 
-        require(success, "TRANSFERABLE: TRANSFER_FAILED");
+        if (!success) revert Transferable__TransferFailed();
     }
 
     function _safeNativeTransfer(address to_, uint256 amount_)
@@ -84,7 +87,8 @@ abstract contract TransferableUpgradeable is Initializable {
         virtual
     {
         __checkValidTransfer(to_, amount_);
-        require(__nativeTransfer(to_, amount_), "TRANSFERABLE: TRANFER_FAILED");
+        if (!__nativeTransfer(to_, amount_))
+            revert Transferable__TransferFailed();
     }
 
     function __nativeTransfer(address to_, uint256 amount_)
@@ -97,10 +101,8 @@ abstract contract TransferableUpgradeable is Initializable {
     }
 
     function __checkValidTransfer(address to_, uint256 value_) private view {
-        require(
-            value_ != 0 && to_ != address(0) && to_ != address(this),
-            "TRANSFERABLE: INVALID_ARGUMENTS"
-        );
+        if (value_ == 0 || to_ == address(0) || to_ == address(this))
+            revert Transferable__InvalidArguments();
     }
 
     uint256[50] private __gap;

@@ -3,6 +3,9 @@ pragma solidity ^0.8.17;
 
 import "../oz/token/ERC20/IERC20.sol";
 
+error Transferable__TransferFailed();
+error Transferable__InvalidArguments();
+
 abstract contract Transferable {
     function _safeTransferFrom(
         IERC20 token_,
@@ -36,7 +39,7 @@ abstract contract Transferable {
             }
         }
 
-        require(success, "TRANSFERABLE: TRANSFER_FAILED");
+        if (!success) revert Transferable__TransferFailed();
     }
 
     function _safeTransfer(
@@ -71,7 +74,7 @@ abstract contract Transferable {
             }
         }
 
-        require(success, "TRANSFERABLE: TRANSFER_FAILED");
+        if (!success) revert Transferable__TransferFailed();
     }
 
     function _safeNativeTransfer(address to_, uint256 amount_)
@@ -79,7 +82,8 @@ abstract contract Transferable {
         virtual
     {
         __checkValidTransfer(to_, amount_);
-        require(__nativeTransfer(to_, amount_), "TRANSFERABLE: TRANFER_FAILED");
+        if (__nativeTransfer(to_, amount_))
+            revert Transferable__TransferFailed();
     }
 
     function __nativeTransfer(address to_, uint256 amount_)
@@ -92,9 +96,7 @@ abstract contract Transferable {
     }
 
     function __checkValidTransfer(address to_, uint256 value_) private view {
-        require(
-            value_ != 0 && to_ != address(0) && to_ != address(this),
-            "TRANSFERABLE: INVALID_ARGUMENTS"
-        );
+        if (value_ == 0 || to_ == address(0) || to_ == address(this))
+            revert Transferable__InvalidArguments();
     }
 }
