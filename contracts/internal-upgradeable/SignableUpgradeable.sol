@@ -20,13 +20,7 @@ abstract contract SignableUpgradeable is
 
     function __Signable_init_unchained() internal onlyInitializing {}
 
-    function nonces(address sender_)
-        external
-        view
-        virtual
-        override
-        returns (uint256)
-    {
+    function nonces(address sender_) external view virtual returns (uint256) {
         return _nonce(sender_);
     }
 
@@ -112,13 +106,7 @@ abstract contract SignableUpgradeable is
         }
     }
 
-    function DOMAIN_SEPARATOR()
-        external
-        view
-        virtual
-        override
-        returns (bytes32)
-    {
+    function DOMAIN_SEPARATOR() external view virtual returns (bytes32) {
         return _domainSeparatorV4();
     }
 

@@ -24,7 +24,7 @@ abstract contract WithdrawableUpgradeable is
         IERC20Upgradeable token_,
         address to_,
         uint256 amount_
-    ) external virtual override;
+    ) external virtual;
 
     uint256[50] private __gap;
 }

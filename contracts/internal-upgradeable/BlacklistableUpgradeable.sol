@@ -21,17 +21,9 @@ abstract contract BlacklistableUpgradeable is
 
     function __Blacklistable_init_unchained() internal onlyInitializing {}
 
-    function setUserStatus(address account_, bool status)
-        external
-        virtual
-        override;
+    function setUserStatus(address account_, bool status) external virtual;
 
-    function isBlacklisted(address account_)
-        public
-        view
-        override
-        returns (bool)
-    {
+    function isBlacklisted(address account_) public view returns (bool) {
         return _blacklisted.get(account_.fillLast96Bits());
     }
 

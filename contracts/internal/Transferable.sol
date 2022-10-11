@@ -97,6 +97,4 @@ abstract contract Transferable {
             "TRANSFERABLE: INVALID_ARGUMENTS"
         );
     }
-
-    uint256[50] private __gap;
 }

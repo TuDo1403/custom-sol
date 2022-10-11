@@ -47,6 +47,4 @@ abstract contract ProxyChecker {
     function _txOrigin() internal view returns (address) {
         return tx.origin;
     }
-
-    uint256[50] private _gap;
 }
