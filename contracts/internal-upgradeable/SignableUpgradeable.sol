@@ -16,7 +16,12 @@ abstract contract SignableUpgradeable is
 
     mapping(bytes32 => uint256) internal _nonces;
 
-    function __Signable_init() internal onlyInitializing {}
+    function __Signable_init(string memory name_, string memory version_)
+        internal
+        onlyInitializing
+    {
+        __EIP712_init_unchained(name_, version_);
+    }
 
     function __Signable_init_unchained() internal onlyInitializing {}
 
@@ -29,7 +34,7 @@ abstract contract SignableUpgradeable is
         bytes32 structHash_,
         bytes calldata signature_
     ) internal view virtual {
-        _checkVerifier(verifier_, _hashTypedDataV4(structHash_), signature_);
+        _checkVerifier(verifier_, structHash_, signature_);
     }
 
     function _verify(
@@ -39,44 +44,44 @@ abstract contract SignableUpgradeable is
         bytes32 r,
         bytes32 s
     ) internal view virtual {
-        _checkVerifier(verifier_, _hashTypedDataV4(structHash_), v, r, s);
+        _checkVerifier(verifier_, structHash_, v, r, s);
     }
 
     function _checkVerifier(
         address verifier_,
-        bytes32 digest_,
+        bytes32 structHash_,
         uint8 v,
         bytes32 r,
         bytes32 s
     ) internal view virtual {
-        if (_recoverSigner(digest_, v, r, s) != verifier_)
+        if (_recoverSigner(structHash_, v, r, s) != verifier_)
             revert Signable__InvalidSignature();
     }
 
     function _checkVerifier(
         address verifier_,
-        bytes32 digest_,
+        bytes32 structHash_,
         bytes calldata signature_
     ) internal view virtual {
-        if (_recoverSigner(digest_, signature_) != verifier_)
+        if (_recoverSigner(structHash_, signature_) != verifier_)
             revert Signable__InvalidSignature();
     }
 
-    function _recoverSigner(bytes32 digest_, bytes calldata signature_)
+    function _recoverSigner(bytes32 structHash_, bytes calldata signature_)
         internal
         view
         returns (address)
     {
-        return digest_.recover(signature_);
+        return _hashTypedDataV4(structHash_).recover(signature_);
     }
 
     function _recoverSigner(
-        bytes32 digest_,
+        bytes32 structHash_,
         uint8 v,
         bytes32 r,
         bytes32 s
     ) internal view returns (address) {
-        return digest_.recover(v, r, s);
+        return _hashTypedDataV4(structHash_).recover(v, r, s);
     }
 
     function _useNonce(address sender_) internal virtual returns (uint256) {
@@ -87,6 +92,14 @@ abstract contract SignableUpgradeable is
 
     function _nonce(address sender_) internal view virtual returns (uint256) {
         return _nonces[sender_.fillLast12Bytes()];
+    }
+
+    function _mergeSignature(
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    ) internal pure returns (bytes memory signature) {
+        return abi.encodePacked(r, s, v);
     }
 
     function _splitSignature(bytes calldata signature_)

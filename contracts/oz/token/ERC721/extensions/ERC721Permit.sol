@@ -11,6 +11,12 @@ import "../../../../internal/Signable.sol";
 abstract contract ERC721Permit is ERC721, IERC721Permit, Signable {
     using Bytes32Address for address;
 
+    constructor(
+        string memory name_,
+        string memory symbol_,
+        string memory version_
+    ) payable Signable(name_, version_) ERC721(name_, symbol_) {}
+
     /// @dev Gets the current nonce for a token ID and then increments it, returning the original value
 
     /// @inheritdoc IERC721Permit
@@ -40,6 +46,7 @@ abstract contract ERC721Permit is ERC721, IERC721Permit, Signable {
         address owner = ownerOf(tokenId_);
         if (spender_ == owner) revert ERC721Permit__SelfApproving();
         _verify(
+            owner,
             keccak256(
                 abi.encode(
                     _PERMIT_TYPEHASH,
@@ -49,7 +56,6 @@ abstract contract ERC721Permit is ERC721, IERC721Permit, Signable {
                     deadline_
                 )
             ),
-            owner,
             v,
             r,
             s

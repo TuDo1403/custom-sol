@@ -13,6 +13,11 @@ abstract contract Signable is EIP712, ISignable {
 
     mapping(bytes32 => uint256) internal _nonces;
 
+    constructor(string memory name_, string memory version_)
+        payable
+        EIP712(name_, version_)
+    {}
+
     function nonces(address sender_) external view virtual returns (uint256) {
         return _nonce(sender_);
     }
@@ -22,37 +27,54 @@ abstract contract Signable is EIP712, ISignable {
         bytes32 structHash_,
         bytes calldata signature_
     ) internal view virtual {
-        _checkVerifier(verifier_, _hashTypedDataV4(structHash_), signature_);
+        _checkVerifier(verifier_, structHash_, signature_);
     }
 
     function _verify(
-        bytes32 structHash_,
         address verifier_,
+        bytes32 structHash_,
         uint8 v,
         bytes32 r,
         bytes32 s
     ) internal view virtual {
-        _checkVerifier(verifier_, _hashTypedDataV4(structHash_), v, r, s);
+        _checkVerifier(verifier_, structHash_, v, r, s);
     }
 
     function _checkVerifier(
         address verifier_,
-        bytes32 digest_,
+        bytes32 structHash_,
         uint8 v,
         bytes32 r,
         bytes32 s
     ) internal view virtual {
-        if (digest_.recover(v, r, s) != verifier_)
+        if (_recoverSigner(structHash_, v, r, s) != verifier_)
             revert Signable__InvalidSignature();
     }
 
     function _checkVerifier(
         address verifier_,
-        bytes32 digest_,
+        bytes32 structHash_,
         bytes calldata signature_
     ) internal view virtual {
-        if (digest_.recover(signature_) != verifier_)
+        if (_recoverSigner(structHash_, signature_) != verifier_)
             revert Signable__InvalidSignature();
+    }
+
+    function _recoverSigner(bytes32 structHash_, bytes calldata signature_)
+        internal
+        view
+        returns (address)
+    {
+        return _hashTypedDataV4(structHash_).recover(signature_);
+    }
+
+    function _recoverSigner(
+        bytes32 structHash_,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    ) internal view returns (address) {
+        return _hashTypedDataV4(structHash_).recover(v, r, s);
     }
 
     function _useNonce(address sender_) internal virtual returns (uint256) {
@@ -63,6 +85,14 @@ abstract contract Signable is EIP712, ISignable {
 
     function _nonce(address sender_) internal view virtual returns (uint256) {
         return _nonces[sender_.fillLast12Bytes()];
+    }
+
+    function _mergeSignature(
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    ) internal pure returns (bytes memory signature) {
+        return abi.encodePacked(r, s, v);
     }
 
     function _splitSignature(bytes calldata signature_)

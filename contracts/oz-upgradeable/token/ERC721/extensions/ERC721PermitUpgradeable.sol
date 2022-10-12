@@ -15,7 +15,14 @@ abstract contract ERC721PermitUpgradeable is
 {
     using Bytes32Address for address;
 
-    function __ERC721Permit_init() internal onlyInitializing {}
+    function __ERC721Permit_init(
+        string calldata name_,
+        string calldata symbol_,
+        string calldata version_
+    ) internal onlyInitializing {
+        __ERC721_init_unchained(name_, symbol_);
+        __EIP712_init_unchained(name_, version_);
+    }
 
     function __ERC721Permit_init_unchained() internal onlyInitializing {}
 

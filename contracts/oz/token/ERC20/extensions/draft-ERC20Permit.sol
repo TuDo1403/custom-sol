@@ -38,7 +38,7 @@ abstract contract ERC20Permit is ERC20, IERC20Permit, Signable {
      *
      * It's a good idea to use the same `name` that is defined as the ERC20 token name.
      */
-    constructor(string memory name) EIP712(name, "1") {}
+    constructor(string memory name_) Signable(name_, "1") {}
 
     /**
      * @dev See {IERC20Permit-permit}.
@@ -55,6 +55,7 @@ abstract contract ERC20Permit is ERC20, IERC20Permit, Signable {
         if (block.timestamp > deadline) revert ERC20Permit__Expired();
 
         _verify(
+            owner,
             keccak256(
                 abi.encode(
                     _PERMIT_TYPEHASH,
@@ -65,7 +66,6 @@ abstract contract ERC20Permit is ERC20, IERC20Permit, Signable {
                     deadline
                 )
             ),
-            owner,
             v,
             r,
             s
