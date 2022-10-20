@@ -8,7 +8,7 @@ import "../libraries/Bytes32Address.sol";
 
 import "./interfaces/IBlacklistable.sol";
 
-abstract contract Blacklistable is Context, IBlacklistable {
+abstract contract Blacklistable is IBlacklistable {
     using Bytes32Address for address;
     using BitMaps for BitMaps.BitMap;
 

@@ -1,12 +1,12 @@
-// SPDX-License-Identifier: AGPL-3.0-only
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
 import {Bytes32Address} from "./Bytes32Address.sol";
 
-/// @notice Deploy to deterministic addresses without an initcode factor.
-/// @author Solmate (https://github.com/transmissions11/solmate/blob/main/src/utils/CREATE3.sol)
-/// @author Modified from 0xSequence (https://github.com/0xSequence/create3/blob/master/contracts/Create3.sol)
-library Create3 {
+error ProxyCreator__DeploymentFailed();
+error ProxyCreator__InitializationFailed();
+
+library ProxyCreator {
     using Bytes32Address for bytes32;
 
     //--------------------------------------------------------------------------------//
@@ -20,6 +20,7 @@ library Create3 {
     // 0x3d       |  0x3d                 | RETURNDATASIZE   | 0 size                 //
     // 0x34       |  0x34                 | CALLVALUE        | value 0 size           //
     // 0xf0       |  0xf0                 | CREATE           | newContract            //
+    // 0xff       |  0xff                 | SELFDESTRUCT     |                        //
     //--------------------------------------------------------------------------------//
     // Opcode     | Opcode + Arguments    | Description      | Stack View             //
     //--------------------------------------------------------------------------------//
@@ -31,7 +32,7 @@ library Create3 {
     // 0xf3       |  0xf3                 | RETURN           |                        //
     //--------------------------------------------------------------------------------//
     bytes internal constant PROXY_BYTECODE =
-        hex"67_36_3d_3d_37_36_3d_34_f0_3d_52_60_08_60_18_f3";
+        hex"63_00_00_00_09_80_60_0E_60_00_39_60_00_F3_36_3d_80_37_36_3d_34_f0_ff";
 
     bytes32 internal constant PROXY_BYTECODE_HASH = keccak256(PROXY_BYTECODE);
 
@@ -53,11 +54,12 @@ library Create3 {
                 salt
             )
         }
-        require(proxy != address(0), "DEPLOYMENT_FAILED");
+        if (proxy == address(0)) revert ProxyCreator__DeploymentFailed();
 
         deployed = getDeployed(salt);
         (bool success, ) = proxy.call{value: value}(creationCode);
-        require(success && deployed.code.length != 0, "INITIALIZATION_FAILED");
+        if (!success || deployed.code.length == 0)
+            revert ProxyCreator__InitializationFailed();
     }
 
     function getDeployed(bytes32 salt) internal view returns (address) {
