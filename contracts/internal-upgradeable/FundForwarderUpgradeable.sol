@@ -15,7 +15,7 @@ abstract contract FundForwarderUpgradeable is
 
     event Forwarded(address indexed from, uint256 indexed amount);
 
-    receive() external payable {
+    receive() external payable virtual {
         (bool ok, ) = vault.call{value: msg.value}("");
         if (!ok) revert FundForwarder__ForwardFailed();
         emit Forwarded(_msgSender(), msg.value);
