@@ -3,7 +3,7 @@ pragma solidity ^0.8.17;
 
 import "./interfaces/ICloner.sol";
 
-import "@openzeppelin/contracts/proxy/Clones.sol";
+import "../oz/proxy/Clones.sol";
 
 import "../libraries/Bytes32Address.sol";
 

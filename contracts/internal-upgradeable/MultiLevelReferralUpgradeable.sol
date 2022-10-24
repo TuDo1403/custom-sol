@@ -1,27 +1,31 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "./ProxyChecker.sol";
+import "./ProxyCheckerUpgradeable.sol";
 
-import "./interfaces/IMultiLevelReferral.sol";
+import "./interfaces/IMultiLevelReferralUpgradeable.sol";
 
 import "../libraries/FixedPointMathLib.sol";
 
-abstract contract MultiLevelReferral is ProxyChecker, IMultiLevelReferral {
+abstract contract MultiLevelReferral is
+    ProxyCheckerUpgradeable,
+    IMultiLevelReferralUpgradeable
+{
     using FixedPointMathLib for uint256;
 
     uint256 public constant PERCENTAGE_FRACTION = 10_000;
 
-    uint256 public immutable activeTimestampThreshold;
+    uint256 public activeTimestampThreshold;
 
     uint16[] public ratePerTier;
 
     mapping(address => Referrer) private __referrals;
     mapping(address => uint64) public lastActiveTimestamp;
 
-    constructor(uint64 activeTimestampThreshold_, uint16[] memory ratePerTier_)
-        payable
-    {
+    function __MultiLevelReferral_init(
+        uint64 activeTimestampThreshold_,
+        uint16[] memory ratePerTier_
+    ) internal onlyInitializing {
         uint256 length = ratePerTier_.length;
         uint256 sum;
         for (uint256 i; i < length; ) {
@@ -36,6 +40,8 @@ abstract contract MultiLevelReferral is ProxyChecker, IMultiLevelReferral {
         ratePerTier = ratePerTier_;
         activeTimestampThreshold = activeTimestampThreshold_;
     }
+
+    function __MultiLevelReferral_init_unchained() internal onlyInitializing {}
 
     function referrerOf(address account_)
         external
@@ -103,4 +109,6 @@ abstract contract MultiLevelReferral is ProxyChecker, IMultiLevelReferral {
     function _updateLastActiveTimestamp(address account_) internal {
         lastActiveTimestamp[account_] = uint64(block.timestamp);
     }
+
+    uint256[46] private __gap;
 }
