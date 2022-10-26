@@ -34,7 +34,8 @@ abstract contract SignableUpgradeable is
         bytes32 structHash_,
         bytes calldata signature_
     ) internal view virtual {
-        _checkVerifier(verifier_, structHash_, signature_);
+        if (_recoverSigner(structHash_, signature_) != verifier_)
+            revert Signable__InvalidSignature();
     }
 
     function _verify(
@@ -44,26 +45,7 @@ abstract contract SignableUpgradeable is
         bytes32 r,
         bytes32 s
     ) internal view virtual {
-        _checkVerifier(verifier_, structHash_, v, r, s);
-    }
-
-    function _checkVerifier(
-        address verifier_,
-        bytes32 structHash_,
-        uint8 v,
-        bytes32 r,
-        bytes32 s
-    ) internal view virtual {
         if (_recoverSigner(structHash_, v, r, s) != verifier_)
-            revert Signable__InvalidSignature();
-    }
-
-    function _checkVerifier(
-        address verifier_,
-        bytes32 structHash_,
-        bytes calldata signature_
-    ) internal view virtual {
-        if (_recoverSigner(structHash_, signature_) != verifier_)
             revert Signable__InvalidSignature();
     }
 
@@ -84,14 +66,31 @@ abstract contract SignableUpgradeable is
         return _hashTypedDataV4(structHash_).recover(v, r, s);
     }
 
-    function _useNonce(address sender_) internal virtual returns (uint256) {
-        unchecked {
-            return _nonces[sender_.fillLast12Bytes()]++;
+    function _useNonce(address sender_)
+        internal
+        virtual
+        returns (uint256 nonce)
+    {
+        assembly {
+            mstore(0x00, sender_)
+            mstore(0x20, _nonces.slot)
+            let key := keccak256(0x00, 0x40)
+            nonce := sload(key)
+            sstore(key, add(nonce, 1))
         }
     }
 
-    function _nonce(address sender_) internal view virtual returns (uint256) {
-        return _nonces[sender_.fillLast12Bytes()];
+    function _nonce(address sender_)
+        internal
+        view
+        virtual
+        returns (uint256 nonce)
+    {
+        assembly {
+            mstore(0x00, sender_)
+            mstore(0x20, _nonces.slot)
+            nonce := sload(keccak256(0x00, 0x40))
+        }
     }
 
     function _mergeSignature(

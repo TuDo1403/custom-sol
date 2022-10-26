@@ -7,7 +7,7 @@ abstract contract ProtocolFeeUpgradeable is IProtocolFeeUpgradeable {
     FeeInfo private __feeInfo;
 
     function feeInfo()
-        external
+        public
         view
         returns (IERC20Upgradeable token, uint256 feeAmt)
     {
