@@ -26,6 +26,13 @@ abstract contract MultiLevelReferral is
         uint64 activeTimestampThreshold_,
         uint16[] memory ratePerTier_
     ) internal onlyInitializing {
+        __MultiLevelReferral_init(activeTimestampThreshold_, ratePerTier_);
+    }
+
+    function __MultiLevelReferral_init_unchained(
+        uint64 activeTimestampThreshold_,
+        uint16[] memory ratePerTier_
+    ) internal onlyInitializing {
         uint256 length = ratePerTier_.length;
         uint256 sum;
         for (uint256 i; i < length; ) {
@@ -40,8 +47,6 @@ abstract contract MultiLevelReferral is
         ratePerTier = ratePerTier_;
         activeTimestampThreshold = activeTimestampThreshold_;
     }
-
-    function __MultiLevelReferral_init_unchained() internal onlyInitializing {}
 
     function referrerOf(address account_)
         external

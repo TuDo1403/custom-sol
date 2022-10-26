@@ -22,10 +22,15 @@ abstract contract FundForwarderUpgradeable is
     }
 
     function __FundForwarder_init(address vault_) internal onlyInitializing {
-        vault = vault_;
+        __FundForwarder_init_unchained(vault_);
     }
 
-    function __FundForwarder_init_unchained() internal onlyInitializing {}
+    function __FundForwarder_init_unchained(address vault_)
+        internal
+        onlyInitializing
+    {
+        vault = vault_;
+    }
 
     uint256[49] private __gap;
 }

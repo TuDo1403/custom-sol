@@ -10,6 +10,10 @@ abstract contract MultiDelegatecallUpgradeable is Initializable {
     address public original;
 
     function __MultiDelegatecall_init() internal onlyInitializing {
+        __MultiDelegatecall_init_unchained();
+    }
+
+    function __MultiDelegatecall_init_unchained() internal onlyInitializing {
         original = address(this);
     }
 

@@ -1,10 +1,19 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
+import "../oz-upgradeable/proxy/utils/Initializable.sol";
+
 import "./interfaces/IProtocolFeeUpgradeable.sol";
 
-abstract contract ProtocolFeeUpgradeable is IProtocolFeeUpgradeable {
+abstract contract ProtocolFeeUpgradeable is
+    Initializable,
+    IProtocolFeeUpgradeable
+{
     FeeInfo private __feeInfo;
+
+    function __ProtocolFee_init() internal onlyInitializing {}
+
+    function __ProtocolFee_init_unchained() internal onlyInitializing {}
 
     function feeInfo()
         public
