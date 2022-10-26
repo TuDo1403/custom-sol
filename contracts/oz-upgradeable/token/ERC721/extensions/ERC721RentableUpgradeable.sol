@@ -79,7 +79,7 @@ abstract contract ERC721RentableUpgradeable is
         super._beforeTokenTransfer(from, to, tokenId);
 
         UserInfo memory info = _users[tokenId];
-        if (block.timestamp > info.expires) revert Rentable__NotValidTransfer();
+        if (block.timestamp < info.expires) revert Rentable__NotValidTransfer();
         if (from != to && info.user != address(0)) {
             delete _users[tokenId];
 
