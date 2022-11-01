@@ -61,6 +61,8 @@ abstract contract MultiLevelReferral is
         if (__referrals[referree_].addr != address(0))
             revert MultiLevelReferral__ReferralExisted();
 
+        __referrals[referree_].addr = referrer_;
+
         uint256 maxLevel = ratePerTier.length;
         uint256 level;
         for (uint256 i; i < maxLevel; ) {
@@ -71,10 +73,9 @@ abstract contract MultiLevelReferral is
                 level = ++__referrals[referrer_].level;
                 ++i;
             }
-
-            referrer_ = __referrals[referrer_].addr;
-
             emit LevelUpdated(referrer_, level);
+
+            if ((referrer_ = __referrals[referrer_].addr) == address(0)) break;
         }
 
         emit ReferralAdded(referrer_, referree_);

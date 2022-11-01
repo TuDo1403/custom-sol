@@ -98,7 +98,12 @@ abstract contract SignableUpgradeable is
         bytes32 r,
         bytes32 s
     ) internal pure returns (bytes memory signature) {
-        return abi.encodePacked(r, s, v);
+        signature = new bytes(65);
+        assembly {
+            mstore8(add(signature, 32), r)
+            mstore(add(signature, 33), s)
+            mstore(add(signature, 65), v)
+        }
     }
 
     function _splitSignature(bytes calldata signature_)
