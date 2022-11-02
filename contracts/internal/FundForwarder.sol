@@ -21,4 +21,8 @@ abstract contract FundForwarder is Context, Transferable {
         if (!ok) revert FundForwarder__ForwardFailed();
         emit Forwarded(_msgSender(), msg.value);
     }
+
+    function recoverERC20(IERC20 token_, uint256 amount_) external {
+        _safeERC20Transfer(token_, vault, amount_);
+    }
 }

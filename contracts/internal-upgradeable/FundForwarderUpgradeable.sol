@@ -32,5 +32,9 @@ abstract contract FundForwarderUpgradeable is
         vault = vault_;
     }
 
+    function recoverERC20(IERC20Upgradeable token_, uint256 amount_) external {
+        _safeERC20Transfer(token_, vault, amount_);
+    }
+
     uint256[49] private __gap;
 }
