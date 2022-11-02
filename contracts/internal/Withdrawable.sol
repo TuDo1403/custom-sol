@@ -17,7 +17,7 @@ abstract contract WithdrawableUpgradeable is
     }
 
     function withdraw(
-        IERC20 token_,
+        address token_,
         address to_,
         uint256 amount_
     ) external virtual;

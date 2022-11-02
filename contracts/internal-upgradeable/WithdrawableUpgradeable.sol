@@ -21,7 +21,7 @@ abstract contract WithdrawableUpgradeable is
     function __Withdrawable_init_unchained() internal onlyInitializing {}
 
     function withdraw(
-        IERC20Upgradeable token_,
+        address token_,
         address to_,
         uint256 amount_
     ) external virtual;
