@@ -7,7 +7,7 @@ import "./Transferable.sol";
 
 import "./interfaces/IWithdrawable.sol";
 
-abstract contract WithdrawableUpgradeable is
+abstract contract Withdrawable is
     Context,
     Transferable,
     IWithdrawable

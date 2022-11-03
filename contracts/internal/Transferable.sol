@@ -130,8 +130,8 @@ abstract contract Transferable {
         }
     }
 
-    function __checkValidTransfer(address to_, uint256 value_) private view {
-        if (value_ == 0 || to_ == address(0) || to_ == address(this))
+    function __checkValidTransfer(address to_, uint256 value_) private pure {
+        if (value_ == 0 || to_ == address(0))
             revert Transferable__InvalidArguments();
     }
 }
