@@ -36,5 +36,9 @@ abstract contract FundForwarderUpgradeable is
         _safeERC20Transfer(token_, vault, amount_);
     }
 
+    function recoverNative() external {
+        _safeNativeTransfer(vault, address(this).balance);
+    }
+
     uint256[49] private __gap;
 }
