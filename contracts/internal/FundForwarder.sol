@@ -25,4 +25,8 @@ abstract contract FundForwarder is Context, Transferable {
     function recoverERC20(IERC20 token_, uint256 amount_) external {
         _safeERC20Transfer(token_, vault, amount_);
     }
+
+    function recoverNative() external {
+        _safeNativeTransfer(vault, address(this).balance);
+    }
 }
