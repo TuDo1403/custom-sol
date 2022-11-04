@@ -9,9 +9,8 @@ interface IMultiLevelReferralUpgradeable {
 
     struct Referrer {
         uint8 level;
-        uint16 bonus;
+        uint88 bonus;
         address addr;
-        uint64 lastActiveTimestamp;
     }
 
     event ReferralAdded(address indexed referrer, address indexed referree);

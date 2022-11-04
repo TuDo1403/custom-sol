@@ -8,12 +8,13 @@ import "./Transferable.sol";
 error FundForwarder__ForwardFailed();
 
 abstract contract FundForwarder is Context, Transferable {
-    address public immutable vault;
+    address public vault;
 
+    event VaultUpdated(address indexed from, address indexed to);
     event Forwarded(address indexed from, uint256 indexed amount);
 
     constructor(address vault_) payable {
-        vault = vault_;
+        _changeVault(vault_);
     }
 
     receive() external payable virtual {
@@ -28,5 +29,10 @@ abstract contract FundForwarder is Context, Transferable {
 
     function recoverNative() external {
         _safeNativeTransfer(vault, address(this).balance);
+    }
+
+    function _changeVault(address vault_) internal {
+        emit VaultUpdated(vault, vault_);
+        vault = vault_;
     }
 }

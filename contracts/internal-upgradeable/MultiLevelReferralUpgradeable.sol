@@ -93,7 +93,7 @@ abstract contract MultiLevelReferral is
             referrer = __referrals[referrer].addr;
             unchecked {
                 if (_isAccountActiveLately(referrer))
-                    __referrals[referrer].bonus += uint16(
+                    __referrals[referrer].bonus += uint88(
                         amount_.mulDivDown(rates[i], percentageFraction)
                     );
                 ++i;

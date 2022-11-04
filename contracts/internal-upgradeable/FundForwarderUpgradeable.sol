@@ -13,6 +13,7 @@ abstract contract FundForwarderUpgradeable is
 {
     address public vault;
 
+    event VaultUpdated(address indexed from, address indexed to);
     event Forwarded(address indexed from, uint256 indexed amount);
 
     receive() external payable virtual {
@@ -29,7 +30,7 @@ abstract contract FundForwarderUpgradeable is
         internal
         onlyInitializing
     {
-        vault = vault_;
+        _changeVault(vault_);
     }
 
     function recoverERC20(IERC20Upgradeable token_, uint256 amount_) external {
@@ -38,6 +39,11 @@ abstract contract FundForwarderUpgradeable is
 
     function recoverNative() external {
         _safeNativeTransfer(vault, address(this).balance);
+    }
+
+    function _changeVault(address vault_) internal {
+        emit VaultUpdated(vault, vault_);
+        vault = vault_;
     }
 
     uint256[49] private __gap;

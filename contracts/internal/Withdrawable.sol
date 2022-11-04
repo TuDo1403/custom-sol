@@ -7,11 +7,7 @@ import "./Transferable.sol";
 
 import "./interfaces/IWithdrawable.sol";
 
-abstract contract Withdrawable is
-    Context,
-    Transferable,
-    IWithdrawable
-{
+abstract contract Withdrawable is Context, Transferable, IWithdrawable {
     receive() external payable virtual {
         emit Received(_msgSender(), msg.value);
     }
