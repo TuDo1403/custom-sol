@@ -33,4 +33,6 @@ abstract contract MultiDelegatecallUpgradeable is Initializable {
             }
         }
     }
+
+    uint256[49] private __gap;
 }
