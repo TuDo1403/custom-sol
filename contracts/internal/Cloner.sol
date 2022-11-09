@@ -19,17 +19,14 @@ abstract contract Cloner is ICloner {
         _setImplement(implement_);
     }
 
-    function setImplement(address implement_) public virtual {
-        emit ImplementChanged(implement(), implement_);
-        _setImplement(implement_);
-    }
+    function setImplement(address implement_) external virtual;
 
     function implement() public view returns (address) {
         return __implement.fromFirst20Bytes();
     }
 
-    function cloneOf(bytes32 salt_)
-        external
+    function _cloneOf(bytes32 salt_)
+        internal
         view
         returns (address clone, bool isCloned)
     {
@@ -53,9 +50,9 @@ abstract contract Cloner is ICloner {
         bytes32 salt_,
         bytes4 initSelector_,
         bytes memory initCode_
-    ) internal {
+    ) internal returns (address clone) {
         address _implement = implement();
-        address clone = _implement.cloneDeterministic(salt_);
+        clone = _implement.cloneDeterministic(salt_);
         (bool ok, ) = clone.call(abi.encodePacked(initSelector_, initCode_));
         if (!ok) revert Cloner__InitCloneFailed();
 

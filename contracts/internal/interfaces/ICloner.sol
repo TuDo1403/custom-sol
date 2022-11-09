@@ -17,11 +17,6 @@ interface ICloner {
 
     function implement() external view returns (address);
 
-    function cloneOf(bytes32 salt_)
-        external
-        view
-        returns (address clone, bool isCloned);
-
     function allClonesOf(address implement_)
         external
         view
