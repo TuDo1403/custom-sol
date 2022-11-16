@@ -60,7 +60,7 @@ abstract contract ERC721PermitUpgradeable is
                     _PERMIT_TYPE_HASH,
                     spender_,
                     tokenId_,
-                    _useNonce(owner),
+                    _useNonce(tokenId_),
                     deadline_
                 )
             ),

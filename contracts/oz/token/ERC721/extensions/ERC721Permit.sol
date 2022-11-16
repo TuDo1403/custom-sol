@@ -52,7 +52,7 @@ abstract contract ERC721Permit is ERC721, IERC721Permit, Signable {
                     _PERMIT_TYPEHASH,
                     spender_,
                     tokenId_,
-                    _useNonce(owner),
+                    _useNonce(tokenId_),
                     deadline_
                 )
             ),
