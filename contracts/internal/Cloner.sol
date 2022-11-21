@@ -53,8 +53,12 @@ abstract contract Cloner is ICloner {
     ) internal returns (address clone) {
         address _implement = implement();
         clone = _implement.cloneDeterministic(salt_);
-        (bool ok, ) = clone.call(abi.encodePacked(initSelector_, initCode_));
-        if (!ok) revert Cloner__InitCloneFailed();
+        if (initSelector_ != 0) {
+            (bool ok, ) = clone.call(
+                abi.encodePacked(initSelector_, initCode_)
+            );
+            if (!ok) revert Cloner__InitCloneFailed();
+        }
 
         __clones[_implement.fillLast12Bytes()].push(clone);
 
