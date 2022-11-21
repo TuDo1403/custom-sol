@@ -7,8 +7,7 @@ import "../oz/utils/structs/BitMaps.sol";
 
 library EnumerableSetV2 {
     using Array for uint256[];
-    using SSTORE2 for bytes;
-    using SSTORE2 for address;
+    using SSTORE2 for *;
     using BitMaps for BitMaps.BitMap;
 
     struct Set {

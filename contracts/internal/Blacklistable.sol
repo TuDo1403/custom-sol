@@ -21,6 +21,6 @@ abstract contract Blacklistable is IBlacklistable {
     }
 
     function _setUserStatus(address account_, bool status_) internal {
-        _blacklisted.setTo(account_.fillFirst96Bits(), status_);
+        _blacklisted.setTo(account_.fillLast96Bits(), status_);
     }
 }
