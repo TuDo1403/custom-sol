@@ -216,10 +216,10 @@ abstract contract ERC1967UpgradeUpgradeable is Initializable {
      *
      * _Available since v3.4._
      */
-    function _functionDelegateCall(address target, bytes memory data)
-        private
-        returns (bytes memory)
-    {
+    function _functionDelegateCall(
+        address target,
+        bytes memory data
+    ) private returns (bytes memory) {
         if (!_isContract(target))
             revert ERC1967UpgradeUpgradeable__DelegateCallToNonContract();
 
@@ -232,11 +232,10 @@ abstract contract ERC1967UpgradeUpgradeable is Initializable {
         return addr_.code.length != 0;
     }
 
-    function _verifyCallResult(bool success, bytes memory returndata)
-        internal
-        pure
-        returns (bytes memory)
-    {
+    function _verifyCallResult(
+        bool success,
+        bytes memory returndata
+    ) internal pure returns (bytes memory) {
         if (success) return returndata;
         else {
             // Look for revert reason and bubble it up if present

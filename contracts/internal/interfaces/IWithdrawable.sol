@@ -9,11 +9,17 @@ interface IWithdrawable {
         address indexed to,
         uint256 indexed value
     );
+
+    /**
+     * @dev Event emitted when funds are received by the contract
+     */
     event Received(address indexed sender, uint256 indexed value);
 
-    function withdraw(
-        address from_,
-        address to_,
-        uint256 amount_
-    ) external;
+    /**
+     * @dev Withdraws the given amount of tokens or Ether from the contract
+     * @param token_ Address of the token contract to withdraw. If zero address, withdraw Ether.
+     * @param to_ Address to send the tokens or Ether to
+     * @param amount_ Amount of tokens or Ether to withdraw
+     */
+    function withdraw(address token_, address to_, uint256 amount_) external;
 }

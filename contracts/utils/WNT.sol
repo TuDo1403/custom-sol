@@ -14,11 +14,10 @@ import "./interfaces/IWNT.sol";
 /// @author Solmate (https://github.com/transmissions11/solmate/blob/main/src/tokens/WETH.sol)
 /// @author Inspired by WETH9 (https://github.com/dapphub/ds-weth/blob/master/src/weth9.sol)
 contract WNT is IWNT, ERC20Permit, Transferable {
-    constructor(string memory name_, string memory symbol_)
-        payable
-        ERC20Permit(name_)
-        ERC20(name_, symbol_, 18)
-    {}
+    constructor(
+        string memory name_,
+        string memory symbol_
+    ) payable ERC20Permit(name_) ERC20(name_, symbol_, 18) {}
 
     function deposit() public payable virtual {
         address sender = _msgSender();

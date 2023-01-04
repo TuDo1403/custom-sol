@@ -44,7 +44,7 @@ contract SigUtil {
                 ERC20PERMIT_TYPE_HASH,
                 owner,
                 spender,
-                value * 10**18,
+                value * 10 ** 18,
                 nonce = paymentToken.nonces(owner),
                 deadline
             )
@@ -55,16 +55,9 @@ contract SigUtil {
         );
     }
 
-    function splitSignature(bytes calldata signature_)
-        external
-        pure
-        returns (
-            uint256 length,
-            uint8 v,
-            bytes32 r,
-            bytes32 s
-        )
-    {
+    function splitSignature(
+        bytes calldata signature_
+    ) external pure returns (uint256 length, uint8 v, bytes32 r, bytes32 s) {
         length = signature_.length;
         if (signature_.length == 65) {
             assembly {
@@ -75,11 +68,10 @@ contract SigUtil {
         }
     }
 
-    function recover(bytes32 digest, bytes calldata sig)
-        external
-        view
-        returns (address)
-    {
+    function recover(
+        bytes32 digest,
+        bytes calldata sig
+    ) external view returns (address) {
         return ECDSA.recover(digest, sig);
     }
 

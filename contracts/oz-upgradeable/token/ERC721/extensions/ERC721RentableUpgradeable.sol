@@ -38,34 +38,22 @@ abstract contract ERC721RentableUpgradeable is
         emit UserUpdated(tokenId, user, expires);
     }
 
-    function userOf(uint256 tokenId)
-        external
-        view
-        virtual
-        override
-        returns (address user)
-    {
+    function userOf(
+        uint256 tokenId
+    ) external view virtual override returns (address user) {
         UserInfo memory info = _users[tokenId];
         user = info.expires > block.timestamp ? info.user : address(0);
     }
 
-    function userExpires(uint256 tokenId)
-        public
-        view
-        virtual
-        override
-        returns (uint256)
-    {
+    function userExpires(
+        uint256 tokenId
+    ) public view virtual override returns (uint256) {
         return _users[tokenId].expires;
     }
 
-    function supportsInterface(bytes4 interfaceId)
-        public
-        view
-        virtual
-        override
-        returns (bool)
-    {
+    function supportsInterface(
+        bytes4 interfaceId
+    ) public view virtual override returns (bool) {
         return
             interfaceId == type(IERC721RentableUpgradeable).interfaceId ||
             super.supportsInterface(interfaceId);

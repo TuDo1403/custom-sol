@@ -49,17 +49,17 @@ abstract contract EIP712Upgradeable is Initializable {
      * NOTE: These parameters cannot be changed except through a xref:learn::upgrading-smart-contracts.adoc[smart
      * contract upgrade].
      */
-    function __EIP712_init(string memory name, string memory version)
-        internal
-        onlyInitializing
-    {
+    function __EIP712_init(
+        string memory name,
+        string memory version
+    ) internal onlyInitializing {
         __EIP712_init_unchained(name, version);
     }
 
-    function __EIP712_init_unchained(string memory name, string memory version)
-        internal
-        onlyInitializing
-    {
+    function __EIP712_init_unchained(
+        string memory name,
+        string memory version
+    ) internal onlyInitializing {
         _HASHED_NAME = keccak256(bytes(name));
         _HASHED_VERSION = keccak256(bytes(version));
     }
@@ -108,12 +108,9 @@ abstract contract EIP712Upgradeable is Initializable {
      * address signer = ECDSA.recover(digest, signature);
      * ```
      */
-    function _hashTypedDataV4(bytes32 structHash)
-        internal
-        view
-        virtual
-        returns (bytes32)
-    {
+    function _hashTypedDataV4(
+        bytes32 structHash
+    ) internal view virtual returns (bytes32) {
         return
             ECDSAUpgradeable.toTypedDataHash(_domainSeparatorV4(), structHash);
     }

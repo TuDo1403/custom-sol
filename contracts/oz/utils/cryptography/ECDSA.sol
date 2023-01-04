@@ -41,11 +41,10 @@ library ECDSA {
         }
     }
 
-    function recover(bytes32 hash, bytes calldata signature)
-        internal
-        view
-        returns (address result)
-    {
+    function recover(
+        bytes32 hash,
+        bytes calldata signature
+    ) internal view returns (address result) {
         assembly {
             // Copy the free memory pointer so that we can restore it later.
             let m := mload(0x40)
@@ -91,11 +90,10 @@ library ECDSA {
         }
     }
 
-    function toTypedDataHash(bytes32 domainSeparator, bytes32 structHash)
-        internal
-        pure
-        returns (bytes32 result)
-    {
+    function toTypedDataHash(
+        bytes32 domainSeparator,
+        bytes32 structHash
+    ) internal pure returns (bytes32 result) {
         assembly {
             // Load free memory pointer
             let memPtr := mload(64)
@@ -112,11 +110,9 @@ library ECDSA {
         }
     }
 
-    function toEthSignedMessageHash(bytes32 hash)
-        internal
-        pure
-        returns (bytes32 result)
-    {
+    function toEthSignedMessageHash(
+        bytes32 hash
+    ) internal pure returns (bytes32 result) {
         assembly {
             // Store into scratch space for keccak256.
             mstore(0x20, hash)
@@ -126,11 +122,9 @@ library ECDSA {
         }
     }
 
-    function toEthSignedMessageHash(bytes memory s)
-        internal
-        pure
-        returns (bytes32 result)
-    {
+    function toEthSignedMessageHash(
+        bytes memory s
+    ) internal pure returns (bytes32 result) {
         assembly {
             // We need at most 128 bytes for Ethereum signed message header.
             // The max length of the ASCII reprenstation of a uint256 is 78 bytes.

@@ -117,12 +117,9 @@ abstract contract EIP712 {
      * address signer = ECDSA.recover(digest, signature);
      * ```
      */
-    function _hashTypedDataV4(bytes32 structHash)
-        internal
-        view
-        virtual
-        returns (bytes32)
-    {
+    function _hashTypedDataV4(
+        bytes32 structHash
+    ) internal view virtual returns (bytes32) {
         return ECDSA.toTypedDataHash(_domainSeparatorV4(), structHash);
     }
 }

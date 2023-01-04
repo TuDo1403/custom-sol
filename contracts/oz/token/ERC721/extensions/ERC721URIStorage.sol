@@ -29,13 +29,9 @@ abstract contract ERC721URIStorage is ERC721 {
     /**
      * @dev See {IERC721Metadata-tokenURI}.
      */
-    function tokenURI(uint256 tokenId)
-        public
-        view
-        virtual
-        override
-        returns (string memory)
-    {
+    function tokenURI(
+        uint256 tokenId
+    ) public view virtual override returns (string memory) {
         ownerOf(tokenId);
 
         string memory _tokenURI = _tokenURIs[tokenId];
@@ -59,10 +55,10 @@ abstract contract ERC721URIStorage is ERC721 {
      *
      * - `tokenId` must exist.
      */
-    function _setTokenURI(uint256 tokenId, string memory _tokenURI)
-        internal
-        virtual
-    {
+    function _setTokenURI(
+        uint256 tokenId,
+        string memory _tokenURI
+    ) internal virtual {
         ownerOf(tokenId);
         _tokenURIs[tokenId] = _tokenURI;
     }

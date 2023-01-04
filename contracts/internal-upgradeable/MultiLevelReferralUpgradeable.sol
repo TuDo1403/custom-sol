@@ -48,11 +48,9 @@ abstract contract MultiLevelReferral is
         activeTimestampThreshold = activeTimestampThreshold_;
     }
 
-    function referrerOf(address account_)
-        external
-        view
-        returns (Referrer memory)
-    {
+    function referrerOf(
+        address account_
+    ) external view returns (Referrer memory) {
         return __referrals[account_];
     }
 
@@ -81,9 +79,10 @@ abstract contract MultiLevelReferral is
         emit ReferralAdded(referrer_, referree_);
     }
 
-    function _updateReferrerBonuses(address referree_, uint256 amount_)
-        internal
-    {
+    function _updateReferrerBonuses(
+        address referree_,
+        uint256 amount_
+    ) internal {
         uint16[] memory rates = ratePerTier;
         uint256 length = rates.length;
 
@@ -101,12 +100,9 @@ abstract contract MultiLevelReferral is
         }
     }
 
-    function _isAccountActiveLately(address account_)
-        internal
-        view
-        virtual
-        returns (bool)
-    {
+    function _isAccountActiveLately(
+        address account_
+    ) internal view virtual returns (bool) {
         return
             block.timestamp - lastActiveTimestamp[account_] <=
             activeTimestampThreshold;

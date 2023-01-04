@@ -134,11 +134,10 @@ library SSTORE2 {
             );
     }
 
-    function read(address pointer, uint256 start)
-        internal
-        view
-        returns (bytes memory)
-    {
+    function read(
+        address pointer,
+        uint256 start
+    ) internal view returns (bytes memory) {
         start += DATA_OFFSET;
         return readBytecode(pointer, start, pointer.code.length - start);
     }

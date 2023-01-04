@@ -46,10 +46,9 @@ abstract contract ERC20PermitUpgradeable is
         __EIP712_init_unchained(name_, "1");
     }
 
-    function __ERC20Permit_init_unchained(string memory)
-        internal
-        onlyInitializing
-    {}
+    function __ERC20Permit_init_unchained(
+        string memory
+    ) internal onlyInitializing {}
 
     /**
      * @dev See {IERC20Permit-permit}.
@@ -102,7 +101,9 @@ abstract contract ERC20PermitUpgradeable is
         return _domainSeparatorV4();
     }
 
-    function nonces(address account_)
+    function nonces(
+        address account_
+    )
         external
         view
         override(SignableUpgradeable, IERC20PermitUpgradeable)

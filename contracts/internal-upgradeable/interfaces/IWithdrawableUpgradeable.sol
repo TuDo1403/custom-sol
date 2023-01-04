@@ -9,9 +9,5 @@ interface IWithdrawableUpgradeable {
     );
     event Received(address indexed sender, uint256 indexed value);
 
-    function withdraw(
-        address from_,
-        address to_,
-        uint256 amount_
-    ) external;
+    function withdraw(address from_, address to_, uint256 amount_) external;
 }

@@ -45,19 +45,17 @@ library EnumerableSetV2 {
         return false;
     }
 
-    function _contains(Set storage set, uint256 value)
-        private
-        view
-        returns (bool)
-    {
+    function _contains(
+        Set storage set,
+        uint256 value
+    ) private view returns (bool) {
         return set.indexes.get(value);
     }
 
-    function _at(Set storage set, uint256 index)
-        private
-        view
-        returns (uint256)
-    {
+    function _at(
+        Set storage set,
+        uint256 index
+    ) private view returns (uint256) {
         return _values(set)[index];
     }
 
@@ -85,10 +83,10 @@ library EnumerableSetV2 {
         _remove(set._inner);
     }
 
-    function remove(AddressSet storage set, address value)
-        internal
-        returns (bool removed)
-    {
+    function remove(
+        AddressSet storage set,
+        address value
+    ) internal returns (bool removed) {
         uint256 val;
         assembly {
             val := value
@@ -96,11 +94,10 @@ library EnumerableSetV2 {
         removed = _remove(set._inner, val);
     }
 
-    function contains(AddressSet storage set, address value)
-        internal
-        view
-        returns (bool)
-    {
+    function contains(
+        AddressSet storage set,
+        address value
+    ) internal view returns (bool) {
         uint256 store;
         assembly {
             store := value
@@ -108,11 +105,10 @@ library EnumerableSetV2 {
         return _contains(set._inner, store);
     }
 
-    function at(AddressSet storage set, uint256 index)
-        internal
-        view
-        returns (address addr)
-    {
+    function at(
+        AddressSet storage set,
+        uint256 index
+    ) internal view returns (address addr) {
         uint256 value = _at(set._inner, index);
         assembly {
             addr := value
@@ -123,11 +119,9 @@ library EnumerableSetV2 {
         return _length(set._inner);
     }
 
-    function values(AddressSet storage set)
-        internal
-        view
-        returns (address[] memory res)
-    {
+    function values(
+        AddressSet storage set
+    ) internal view returns (address[] memory res) {
         uint256[] memory val = _values(set._inner);
         uint256 length_ = val.length;
         uint256[] memory tmp = new uint256[](length_);
@@ -140,7 +134,7 @@ library EnumerableSetV2 {
             }
         }
         assembly {
-            mstore(tmp, counter)
+            mstore(tmp, add(counter, 1))
             res := tmp
         }
     }

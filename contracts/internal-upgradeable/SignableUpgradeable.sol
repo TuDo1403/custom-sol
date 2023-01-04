@@ -16,10 +16,10 @@ abstract contract SignableUpgradeable is
 
     mapping(bytes32 => uint256) internal _nonces;
 
-    function __Signable_init(string memory name_, string memory version_)
-        internal
-        onlyInitializing
-    {
+    function __Signable_init(
+        string memory name_,
+        string memory version_
+    ) internal onlyInitializing {
         __EIP712_init_unchained(name_, version_);
     }
 
@@ -49,11 +49,10 @@ abstract contract SignableUpgradeable is
             revert Signable__InvalidSignature();
     }
 
-    function _recoverSigner(bytes32 structHash_, bytes calldata signature_)
-        internal
-        view
-        returns (address)
-    {
+    function _recoverSigner(
+        bytes32 structHash_,
+        bytes calldata signature_
+    ) internal view returns (address) {
         return _hashTypedDataV4(structHash_).recover(signature_);
     }
 
@@ -66,11 +65,9 @@ abstract contract SignableUpgradeable is
         return _hashTypedDataV4(structHash_).recover(v, r, s);
     }
 
-    function _useNonce(address sender_)
-        internal
-        virtual
-        returns (uint256 nonce)
-    {
+    function _useNonce(
+        address sender_
+    ) internal virtual returns (uint256 nonce) {
         assembly {
             mstore(0x00, sender_)
             mstore(0x20, _nonces.slot)
@@ -80,12 +77,9 @@ abstract contract SignableUpgradeable is
         }
     }
 
-    function _nonce(address sender_)
-        internal
-        view
-        virtual
-        returns (uint256 nonce)
-    {
+    function _nonce(
+        address sender_
+    ) internal view virtual returns (uint256 nonce) {
         assembly {
             mstore(0x00, sender_)
             mstore(0x20, _nonces.slot)
@@ -106,16 +100,9 @@ abstract contract SignableUpgradeable is
         }
     }
 
-    function _splitSignature(bytes calldata signature_)
-        internal
-        pure
-        virtual
-        returns (
-            bytes32 r,
-            bytes32 s,
-            uint8 v
-        )
-    {
+    function _splitSignature(
+        bytes calldata signature_
+    ) internal pure virtual returns (bytes32 r, bytes32 s, uint8 v) {
         assembly {
             r := calldataload(signature_.offset)
             s := calldataload(add(signature_.offset, 0x20))

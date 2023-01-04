@@ -18,31 +18,28 @@ library BitMap256 {
         }
     }
 
-    function unsafeGet(BitMap storage bitmap_, uint256 value_)
-        internal
-        view
-        returns (bool isSet)
-    {
+    function unsafeGet(
+        BitMap storage bitmap_,
+        uint256 value_
+    ) internal view returns (bool isSet) {
         assembly {
             isSet := and(sload(bitmap_.slot), shl(and(value_, 0xff), 1))
         }
     }
 
-    function unsafeGet(uint256 bitmap_, uint256 value_)
-        internal
-        pure
-        returns (bool isSet)
-    {
+    function unsafeGet(
+        uint256 bitmap_,
+        uint256 value_
+    ) internal pure returns (bool isSet) {
         assembly {
             isSet := and(bitmap_, shl(and(value_, 0xff), 1))
         }
     }
 
-    function get(BitMap storage bitmap_, uint256 value_)
-        internal
-        view
-        returns (bool isSet)
-    {
+    function get(
+        BitMap storage bitmap_,
+        uint256 value_
+    ) internal view returns (bool isSet) {
         assembly {
             mstore(0x00, value_)
             isSet := and(
@@ -52,11 +49,10 @@ library BitMap256 {
         }
     }
 
-    function get(uint256 bitmap_, uint256 value_)
-        internal
-        pure
-        returns (bool isSet)
-    {
+    function get(
+        uint256 bitmap_,
+        uint256 value_
+    ) internal pure returns (bool isSet) {
         assembly {
             mstore(0x00, value_)
             isSet := and(bitmap_, shl(and(keccak256(0x00, 32), 0xff), 1))
@@ -87,11 +83,10 @@ library BitMap256 {
         }
     }
 
-    function unsafeSet(uint256 bitmap_, uint256 value_)
-        internal
-        pure
-        returns (uint256 bitmap)
-    {
+    function unsafeSet(
+        uint256 bitmap_,
+        uint256 value_
+    ) internal pure returns (uint256 bitmap) {
         assembly {
             bitmap := or(bitmap_, shl(and(value_, 0xff), 1))
         }
@@ -107,11 +102,10 @@ library BitMap256 {
         }
     }
 
-    function set(uint256 bitmap_, uint256 value_)
-        internal
-        pure
-        returns (uint256 bitmap)
-    {
+    function set(
+        uint256 bitmap_,
+        uint256 value_
+    ) internal pure returns (uint256 bitmap) {
         assembly {
             mstore(0x00, value_)
             bitmap := or(bitmap_, shl(and(keccak256(0x00, 32), 0xff), 1))
@@ -127,11 +121,10 @@ library BitMap256 {
         }
     }
 
-    function unsafeUnset(uint256 bitmap_, uint256 value_)
-        internal
-        pure
-        returns (uint256 bitmap)
-    {
+    function unsafeUnset(
+        uint256 bitmap_,
+        uint256 value_
+    ) internal pure returns (uint256 bitmap) {
         assembly {
             bitmap := and(bitmap_, not(shl(and(value_, 0xff), 1)))
         }
@@ -150,11 +143,10 @@ library BitMap256 {
         }
     }
 
-    function unset(uint256 bitmap_, uint256 value_)
-        internal
-        pure
-        returns (uint256 bitmap)
-    {
+    function unset(
+        uint256 bitmap_,
+        uint256 value_
+    ) internal pure returns (uint256 bitmap) {
         assembly {
             mstore(0x00, value_)
             bitmap := and(bitmap_, not(shl(and(keccak256(0x00, 32), 0xff), 1)))

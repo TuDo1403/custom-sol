@@ -35,7 +35,9 @@ abstract contract ERC2981Upgradeable is IERC2981Upgradeable, ERC165Upgradeable {
     /**
      * @dev See {IERC165-supportsInterface}.
      */
-    function supportsInterface(bytes4 interfaceId)
+    function supportsInterface(
+        bytes4 interfaceId
+    )
         public
         view
         virtual
@@ -50,13 +52,10 @@ abstract contract ERC2981Upgradeable is IERC2981Upgradeable, ERC165Upgradeable {
     /**
      * @inheritdoc IERC2981Upgradeable
      */
-    function royaltyInfo(uint256 _tokenId, uint256 _salePrice)
-        public
-        view
-        virtual
-        override
-        returns (address, uint256)
-    {
+    function royaltyInfo(
+        uint256 _tokenId,
+        uint256 _salePrice
+    ) public view virtual override returns (address, uint256) {
         RoyaltyInfo memory royalty = _tokenRoyaltyInfo[_tokenId];
 
         if (royalty.receiver == address(0)) royalty = _defaultRoyaltyInfo;
@@ -84,10 +83,10 @@ abstract contract ERC2981Upgradeable is IERC2981Upgradeable, ERC165Upgradeable {
      * - `receiver` cannot be the zero address.
      * - `feeNumerator` cannot be greater than the fee denominator.
      */
-    function _setDefaultRoyalty(address receiver, uint96 feeNumerator)
-        internal
-        virtual
-    {
+    function _setDefaultRoyalty(
+        address receiver,
+        uint96 feeNumerator
+    ) internal virtual {
         if (feeNumerator > _feeDenominator())
             revert ERC2981__SalePriceExceeded();
         __nonZeroAdress(receiver);

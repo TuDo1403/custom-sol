@@ -35,24 +35,16 @@ abstract contract ERC721 is Context, ERC165, IERC721, IERC721Metadata {
     mapping(uint256 => bytes32) internal _ownerOf;
     mapping(bytes32 => uint256) internal _balanceOf;
 
-    function ownerOf(uint256 id)
-        public
-        view
-        virtual
-        override
-        returns (address owner)
-    {
+    function ownerOf(
+        uint256 id
+    ) public view virtual override returns (address owner) {
         if ((owner = _ownerOf[id].fromFirst20Bytes()) == address(0))
             revert ERC721__NotMinted();
     }
 
-    function balanceOf(address owner)
-        public
-        view
-        virtual
-        override
-        returns (uint256)
-    {
+    function balanceOf(
+        address owner
+    ) public view virtual override returns (uint256) {
         if (owner == address(0)) revert ERC721__NonZeroAddress();
 
         return _balanceOf[owner.fillLast12Bytes()];
@@ -96,11 +88,10 @@ abstract contract ERC721 is Context, ERC165, IERC721, IERC721Metadata {
         emit Approval(owner, spender, id);
     }
 
-    function setApprovalForAll(address operator, bool approved)
-        public
-        virtual
-        override
-    {
+    function setApprovalForAll(
+        address operator,
+        bool approved
+    ) public virtual override {
         address sender = _msgSender();
         _isApprovedForAll[sender.fillLast12Bytes()].setTo(
             operator.fillLast96Bits(),
@@ -110,33 +101,26 @@ abstract contract ERC721 is Context, ERC165, IERC721, IERC721Metadata {
         emit ApprovalForAll(sender, operator, approved);
     }
 
-    function getApproved(uint256 tokenId)
-        external
-        view
-        override
-        returns (address operator)
-    {
+    function getApproved(
+        uint256 tokenId
+    ) external view override returns (address operator) {
         return _getApproved[tokenId].fromFirst20Bytes();
     }
 
-    function isApprovedForAll(address owner, address operator)
-        external
-        view
-        override
-        returns (bool)
-    {
+    function isApprovedForAll(
+        address owner,
+        address operator
+    ) external view override returns (bool) {
         return
             _isApprovedForAll[owner.fillLast12Bytes()].get(
                 operator.fillLast96Bits()
             );
     }
 
-    function _isApprovedOrOwner(address spender, uint256 tokenId)
-        internal
-        view
-        virtual
-        returns (bool)
-    {
+    function _isApprovedOrOwner(
+        address spender,
+        uint256 tokenId
+    ) internal view virtual returns (bool) {
         address owner = ownerOf(tokenId);
         return (spender == owner ||
             _isApprovedForAll[owner.fillLast12Bytes()].get(
@@ -260,13 +244,9 @@ abstract contract ERC721 is Context, ERC165, IERC721, IERC721Metadata {
                               ERC165 LOGIC
     //////////////////////////////////////////////////////////////*/
 
-    function supportsInterface(bytes4 interfaceId)
-        public
-        view
-        virtual
-        override(ERC165, IERC165)
-        returns (bool)
-    {
+    function supportsInterface(
+        bytes4 interfaceId
+    ) public view virtual override(ERC165, IERC165) returns (bool) {
         return
             interfaceId == 0x01ffc9a7 || // ERC165 Interface ID for ERC165
             interfaceId == 0x80ac58cd || // ERC165 Interface ID for ERC721

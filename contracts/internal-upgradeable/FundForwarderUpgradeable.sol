@@ -26,10 +26,9 @@ abstract contract FundForwarderUpgradeable is
         __FundForwarder_init_unchained(vault_);
     }
 
-    function __FundForwarder_init_unchained(address vault_)
-        internal
-        onlyInitializing
-    {
+    function __FundForwarder_init_unchained(
+        address vault_
+    ) internal onlyInitializing {
         _changeVault(vault_);
     }
 

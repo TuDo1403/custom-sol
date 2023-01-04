@@ -58,11 +58,10 @@ abstract contract ERC20 is Context, IERC20 {
                                ERC20 LOGIC
     //////////////////////////////////////////////////////////////*/
 
-    function approve(address spender, uint256 amount)
-        public
-        virtual
-        returns (bool)
-    {
+    function approve(
+        address spender,
+        uint256 amount
+    ) public virtual returns (bool) {
         address sender = _msgSender();
         _allowance[sender.fillLast12Bytes()][
             spender.fillLast12Bytes()
@@ -73,11 +72,10 @@ abstract contract ERC20 is Context, IERC20 {
         return true;
     }
 
-    function transfer(address to, uint256 amount)
-        public
-        virtual
-        returns (bool)
-    {
+    function transfer(
+        address to,
+        uint256 amount
+    ) public virtual returns (bool) {
         address sender = _msgSender();
         _beforeTokenTransfer(sender, to, amount);
         _balanceOf[sender.fillLast12Bytes()] -= amount;
@@ -119,21 +117,16 @@ abstract contract ERC20 is Context, IERC20 {
         return true;
     }
 
-    function balanceOf(address account)
-        external
-        view
-        override
-        returns (uint256)
-    {
+    function balanceOf(
+        address account
+    ) external view override returns (uint256) {
         return _balanceOf[account.fillLast12Bytes()];
     }
 
-    function allowance(address owner, address spender)
-        external
-        view
-        override
-        returns (uint256)
-    {
+    function allowance(
+        address owner,
+        address spender
+    ) external view override returns (uint256) {
         return _allowance[owner.fillLast12Bytes()][spender.fillLast12Bytes()];
     }
 

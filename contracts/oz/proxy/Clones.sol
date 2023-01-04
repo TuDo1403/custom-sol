@@ -47,10 +47,10 @@ library Clones {
      * the clone. Using the same `implementation` and `salt` multiple time will revert, since
      * the clones cannot be deployed twice at the same address.
      */
-    function cloneDeterministic(address implementation, bytes32 salt)
-        internal
-        returns (address instance)
-    {
+    function cloneDeterministic(
+        address implementation,
+        bytes32 salt
+    ) internal returns (address instance) {
         /// @solidity memory-safe-assembly
         assembly {
             let ptr := mload(0x40)
@@ -98,11 +98,10 @@ library Clones {
     /**
      * @dev Computes the address of a clone deployed using {Clones-cloneDeterministic}.
      */
-    function predictDeterministicAddress(address implementation, bytes32 salt)
-        internal
-        view
-        returns (address predicted)
-    {
+    function predictDeterministicAddress(
+        address implementation,
+        bytes32 salt
+    ) internal view returns (address predicted) {
         return predictDeterministicAddress(implementation, salt, address(this));
     }
 }

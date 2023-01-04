@@ -52,11 +52,10 @@ library Create2 {
      * @dev Returns the address where a contract will be stored if deployed via {deploy}. Any change in the
      * `bytecodeHash` or `salt` will result in a new destination address.
      */
-    function computeAddress(bytes32 salt, bytes32 bytecodeHash)
-        internal
-        view
-        returns (address)
-    {
+    function computeAddress(
+        bytes32 salt,
+        bytes32 bytecodeHash
+    ) internal view returns (address) {
         return computeAddress(salt, bytecodeHash, address(this));
     }
 

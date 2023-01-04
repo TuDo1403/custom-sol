@@ -218,11 +218,10 @@ library MathUpgradeable {
     /**
      * @notice Calculates sqrt(a), following the selected rounding direction.
      */
-    function sqrt(uint256 a, Rounding rounding)
-        internal
-        pure
-        returns (uint256)
-    {
+    function sqrt(
+        uint256 a,
+        Rounding rounding
+    ) internal pure returns (uint256) {
         uint256 result = sqrt(a);
         if (rounding == Rounding.Up && result * result < a) {
             result += 1;

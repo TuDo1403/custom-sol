@@ -6,7 +6,17 @@ import "../oz/token/ERC20/IERC20.sol";
 error Transferable__TransferFailed();
 error Transferable__InvalidArguments();
 
+/**
+ * @dev Library for transferring Ether and tokens between accounts
+ */
 abstract contract Transferable {
+    /**
+     * @dev Reverts the transaction if the transfer fails
+     * @param token_ Address of the token contract to transfer. If zero address, transfer Ether.
+     * @param from_ Address to transfer from
+     * @param to_ Address to transfer to
+     * @param value_ Amount of tokens or Ether to transfer
+     */
     function _safeTransferFrom(
         IERC20 token_,
         address from_,
@@ -22,6 +32,12 @@ abstract contract Transferable {
         if (!success) revert Transferable__TransferFailed();
     }
 
+    /**
+     * @dev Reverts the transaction if the transfer fails
+     * @param token_ Address of the token contract to transfer. If zero address, transfer Ether.
+     * @param to_ Address to transfer to
+     * @param value_ Amount of tokens or Ether to transfer
+     */
     function _safeTransfer(
         IERC20 token_,
         address to_,
@@ -36,10 +52,15 @@ abstract contract Transferable {
         if (!success) revert Transferable__TransferFailed();
     }
 
-    function _safeNativeTransfer(address to_, uint256 amount_)
-        internal
-        virtual
-    {
+    /**
+     * @dev Reverts the transaction if the Ether transfer fails
+     * @param to_ Address to transfer to
+     * @param amount_ Amount of Ether to transfer
+     */
+    function _safeNativeTransfer(
+        address to_,
+        uint256 amount_
+    ) internal virtual {
         __checkValidTransfer(to_, amount_);
         if (!__nativeTransfer(to_, amount_))
             revert Transferable__TransferFailed();
@@ -67,10 +88,10 @@ abstract contract Transferable {
             revert Transferable__TransferFailed();
     }
 
-    function __nativeTransfer(address to_, uint256 amount_)
-        private
-        returns (bool success)
-    {
+    function __nativeTransfer(
+        address to_,
+        uint256 amount_
+    ) private returns (bool success) {
         assembly {
             success := call(gas(), to_, amount_, 0, 0, 0, 0)
         }

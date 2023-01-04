@@ -21,11 +21,10 @@ abstract contract DeterministicDeployer {
 }
 
 abstract contract Create2Deployer is DeterministicDeployer {
-    function instanceOf(bytes32 salt_, bytes32 bytecodeHash_)
-        external
-        view
-        returns (address instance, bool isDeployed)
-    {
+    function instanceOf(
+        bytes32 salt_,
+        bytes32 bytecodeHash_
+    ) external view returns (address instance, bool isDeployed) {
         instance = Create2.computeAddress(salt_, bytecodeHash_);
         isDeployed = instance.code.length != 0;
     }
@@ -47,11 +46,9 @@ abstract contract Create2Deployer is DeterministicDeployer {
 }
 
 abstract contract Create3Deployer is DeterministicDeployer {
-    function instanceOf(bytes32 salt_)
-        external
-        view
-        returns (address instance, bool isDeployed)
-    {
+    function instanceOf(
+        bytes32 salt_
+    ) external view returns (address instance, bool isDeployed) {
         instance = Create3.getDeployed(salt_);
         isDeployed = instance.code.length != 0;
     }

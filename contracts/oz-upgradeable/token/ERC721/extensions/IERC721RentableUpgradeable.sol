@@ -22,11 +22,7 @@ interface IERC721RentableUpgradeable {
     /// Throws if `tokenId` is not valid NFT
     /// @param user  The new user of the NFT
     /// @param expires  UNIX timestamp, The new user could use the NFT before expires
-    function setUser(
-        uint256 tokenId,
-        address user,
-        uint64 expires
-    ) external;
+    function setUser(uint256 tokenId, address user, uint64 expires) external;
 
     /// @notice Get the user address of an NFT
     /// @dev The zero address indicates that there is no user or the user is expired

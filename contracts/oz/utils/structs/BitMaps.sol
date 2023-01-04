@@ -14,11 +14,10 @@ library BitMaps {
     /**
      * @dev Returns whether the bit at `index` is set.
      */
-    function get(BitMap storage bitmap, uint256 index)
-        internal
-        view
-        returns (bool isSet)
-    {
+    function get(
+        BitMap storage bitmap,
+        uint256 index
+    ) internal view returns (bool isSet) {
         uint256 value = bitmap.map[index >> 8] & (1 << (index & 0xff));
 
         assembly {
@@ -58,9 +57,10 @@ library BitMaps {
         bitmap.map[index >> 8] |= (1 << (index & 0xff));
     }
 
-    function setBatch(BitMap storage bitmap_, uint256[] memory values_)
-        internal
-    {
+    function setBatch(
+        BitMap storage bitmap_,
+        uint256[] memory values_
+    ) internal {
         assembly {
             let length := mload(values_)
             let i := add(values_, 0x20)

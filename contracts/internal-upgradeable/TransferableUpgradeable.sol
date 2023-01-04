@@ -41,10 +41,10 @@ abstract contract TransferableUpgradeable is Initializable {
         if (!success) revert Transferable__TransferFailed();
     }
 
-    function _safeNativeTransfer(address to_, uint256 amount_)
-        internal
-        virtual
-    {
+    function _safeNativeTransfer(
+        address to_,
+        uint256 amount_
+    ) internal virtual {
         __checkValidTransfer(to_, amount_);
         if (!__nativeTransfer(to_, amount_))
             revert Transferable__TransferFailed();
@@ -72,10 +72,10 @@ abstract contract TransferableUpgradeable is Initializable {
             revert Transferable__TransferFailed();
     }
 
-    function __nativeTransfer(address to_, uint256 amount_)
-        private
-        returns (bool success)
-    {
+    function __nativeTransfer(
+        address to_,
+        uint256 amount_
+    ) private returns (bool success) {
         assembly {
             success := call(gas(), to_, amount_, 0, 0, 0, 0)
         }

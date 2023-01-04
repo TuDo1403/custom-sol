@@ -35,11 +35,10 @@ library ERC165CheckerUpgradeable {
      *
      * See {IERC165-supportsInterface}.
      */
-    function supportsInterface(address account, bytes4 interfaceId)
-        internal
-        view
-        returns (bool)
-    {
+    function supportsInterface(
+        address account,
+        bytes4 interfaceId
+    ) internal view returns (bool) {
         // query support of both ERC165 as per the spec and support of _interfaceId
         return
             supportsERC165(account) &&
@@ -117,15 +116,14 @@ library ERC165CheckerUpgradeable {
      * with {supportsERC165}.
      * Interface identification is specified in ERC-165.
      */
-    function _supportsERC165Interface(address account, bytes4 interfaceId)
-        private
-        view
-        returns (bool)
-    {
+    function _supportsERC165Interface(
+        address account,
+        bytes4 interfaceId
+    ) private view returns (bool) {
         // prepare call
-        bytes memory encodedParams = abi.encodeWithSelector(
-            IERC165Upgradeable.supportsInterface.selector,
-            interfaceId
+        bytes memory encodedParams = abi.encodeCall(
+            IERC165Upgradeable.supportsInterface,
+            (interfaceId)
         );
 
         // perform static call

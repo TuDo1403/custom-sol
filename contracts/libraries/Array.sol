@@ -7,11 +7,9 @@ library Array {
     using BitMap256 for uint256;
 
     // 100 record ~= 60k gas
-    function buildSet(uint256[] memory arr_)
-        internal
-        pure
-        returns (uint256[] memory)
-    {
+    function buildSet(
+        uint256[] memory arr_
+    ) internal pure returns (uint256[] memory) {
         uint256 length = arr_.length;
         {
             uint256 val;
@@ -31,11 +29,9 @@ library Array {
         return arr_;
     }
 
-    function trimZero(uint256[] memory arr_)
-        internal
-        pure
-        returns (uint256[] memory res)
-    {
+    function trimZero(
+        uint256[] memory arr_
+    ) internal pure returns (uint256[] memory res) {
         res = arr_;
         uint256 length = res.length;
         uint256 counter;
@@ -50,11 +46,10 @@ library Array {
         }
     }
 
-    function trimZero(uint256[256] memory arr_, uint256 size_)
-        internal
-        pure
-        returns (uint256[] memory res)
-    {
+    function trimZero(
+        uint256[256] memory arr_,
+        uint256 size_
+    ) internal pure returns (uint256[] memory res) {
         res = new uint256[](size_);
         uint256 length = arr_.length;
         uint256 counter;

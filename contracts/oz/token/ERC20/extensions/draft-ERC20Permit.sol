@@ -91,12 +91,9 @@ abstract contract ERC20Permit is ERC20, IERC20Permit, Signable {
         return _domainSeparatorV4();
     }
 
-    function nonces(address account_)
-        external
-        view
-        override(Signable, IERC20Permit)
-        returns (uint256)
-    {
+    function nonces(
+        address account_
+    ) external view override(Signable, IERC20Permit) returns (uint256) {
         return Signable._nonce(account_);
     }
 }

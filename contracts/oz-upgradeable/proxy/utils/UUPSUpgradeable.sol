@@ -97,12 +97,10 @@ abstract contract UUPSUpgradeable is
      *
      * Emits an {Upgraded} event.
      */
-    function upgradeToAndCall(address newImplementation, bytes memory data)
-        external
-        payable
-        virtual
-        onlyProxy
-    {
+    function upgradeToAndCall(
+        address newImplementation,
+        bytes memory data
+    ) external payable virtual onlyProxy {
         _authorizeUpgrade(newImplementation);
         _upgradeToAndCallUUPS(newImplementation, data, true);
     }

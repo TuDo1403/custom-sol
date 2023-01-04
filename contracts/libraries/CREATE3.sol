@@ -99,11 +99,9 @@ library Create3 {
         }
     }
 
-    function getDeployed(bytes32 salt)
-        internal
-        view
-        returns (address deployed)
-    {
+    function getDeployed(
+        bytes32 salt
+    ) internal view returns (address deployed) {
         assembly {
             // Cache the free memory pointer.
             let m := mload(0x40)

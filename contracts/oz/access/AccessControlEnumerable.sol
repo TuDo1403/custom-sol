@@ -22,25 +22,17 @@ abstract contract AccessControlEnumerable is
     /**
      * @dev See {IERC165-supportsInterface}.
      */
-    function supportsInterface(bytes4 interfaceId)
-        public
-        view
-        virtual
-        override
-        returns (bool)
-    {
+    function supportsInterface(
+        bytes4 interfaceId
+    ) public view virtual override returns (bool) {
         return
             interfaceId == type(IAccessControlEnumerable).interfaceId ||
             super.supportsInterface(interfaceId);
     }
 
-    function getAllRoleMembers(bytes32 role_)
-        public
-        view
-        virtual
-        override
-        returns (address[] memory)
-    {
+    function getAllRoleMembers(
+        bytes32 role_
+    ) public view virtual override returns (address[] memory) {
         return _roleMembers[role_].values();
     }
 
@@ -56,13 +48,10 @@ abstract contract AccessControlEnumerable is
      * https://forum.openzeppelin.com/t/iterating-over-elements-on-enumerableset-in-openzeppelin-contracts/2296[forum post]
      * for more information.
      */
-    function getRoleMember(bytes32 role, uint256 index)
-        public
-        view
-        virtual
-        override
-        returns (address)
-    {
+    function getRoleMember(
+        bytes32 role,
+        uint256 index
+    ) public view virtual override returns (address) {
         return _roleMembers[role].at(index);
     }
 
@@ -70,24 +59,19 @@ abstract contract AccessControlEnumerable is
      * @dev Returns the number of accounts that have `role`. Can be used
      * together with {getRoleMember} to enumerate all bearers of a role.
      */
-    function getRoleMemberCount(bytes32 role)
-        public
-        view
-        virtual
-        override
-        returns (uint256)
-    {
+    function getRoleMemberCount(
+        bytes32 role
+    ) public view virtual override returns (uint256) {
         return _roleMembers[role].length();
     }
 
     /**
      * @dev Overload {_grantRole} to track enumerable memberships
      */
-    function _grantRole(bytes32 role, address account)
-        internal
-        virtual
-        override
-    {
+    function _grantRole(
+        bytes32 role,
+        address account
+    ) internal virtual override {
         super._grantRole(role, account);
         _roleMembers[role].add(account);
     }
@@ -95,11 +79,10 @@ abstract contract AccessControlEnumerable is
     /**
      * @dev Overload {_revokeRole} to track enumerable memberships
      */
-    function _revokeRole(bytes32 role, address account)
-        internal
-        virtual
-        override
-    {
+    function _revokeRole(
+        bytes32 role,
+        address account
+    ) internal virtual override {
         super._revokeRole(role, account);
         _roleMembers[role].remove(account);
     }

@@ -14,22 +14,17 @@ library BitMapsUpgradeable {
     /**
      * @dev Returns whether the bit at `index` is set.
      */
-    function get(BitMap storage bitmap, uint256 index)
-        internal
-        view
-        returns (bool)
-    {
+    function get(
+        BitMap storage bitmap,
+        uint256 index
+    ) internal view returns (bool) {
         return bitmap._data[index >> 8] & (1 << (index & 0xff)) != 0;
     }
 
     /**
      * @dev Sets the bit at `index` to the boolean `value`.
      */
-    function setTo(
-        BitMap storage bitmap,
-        uint256 index,
-        bool value
-    ) internal {
+    function setTo(BitMap storage bitmap, uint256 index, bool value) internal {
         if (value) set(bitmap, index);
         else unset(bitmap, index);
     }

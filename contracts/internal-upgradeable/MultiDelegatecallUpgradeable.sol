@@ -17,10 +17,9 @@ abstract contract MultiDelegatecallUpgradeable is Initializable {
         original = address(this);
     }
 
-    function _multiDelegatecall(bytes[] calldata data_)
-        internal
-        returns (bytes[] memory results)
-    {
+    function _multiDelegatecall(
+        bytes[] calldata data_
+    ) internal returns (bytes[] memory results) {
         if (address(this) != original) revert MultiDelegatecall__OnlyDelegate();
         uint256 length = data_.length;
         results = new bytes[](length);
