@@ -70,7 +70,7 @@ contract CommandGate is
     ) external payable whenNotPaused {
         if (!__isWhitelisted.get(contract_.fillLast96Bits()))
             revert CommandGate__UnknownAddress(contract_);
-        if (vault_ != vault && __whitelistedVaults.get(vault_.fillLast96Bits()))
+        if (vault_ != vault && !__whitelistedVaults.get(vault_.fillLast96Bits()))
             revert CommandGate__UnknownAddress(contract_);
 
         _safeNativeTransfer(vault_, msg.value);
@@ -104,7 +104,7 @@ contract CommandGate is
     ) external whenNotPaused {
         if (!__isWhitelisted.get(contract_.fillLast96Bits()))
             revert CommandGate__UnknownAddress(contract_);
-        if (vault_ != vault && __whitelistedVaults.get(vault_.fillLast96Bits()))
+        if (vault_ != vault && !__whitelistedVaults.get(vault_.fillLast96Bits()))
             revert CommandGate__UnknownAddress(vault_);
 
         address user = _msgSender();
