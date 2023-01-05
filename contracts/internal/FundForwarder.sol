@@ -22,7 +22,6 @@ abstract contract FundForwarder is Context, Transferable, IFundForwarder {
      * @param vault_ Address to forward funds to
      */
     constructor(address vault_) payable {
-        emit VaultUpdated(address(0), vault_);
         _changeVault(vault_);
     }
 
@@ -44,7 +43,7 @@ abstract contract FundForwarder is Context, Transferable, IFundForwarder {
         address _vault = vault;
         __nonZeroAddress(_vault);
 
-        _safeERC20Transfer(token_, vault, amount_);
+        _safeERC20Transfer(token_, _vault, amount_);
 
         emit Recovered(_msgSender(), address(token_), amount_);
     }
@@ -63,10 +62,11 @@ abstract contract FundForwarder is Context, Transferable, IFundForwarder {
     function recoverNFTs(IERC721Enumerable token_) external {
         uint256 length = token_.balanceOf(address(this));
         uint256[] memory tokenIds = new uint256[](length);
+        address _vault = vault;
         for (uint256 i; i < length; ) {
             token_.safeTransferFrom(
                 address(this),
-                vault,
+                _vault,
                 tokenIds[i] = token_.tokenOfOwnerByIndex(address(this), i)
             );
 

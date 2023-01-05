@@ -14,9 +14,11 @@ abstract contract ProtocolFee is IProtocolFee {
 
     /// @inheritdoc IProtocolFee
     function feeInfo() external view returns (IERC20 token, uint256 feeAmt) {
-        FeeInfo memory _feeInfo = __feeInfo;
-        token = _feeInfo.token;
-        feeAmt = _feeInfo.royalty;
+        assembly {
+            let data := sload(__feeInfo.slot)
+            token := data
+            feeAmt := shr(160, data)
+        }
     }
 
     /**
@@ -25,7 +27,9 @@ abstract contract ProtocolFee is IProtocolFee {
      * @param amount_ Fee amount
      */
     function _setRoyalty(IERC20 token_, uint96 amount_) internal {
-        __feeInfo = FeeInfo(token_, amount_);
+        assembly {
+            sstore(__feeInfo.slot, or(shl(160, amount_), token_))
+        }
     }
 
     /**
