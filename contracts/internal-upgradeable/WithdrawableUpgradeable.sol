@@ -7,11 +7,17 @@ import "./TransferableUpgradeable.sol";
 
 import "./interfaces/IWithdrawableUpgradeable.sol";
 
+/**
+ * @dev Allows tokens and Ether to be withdrawn from the contract
+ */
 abstract contract WithdrawableUpgradeable is
     ContextUpgradeable,
     TransferableUpgradeable,
     IWithdrawableUpgradeable
 {
+    /**
+     * @dev Fallback function to receive funds and emit the Received event
+     */
     receive() external payable virtual {
         emit Received(_msgSender(), msg.value);
     }

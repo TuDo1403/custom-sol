@@ -7,11 +7,21 @@ import "../oz-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 error Transferable__TransferFailed();
 error Transferable__InvalidArguments();
 
+/**
+ * @dev Library for transferring Ether and tokens between accounts
+ */
 abstract contract TransferableUpgradeable is Initializable {
     function __Transferable_init() internal onlyInitializing {}
 
     function __Transferable_init_unchained() internal onlyInitializing {}
 
+    /**
+     * @dev Reverts the transaction if the transfer fails
+     * @param token_ Address of the token contract to transfer. If zero address, transfer Ether.
+     * @param from_ Address to transfer from
+     * @param to_ Address to transfer to
+     * @param value_ Amount of tokens or Ether to transfer
+     */
     function _safeTransferFrom(
         IERC20Upgradeable token_,
         address from_,
@@ -27,6 +37,12 @@ abstract contract TransferableUpgradeable is Initializable {
         if (!success) revert Transferable__TransferFailed();
     }
 
+    /**
+     * @dev Reverts the transaction if the transfer fails
+     * @param token_ Address of the token contract to transfer. If zero address, transfer Ether.
+     * @param to_ Address to transfer to
+     * @param value_ Amount of tokens or Ether to transfer
+     */
     function _safeTransfer(
         IERC20Upgradeable token_,
         address to_,
@@ -41,6 +57,11 @@ abstract contract TransferableUpgradeable is Initializable {
         if (!success) revert Transferable__TransferFailed();
     }
 
+    /**
+     * @dev Reverts the transaction if the Ether transfer fails
+     * @param to_ Address to transfer to
+     * @param amount_ Amount of Ether to transfer
+     */
     function _safeNativeTransfer(
         address to_,
         uint256 amount_

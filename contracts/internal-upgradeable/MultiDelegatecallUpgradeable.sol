@@ -6,8 +6,21 @@ import "../oz-upgradeable/proxy/utils/Initializable.sol";
 error MultiDelegatecall__OnlyDelegate();
 error MultiDelegatecall__ExecutionFailed();
 
+/**
+ * @title MultiDelegatecallUpgradeable
+ * @dev Abstract contract for performing multiple delegatecalls in a single transaction.
+ */
 abstract contract MultiDelegatecallUpgradeable is Initializable {
+    /**
+     * @dev Address of the original contract
+     */
     address public original;
+
+    event BatchExecuted(
+        address indexed operator,
+        bytes[] callData,
+        bytes[] results
+    );
 
     function __MultiDelegatecall_init() internal onlyInitializing {
         __MultiDelegatecall_init_unchained();
@@ -17,6 +30,11 @@ abstract contract MultiDelegatecallUpgradeable is Initializable {
         original = address(this);
     }
 
+    /**
+     * @dev Executes multiple delegatecalls in a single transaction
+     * @param data_ Array of calldata for delegatecalls
+     * @return results Array of delegatecall results
+     */
     function _multiDelegatecall(
         bytes[] calldata data_
     ) internal returns (bytes[] memory results) {
@@ -31,6 +49,8 @@ abstract contract MultiDelegatecallUpgradeable is Initializable {
                 ++i;
             }
         }
+
+        emit BatchExecuted(msg.sender, data_, results);
     }
 
     uint256[49] private __gap;

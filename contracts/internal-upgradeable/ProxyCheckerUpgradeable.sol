@@ -3,9 +3,20 @@ pragma solidity ^0.8.17;
 
 import "../oz-upgradeable/proxy/utils/Initializable.sol";
 
+/**
+ * @dev Revert error if call is made from a proxy contract
+ */
 error ProxyChecker__EOAUnallowed();
+
+/**
+ * @dev Revert error if call is made from an externally owned account
+ */
 error ProxyChecker__ProxyUnallowed();
 
+/**
+ * @title ProxyCheckerUpgradeable
+ * @dev Abstract contract for checking if a call was made by a proxy contract or an externally owned account.
+ */
 abstract contract ProxyCheckerUpgradeable is Initializable {
     modifier onlyEOA() {
         _onlyEOA(msg.sender);

@@ -7,6 +7,8 @@ pragma solidity ^0.8.0;
  * @dev This is the interface that {BeaconProxy} expects of its beacon.
  */
 interface IBeacon {
+    error UpgradeableBeacon__ImplementationIsNotAContract();
+
     /**
      * @dev Must return an address that can be used as a delegate call target.
      *
