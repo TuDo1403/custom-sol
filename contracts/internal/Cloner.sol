@@ -16,6 +16,7 @@ abstract contract Cloner is ICloner {
 
     constructor(address implement_) payable {
         _setImplement(implement_);
+        emit ImplementChanged(address(0), implement_);
     }
 
     /// @inheritdoc ICloner

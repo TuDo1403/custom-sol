@@ -14,6 +14,12 @@ abstract contract MultiDelegatecall {
      */
     address public immutable original;
 
+    event BatchExecuted(
+        address indexed operator,
+        bytes[] callData,
+        bytes[] results
+    );
+
     /**
      * @dev Constructor that saves the address of the original contract
      */
@@ -40,5 +46,7 @@ abstract contract MultiDelegatecall {
                 ++i;
             }
         }
+
+        emit BatchExecuted(msg.sender, data_, results);
     }
 }
