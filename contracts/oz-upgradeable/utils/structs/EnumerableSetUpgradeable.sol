@@ -87,8 +87,12 @@ library EnumerableSetUpgradeable {
             // the array, and then remove the last element (sometimes called as 'swap and pop').
             // This modifies the order of the array, as noted in {at}.
 
-            uint256 toDeleteIndex = valueIndex - 1;
-            uint256 lastIndex = set._values.length - 1;
+            uint256 toDeleteIndex;
+            uint256 lastIndex;
+            unchecked {
+                toDeleteIndex = valueIndex - 1;
+                lastIndex = set._values.length - 1;
+            }
 
             if (lastIndex != toDeleteIndex) {
                 bytes32 lastValue = set._values[lastIndex];
@@ -253,7 +257,11 @@ library EnumerableSetUpgradeable {
         AddressSet storage set,
         address value
     ) internal returns (bool) {
-        return _add(set._inner, bytes32(uint256(uint160(value))));
+        bytes32 store;
+        assembly {
+            store := value
+        }
+        return _add(set._inner, store);
     }
 
     /**
@@ -266,7 +274,11 @@ library EnumerableSetUpgradeable {
         AddressSet storage set,
         address value
     ) internal returns (bool) {
-        return _remove(set._inner, bytes32(uint256(uint160(value))));
+        bytes32 store;
+        assembly {
+            store := value
+        }
+        return _remove(set._inner, store);
     }
 
     /**
@@ -276,7 +288,11 @@ library EnumerableSetUpgradeable {
         AddressSet storage set,
         address value
     ) internal view returns (bool) {
-        return _contains(set._inner, bytes32(uint256(uint160(value))));
+        bytes32 store;
+        assembly {
+            store := value
+        }
+        return _contains(set._inner, store);
     }
 
     /**
@@ -299,8 +315,11 @@ library EnumerableSetUpgradeable {
     function at(
         AddressSet storage set,
         uint256 index
-    ) internal view returns (address) {
-        return address(uint160(uint256(_at(set._inner, index))));
+    ) internal view returns (address addr) {
+        bytes32 value = _at(set._inner, index);
+        assembly {
+            addr := value
+        }
     }
 
     /**

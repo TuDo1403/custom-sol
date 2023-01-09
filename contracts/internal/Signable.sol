@@ -145,11 +145,10 @@ abstract contract Signable is EIP712, ISignable {
     ) internal pure returns (bytes memory signature) {
         signature = new bytes(65);
         assembly {
-            mstore(add(signature, 32), r)
-            mstore(add(signature, 64), s)
-            mstore(add(signature, 65), v)
+            mstore(add(signature, 0x20), r)
+            mstore(add(signature, 0x40), s)
+            mstore8(add(signature, 0x60), v)
         }
-        return abi.encodePacked(r, s, v);
     }
 
     /**

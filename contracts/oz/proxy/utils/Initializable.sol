@@ -3,7 +3,9 @@
 
 pragma solidity ^0.8.2;
 
-import "../../utils/Address.sol";
+error Initializable__Initializing();
+error Initializable__NotInitializing();
+error Initializable__AlreadyInitialized();
 
 /**
  * @dev This is a base contract to aid in writing upgradeable contracts, or any kind of contract that will be deployed
@@ -59,36 +61,35 @@ abstract contract Initializable {
      * @dev Indicates that the contract has been initialized.
      * @custom:oz-retyped-from bool
      */
-    uint8 private _initialized;
+    uint256 private _initialized;
 
     /**
      * @dev Indicates that the contract is in the process of being initialized.
      */
-    bool private _initializing;
+    uint256 private _initializing;
 
     /**
      * @dev Triggered when the contract has been initialized or reinitialized.
      */
-    event Initialized(uint8 version);
+    event Initialized(uint256 version);
 
     /**
      * @dev A modifier that defines a protected initializer function that can be invoked at most once. In its scope,
      * `onlyInitializing` functions can be used to initialize parent contracts. Equivalent to `reinitializer(1)`.
      */
     modifier initializer() {
-        bool isTopLevelCall = !_initializing;
-        require(
-            (isTopLevelCall && _initialized < 1) ||
-                (!Address.isContract(address(this)) && _initialized == 1),
-            "Initializable: contract is already initialized"
-        );
+        bool isTopLevelCall = _initializing != 2;
+        uint256 initialized = _initialized;
+        if (
+            !((isTopLevelCall && initialized == 0) ||
+                (initialized == 1 && address(this).code.length == 0))
+        ) revert Initializable__AlreadyInitialized();
+
         _initialized = 1;
-        if (isTopLevelCall) {
-            _initializing = true;
-        }
+        if (isTopLevelCall) _initializing = 2;
         _;
         if (isTopLevelCall) {
-            _initializing = false;
+            _initializing = 1;
             emit Initialized(1);
         }
     }
@@ -106,14 +107,12 @@ abstract contract Initializable {
      * a contract, executing them in the right order is up to the developer or operator.
      */
     modifier reinitializer(uint8 version) {
-        require(
-            !_initializing && _initialized < version,
-            "Initializable: contract is already initialized"
-        );
-        _initialized = version;
-        _initializing = true;
+        if (_initializing != 1 || _initialized >= version)
+            revert Initializable__AlreadyInitialized();
+        _initialized = version & ~uint8(0);
+        _initializing = 2;
         _;
-        _initializing = false;
+        _initializing = 1;
         emit Initialized(version);
     }
 
@@ -122,7 +121,7 @@ abstract contract Initializable {
      * {initializer} and {reinitializer} modifiers, directly or indirectly.
      */
     modifier onlyInitializing() {
-        require(_initializing, "Initializable: contract is not initializing");
+        if (_initializing != 2) revert Initializable__NotInitializing();
         _;
     }
 
@@ -133,10 +132,10 @@ abstract contract Initializable {
      * through proxies.
      */
     function _disableInitializers() internal virtual {
-        require(!_initializing, "Initializable: contract is initializing");
-        if (_initialized < type(uint8).max) {
-            _initialized = type(uint8).max;
-            emit Initialized(type(uint8).max);
+        if (_initializing != 1) revert Initializable__Initializing();
+        if (_initialized < 0xff) {
+            _initialized = 0xff;
+            emit Initialized(0xff);
         }
     }
 }

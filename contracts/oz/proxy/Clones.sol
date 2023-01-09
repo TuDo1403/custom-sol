@@ -3,6 +3,9 @@
 
 pragma solidity ^0.8.0;
 
+error ERC1167__CreateFailed();
+error ERC1167__Create2Failed();
+
 /**
  * @dev https://eips.ethereum.org/EIPS/eip-1167[EIP 1167] is a standard for
  * deploying minimal proxy contracts, also known as "clones".
@@ -37,7 +40,7 @@ library Clones {
             )
             instance := create(0, ptr, 0x37)
         }
-        require(instance != address(0), "ERC1167: create failed");
+        if (instance == address(0)) revert ERC1167__CreateFailed();
     }
 
     /**
@@ -65,7 +68,7 @@ library Clones {
             )
             instance := create2(0, ptr, 0x37, salt)
         }
-        require(instance != address(0), "ERC1167: create2 failed");
+        if (instance == address(0)) revert ERC1167__Create2Failed();
     }
 
     /**

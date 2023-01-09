@@ -5,6 +5,8 @@ pragma solidity ^0.8.0;
 
 import "../ERC1967/ERC1967Proxy.sol";
 
+error TransparentUpgradeableProxy__AdminCannotFallbackToProxyTarget();
+
 /**
  * @dev This contract implements a proxy that is upgradeable by an admin.
  *
@@ -43,11 +45,8 @@ contract TransparentUpgradeableProxy is ERC1967Proxy {
      * @dev Modifier used internally that will delegate the call to the implementation unless the sender is the admin.
      */
     modifier ifAdmin() {
-        if (msg.sender == _getAdmin()) {
-            _;
-        } else {
-            _fallback();
-        }
+        if (msg.sender == _getAdmin()) _;
+        else _fallback();
     }
 
     /**
@@ -125,10 +124,8 @@ contract TransparentUpgradeableProxy is ERC1967Proxy {
      * @dev Makes sure the admin cannot access the fallback function. See {Proxy-_beforeFallback}.
      */
     function _beforeFallback() internal virtual override {
-        require(
-            msg.sender != _getAdmin(),
-            "TransparentUpgradeableProxy: admin cannot fallback to proxy target"
-        );
+        if (msg.sender == _getAdmin())
+            revert TransparentUpgradeableProxy__AdminCannotFallbackToProxyTarget();
         super._beforeFallback();
     }
 }

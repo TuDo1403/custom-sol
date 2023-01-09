@@ -8,6 +8,13 @@ import "../../interfaces/draft-IERC1822.sol";
 import "../../utils/Address.sol";
 import "../../utils/StorageSlot.sol";
 
+error ERC1967__ZeroAddress();
+error ERC1967__NewBeaconIsNotAContract();
+error ERC1967__UnsupportedProxiableUUID();
+error ERC1967__NewImplementationIsNotUUPS();
+error ERC1967__NewImplementationIsNotAContract();
+error ERC1967__BeaconImplementationIsNotAContract();
+
 /**
  * @dev This abstract contract provides getters and event emitting update functions for
  * https://eips.ethereum.org/EIPS/eip-1967[EIP1967] slots.
@@ -45,10 +52,8 @@ abstract contract ERC1967Upgrade {
      * @dev Stores a new address in the EIP1967 implementation slot.
      */
     function _setImplementation(address newImplementation) private {
-        require(
-            Address.isContract(newImplementation),
-            "ERC1967: new implementation is not a contract"
-        );
+        if (!Address.isContract(newImplementation))
+            revert ERC1967__NewImplementationIsNotAContract();
         StorageSlot
             .getAddressSlot(_IMPLEMENTATION_SLOT)
             .value = newImplementation;
@@ -75,9 +80,8 @@ abstract contract ERC1967Upgrade {
         bool forceCall
     ) internal {
         _upgradeTo(newImplementation);
-        if (data.length > 0 || forceCall) {
+        if (forceCall || data.length > 0)
             Address.functionDelegateCall(newImplementation, data);
-        }
     }
 
     /**
@@ -99,12 +103,10 @@ abstract contract ERC1967Upgrade {
             try IERC1822Proxiable(newImplementation).proxiableUUID() returns (
                 bytes32 slot
             ) {
-                require(
-                    slot == _IMPLEMENTATION_SLOT,
-                    "ERC1967Upgrade: unsupported proxiableUUID"
-                );
+                if (slot != _IMPLEMENTATION_SLOT)
+                    revert ERC1967__UnsupportedProxiableUUID();
             } catch {
-                revert("ERC1967Upgrade: new implementation is not UUPS");
+                revert ERC1967__NewImplementationIsNotUUPS();
             }
             _upgradeToAndCall(newImplementation, data, forceCall);
         }
@@ -134,10 +136,7 @@ abstract contract ERC1967Upgrade {
      * @dev Stores a new address in the EIP1967 admin slot.
      */
     function _setAdmin(address newAdmin) private {
-        require(
-            newAdmin != address(0),
-            "ERC1967: new admin is the zero address"
-        );
+        if (newAdmin == address(0)) revert ERC1967__ZeroAddress();
         StorageSlot.getAddressSlot(_ADMIN_SLOT).value = newAdmin;
     }
 
@@ -174,14 +173,11 @@ abstract contract ERC1967Upgrade {
      * @dev Stores a new beacon in the EIP1967 beacon slot.
      */
     function _setBeacon(address newBeacon) private {
-        require(
-            Address.isContract(newBeacon),
-            "ERC1967: new beacon is not a contract"
-        );
-        require(
-            Address.isContract(IBeacon(newBeacon).implementation()),
-            "ERC1967: beacon implementation is not a contract"
-        );
+        if (!Address.isContract(newBeacon))
+            revert ERC1967__NewBeaconIsNotAContract();
+        if (!Address.isContract(IBeacon(newBeacon).implementation()))
+            revert ERC1967__BeaconImplementationIsNotAContract();
+
         StorageSlot.getAddressSlot(_BEACON_SLOT).value = newBeacon;
     }
 
@@ -198,7 +194,7 @@ abstract contract ERC1967Upgrade {
     ) internal {
         _setBeacon(newBeacon);
         emit BeaconUpgraded(newBeacon);
-        if (data.length > 0 || forceCall) {
+        if (forceCall || data.length > 0) {
             Address.functionDelegateCall(
                 IBeacon(newBeacon).implementation(),
                 data

@@ -6,6 +6,8 @@ pragma solidity ^0.8.0;
 import "./TransparentUpgradeableProxy.sol";
 import "../../access/Ownable.sol";
 
+error ProxyAdmin__InvalidProxyAddress();
+
 /**
  * @dev This is an auxiliary contract meant to be assigned as the admin of a {TransparentUpgradeableProxy}. For an
  * explanation of why you would want to use this see the documentation for {TransparentUpgradeableProxy}.
@@ -26,7 +28,8 @@ contract ProxyAdmin is Ownable {
         (bool success, bytes memory returndata) = address(proxy).staticcall(
             hex"5c60da1b"
         );
-        require(success);
+        if (!success)
+            revert TransparentUpgradeableProxy__AdminCannotFallbackToProxyTarget();
         return abi.decode(returndata, (address));
     }
 
@@ -45,7 +48,8 @@ contract ProxyAdmin is Ownable {
         (bool success, bytes memory returndata) = address(proxy).staticcall(
             hex"f851a440"
         );
-        require(success);
+        if (!success)
+            revert TransparentUpgradeableProxy__AdminCannotFallbackToProxyTarget();
         return abi.decode(returndata, (address));
     }
 
