@@ -17,7 +17,6 @@ import "./interfaces/IBlacklistable.sol";
 abstract contract Blacklistable is IBlacklistable {
     using Bytes32Address for address;
     using BitMaps for BitMaps.BitMap;
-
     BitMaps.BitMap private __blacklisted;
 
     /// @inheritdoc IBlacklistable

@@ -22,8 +22,7 @@ error Ownable__NonZeroAddress();
  * the owner.
  */
 abstract contract Ownable is Context {
-    using Bytes32Address for address;
-    using Bytes32Address for bytes32;
+    using Bytes32Address for *;
 
     bytes32 private _owner;
 

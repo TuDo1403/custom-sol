@@ -45,10 +45,10 @@ abstract contract ERC20PresetMinterPauser is
      * See {ERC20-constructor}.
      */
     constructor(
-        string memory name,
-        string memory symbol,
-        uint8 decimals
-    ) ERC20(name, symbol, decimals) {
+        string memory name_,
+        string memory symbol_,
+        uint8 decimals_
+    ) ERC20(name_, symbol_, decimals_) {
         address sender = _msgSender();
 
         _grantRole(MINTER_ROLE, sender);

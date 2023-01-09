@@ -19,6 +19,7 @@ abstract contract MultiLevelReferral is ProxyChecker, IMultiLevelReferral {
     using FixedPointMathLib for uint256;
 
     uint256 public constant PERCENTAGE_FRACTION = 10_000;
+
     /**
      * @dev Timestamp threshold for an account to be considered active
      */

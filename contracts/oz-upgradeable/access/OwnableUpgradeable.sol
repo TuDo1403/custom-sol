@@ -23,8 +23,7 @@ error Ownable__NonZeroAddress();
  * the owner.
  */
 abstract contract OwnableUpgradeable is ContextUpgradeable {
-    using Bytes32Address for address;
-    using Bytes32Address for bytes32;
+    using Bytes32Address for *;
 
     bytes32 private _owner;
 
@@ -63,7 +62,7 @@ abstract contract OwnableUpgradeable is ContextUpgradeable {
      * @dev Throws if the sender is not the owner.
      */
     function _checkOwner(address sender_) internal view virtual {
-        if (owner() != sender_) revert Ownable__Unauthorized();
+        if (_owner != sender_.fillLast12Bytes()) revert Ownable__Unauthorized();
     }
 
     /**

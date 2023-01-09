@@ -122,7 +122,7 @@ library ERC165Checker {
             IERC165.supportsInterface,
             (interfaceId)
         );
-        (bool success, bytes memory result) = account.staticcall{gas: 30000}(
+        (bool success, bytes memory result) = account.staticcall{gas: 30_000}(
             encodedParams
         );
         if (result.length < 32) return false;

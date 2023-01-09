@@ -3,7 +3,6 @@
 
 pragma solidity ^0.8.2;
 
-//import "../../utils/AddressUpgradeable.sol";
 error Initializable__Initializing();
 error Initializable__NotInitializing();
 error Initializable__AlreadyInitialized();
@@ -134,9 +133,9 @@ abstract contract Initializable {
      */
     function _disableInitializers() internal virtual {
         if (_initializing != 1) revert Initializable__Initializing();
-        if (_initialized < ~uint8(0)) {
-            _initialized = ~uint8(0);
-            emit Initialized(~uint8(0));
+        if (_initialized < 0xff) {
+            _initialized = 0xff;
+            emit Initialized(0xff);
         }
     }
 }

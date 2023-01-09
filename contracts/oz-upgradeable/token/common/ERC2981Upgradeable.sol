@@ -72,7 +72,7 @@ abstract contract ERC2981Upgradeable is IERC2981Upgradeable, ERC165Upgradeable {
      * override.
      */
     function _feeDenominator() internal pure virtual returns (uint96) {
-        return 10000;
+        return 10_000;
     }
 
     /**

@@ -150,9 +150,7 @@ library SSTORE2 {
         start += DATA_OFFSET;
         end += DATA_OFFSET;
 
-        if (pointer.code.length < end) {
-            revert SSTORE2__ReadOutOfBounds();
-        }
+        if (pointer.code.length < end) revert SSTORE2__ReadOutOfBounds();
 
         return readBytecode(pointer, start, end - start);
     }
