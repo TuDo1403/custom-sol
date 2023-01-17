@@ -12,8 +12,7 @@ import "../../../../libraries/StringLib.sol";
  * @dev ERC721 token with storage based token URI management.
  */
 abstract contract ERC721URIStorageUpgradeable is ERC721Upgradeable {
-    using SSTORE2 for bytes;
-    using SSTORE2 for bytes32;
+    using SSTORE2 for *;
     using StringLib for uint256;
 
     bytes32 internal _baseTokenURIPtr;

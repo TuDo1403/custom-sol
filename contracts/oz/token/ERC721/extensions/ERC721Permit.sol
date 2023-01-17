@@ -13,9 +13,8 @@ abstract contract ERC721Permit is ERC721, IERC721Permit, Signable {
 
     constructor(
         string memory name_,
-        string memory symbol_,
-        string memory version_
-    ) payable Signable(name_, version_) ERC721(name_, symbol_) {}
+        string memory symbol_
+    ) payable Signable(name_, "1") ERC721(name_, symbol_) {}
 
     /// @dev Gets the current nonce for a token ID and then increments it, returning the original value
 
@@ -30,17 +29,15 @@ abstract contract ERC721Permit is ERC721, IERC721Permit, Signable {
     }
 
     /// @dev Value is equal to to keccak256("Permit(address spender,uint256 tokenId,uint256 nonce,uint256 deadline)");
-    bytes32 private constant _PERMIT_TYPEHASH =
+    bytes32 private constant __PERMIT_TYPEHASH =
         0x49ecf333e5b8c95c40fdafc95c1ad136e8914a8fb55e9dc8bb01eaa83a2df9ad;
 
     /// @inheritdoc IERC721Permit
     function permit(
+        address spender_,
         uint256 tokenId_,
         uint256 deadline_,
-        address spender_,
-        uint8 v,
-        bytes32 r,
-        bytes32 s
+        bytes calldata signature_
     ) external override {
         if (block.timestamp > deadline_) revert ERC721Permit__Expired();
         address owner = ownerOf(tokenId_);
@@ -49,16 +46,14 @@ abstract contract ERC721Permit is ERC721, IERC721Permit, Signable {
             owner,
             keccak256(
                 abi.encode(
-                    _PERMIT_TYPEHASH,
+                    __PERMIT_TYPEHASH,
                     spender_,
                     tokenId_,
                     _useNonce(tokenId_),
                     deadline_
                 )
             ),
-            v,
-            r,
-            s
+            signature_
         );
         _getApproved[tokenId_] = spender_.fillLast12Bytes();
     }

@@ -4,12 +4,11 @@ pragma solidity ^0.8.17;
 interface ISignable {
     error Signable__InvalidSignature();
 
-    /**
-     * @dev Returns the nonce for the given address
-     * @param sender_ Address to get the nonce for
-     * @return Nonce of the given address
-     */
-    function nonces(address sender_) external view returns (uint256);
+    event NonceIncremented(
+        address indexed operator,
+        bytes32 indexed id,
+        uint256 indexed value
+    );
 
     /**
      * @dev Returns the domain separator for EIP712 v4

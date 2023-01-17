@@ -14,7 +14,7 @@ abstract contract MultiDelegatecallUpgradeable is Initializable {
     /**
      * @dev Address of the original contract
      */
-    address public original;
+    address private __original;
 
     event BatchExecuted(
         address indexed operator,
@@ -27,7 +27,7 @@ abstract contract MultiDelegatecallUpgradeable is Initializable {
     }
 
     function __MultiDelegatecall_init_unchained() internal onlyInitializing {
-        original = address(this);
+        __original = address(this);
     }
 
     /**
@@ -38,7 +38,8 @@ abstract contract MultiDelegatecallUpgradeable is Initializable {
     function _multiDelegatecall(
         bytes[] calldata data_
     ) internal returns (bytes[] memory results) {
-        if (address(this) != original) revert MultiDelegatecall__OnlyDelegate();
+        if (address(this) != __original)
+            revert MultiDelegatecall__OnlyDelegate();
         uint256 length = data_.length;
         results = new bytes[](length);
         bool ok;

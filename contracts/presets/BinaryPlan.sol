@@ -7,42 +7,112 @@ import "./base/Manager.sol";
 
 import "./interfaces/IBinaryPlan.sol";
 
+/**
+ * @title BinaryPlan
+ * @dev Implements a binary tree-like plan to reward referrals.
+ * @notice This contract only allows the factory contract to create an instance.
+ * @notice The factory contract only allows the operator to call certain functions.
+ */
 contract BinaryPlan is Manager, IBinaryPlan, Initializable {
+    /**
+     * @dev The fraction of the maximum rate for each referral.
+     * @notice The maximum rate for a direct referral is equal to
+     *   `MAXIMUM_BONUS_PERCENTAGE / PERCENTAGE_FRACTION`.
+     */
     uint256 public constant PERCENTAGE_FRACTION = 10_000;
+
+    /**
+     * @dev The maximum rate for a direct referral.
+     * @notice The maximum rate for a direct referral is equal to
+     *   `MAXIMUM_BONUS_PERCENTAGE / PERCENTAGE_FRACTION`.
+     */
     uint256 public constant MAXIMUM_BONUS_PERCENTAGE = 3_000_000;
 
+    /**
+     * @dev The authority contract instance.
+     * @notice This variable is used to cache the contract instance in order to
+     *   minimize the number of contract calls.
+     */
     IAuthority public immutable cachedAuthority;
 
+    /**
+     * @dev The rate of bonuses for referrals.
+     */
     Bonus public bonusRate;
+
+    /**
+     * @dev The indices of the accounts in the binary heap.
+     * @notice The key is the account address.
+     */
     mapping(address => uint256) public indices;
+
+    /**
+     * @dev The accounts in the binary heap.
+     * @notice The key is the account address.
+     */
     mapping(address => Account) public accounts;
+
+    /**
+     * @dev The accounts in the binary heap.
+     * @notice The key is the index of the account in the binary heap.
+     */
     mapping(uint256 => address) public binaryHeap;
 
+    /**
+     * @dev Constructor that sets the authority contract instance.
+     * @param authority_ The authority contract instance.
+     * @notice This function only allows the factory contract to create an
+     *   instance.
+     */
     constructor(IAuthority authority_) payable Manager(authority_, 0) {
         cachedAuthority = authority_;
     }
 
+    /**
+     * @dev Destroys the contract and sends the balance to the caller.
+     * @notice This function only allows the operator to call.
+     */
     function kill() external onlyRole(Roles.OPERATOR_ROLE) {
-        selfdestruct(payable(msg.sender));
+        selfdestruct(payable(_msgSender()));
     }
 
-    function init(address root_) external initializer {
+    /**
+     * @dev Initializes the BinaryPlan contract.
+     * @param root_ The root of the binary tree, who is responsible for the referral network.
+     * @notice Only callable once and by the factory role.
+     */
+    function initialize(address root_) external initializer {
+        // Assign the root_ to the root position in the binary heap
         binaryHeap[1] = root_;
+        // Assign the index of the root in the binary heap to the root's entry in the indices mapping
         indices[root_] = 1;
 
+        // Update the contract's authority to the cached authority
         __updateAuthority(cachedAuthority);
-        _checkRole(Roles.FACTORY_ROLE, msg.sender);
+        // Check that the caller of the function has the FACTORY_ROLE role
+        _checkRole(Roles.FACTORY_ROLE, _msgSender());
 
+        // Set the rate of bonus for branches and direct referrals
         Bonus memory bonus = bonusRate;
         bonus.branchRate = 300;
         bonus.directRate = 600;
         bonusRate = bonus;
     }
 
+    /**
+     * @dev Returns the root of the binary tree
+     * @return The address of the root
+     */
     function root() public view returns (address) {
+        // Return the root of the binary tree, which is stored at index 1 in the binary heap
         return binaryHeap[1];
     }
 
+    /**
+     * @dev Returns an array of addresses representing the nodes in the binary tree
+     * @param root_ The address of the root of the tree to retrieve
+     * @return tree An array of addresses representing the nodes in the binary tree
+     */
     function getTree(
         address root_
     ) external view returns (address[] memory tree) {
@@ -55,6 +125,12 @@ contract BinaryPlan is Manager, IBinaryPlan, Initializable {
         __traversePreorder(root_, 1, tree);
     }
 
+    /**
+     * @dev Traverses the tree in preorder and assigns each node's address to the corresponding index in the given array
+     * @param root_ The address of the root of the tree to traverse
+     * @param idx The current index in the array to assign the current node's address to
+     * @param addrs The array to assign the node addresses to
+     */
     function __traversePreorder(
         address root_,
         uint256 idx,
@@ -76,6 +152,12 @@ contract BinaryPlan is Manager, IBinaryPlan, Initializable {
         );
     }
 
+    /**
+     * @dev Adds a referrer to the binary tree and updates their bonus rate
+     * @param referrer Address of the referrer to add
+     * @param referree Address of the referree to add
+     * @param isLeft Flag indicating whether the referree should be added as a left or right child of the referrer
+     */
     function addReferrer(
         address referrer,
         address referree,
@@ -103,18 +185,17 @@ contract BinaryPlan is Manager, IBinaryPlan, Initializable {
         address root_ = __parentOf(leaf);
         uint256 leafLevel = __levelOf(position);
 
-        uint256 heightDiff;
+        uint8 heightDiff;
         Account memory rootAccount;
         while (root_ != address(0)) {
             rootAccount = accounts[root_];
-            heightDiff = leafLevel - __levelOf(indices[root_]);
-            if (__isLeftBranch(leaf, root_)) {
-                if (rootAccount.leftHeight < heightDiff)
-                    rootAccount.leftHeight = uint8(heightDiff);
-            } else {
-                if (rootAccount.rightHeight < heightDiff)
-                    rootAccount.rightHeight = uint8(heightDiff);
-            }
+            heightDiff = uint8(leafLevel - __levelOf(indices[root_]));
+            if (
+                rootAccount.leftHeight < heightDiff &&
+                __isLeftBranch(leaf, root_)
+            ) rootAccount.leftHeight = heightDiff;
+            else if (rootAccount.rightHeight < heightDiff)
+                rootAccount.rightHeight = heightDiff;
 
             accounts[root_] = rootAccount;
 

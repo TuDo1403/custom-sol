@@ -12,6 +12,12 @@ interface IProtocolFeeUpgradeable {
         uint96 royalty;
     }
 
+    event ProtocolFeeUpdated(
+        address indexed operator,
+        IERC20Upgradeable indexed payment,
+        uint96 indexed royalty
+    );
+
     /**
      * @dev Returns the fee information
      * @return  token feeAmt Token address of the fee and the fee amount

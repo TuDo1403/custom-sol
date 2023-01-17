@@ -13,20 +13,17 @@ interface IERC721PermitUpgradeable is IERC721Upgradeable {
     /// @return The domain seperator used in encoding of permit signature
     function DOMAIN_SEPARATOR() external view returns (bytes32);
 
-    // / @notice Approve of a specific token ID for spending by spender via signature
-    // / @param spender The account that is being approved
-    // / @param tokenId The ID of the token that is being approved for spending
-    // / @param deadline The deadline timestamp by which the call must be mined for the approve to work
-    // / @param v Must produce valid secp256k1 signature from the holder along with `r` and `s`
-    // / @param r Must produce valid secp256k1 signature from the holder along with `v` and `s`
-    // / @param s Must produce valid secp256k1 signature from the holder along with `r` and `v`
+    /// @notice function to be called by anyone to approve `spender` using a Permit signature
+    /// @dev Anyone can call this to approve `spender`, even a third-party
+    /// @param spender the actor to approve
+    /// @param tokenId the token id
+    /// @param deadline the deadline for the permit to be used
+    /// @param signature permit
     function permit(
-        uint256 tokenId_,
-        uint256 deadline_,
-        address spender_,
-        uint8 v_,
-        bytes32 r_,
-        bytes32 s_
+        address spender,
+        uint256 tokenId,
+        uint256 deadline,
+        bytes calldata signature
     ) external;
 
     function nonces(uint256 tokenId_) external view returns (uint256);

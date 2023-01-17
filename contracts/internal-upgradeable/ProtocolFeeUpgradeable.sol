@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
+import "../oz-upgradeable/utils/ContextUpgradeable.sol";
 import "../oz-upgradeable/proxy/utils/Initializable.sol";
 
 import "./interfaces/IProtocolFeeUpgradeable.sol";
@@ -13,6 +14,7 @@ import "./interfaces/IProtocolFeeUpgradeable.sol";
  */
 abstract contract ProtocolFeeUpgradeable is
     Initializable,
+    ContextUpgradeable,
     IProtocolFeeUpgradeable
 {
     FeeInfo private __feeInfo;
@@ -43,6 +45,8 @@ abstract contract ProtocolFeeUpgradeable is
         assembly {
             sstore(__feeInfo.slot, or(shl(160, amount_), token_))
         }
+
+        emit ProtocolFeeUpdated(_msgSender(), token_, amount_);
     }
 
     /**

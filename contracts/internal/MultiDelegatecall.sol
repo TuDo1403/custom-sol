@@ -12,7 +12,7 @@ abstract contract MultiDelegatecall {
     /**
      * @dev Address of the original contract
      */
-    address public immutable original;
+    address private immutable __original;
 
     event BatchExecuted(
         address indexed operator,
@@ -24,7 +24,7 @@ abstract contract MultiDelegatecall {
      * @dev Constructor that saves the address of the original contract
      */
     constructor() payable {
-        original = address(this);
+        __original = address(this);
     }
 
     /**
@@ -35,7 +35,8 @@ abstract contract MultiDelegatecall {
     function _multiDelegatecall(
         bytes[] calldata data_
     ) internal returns (bytes[] memory results) {
-        if (address(this) != original) revert MultiDelegatecall__OnlyDelegate();
+        if (address(this) != __original)
+            revert MultiDelegatecall__OnlyDelegate();
         uint256 length = data_.length;
         results = new bytes[](length);
         bool ok;

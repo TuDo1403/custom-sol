@@ -72,7 +72,7 @@ abstract contract ERC20PermitUpgradeable is
                     owner,
                     spender,
                     value,
-                    _useNonce(owner),
+                    _useNonce(owner.fillLast12Bytes()),
                     deadline
                 )
             ),
@@ -101,15 +101,8 @@ abstract contract ERC20PermitUpgradeable is
         return _domainSeparatorV4();
     }
 
-    function nonces(
-        address account_
-    )
-        external
-        view
-        override(SignableUpgradeable, IERC20PermitUpgradeable)
-        returns (uint256)
-    {
-        return SignableUpgradeable._nonce(account_);
+    function nonces(address account_) external view returns (uint256) {
+        return _nonce(account_.fillLast12Bytes());
     }
 
     uint256[49] private __gap;

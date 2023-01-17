@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.15;
+pragma solidity ^0.8.17;
 
 import "../oz/utils/structs/BitMaps.sol";
 import "../oz/utils/introspection/ERC165Checker.sol";
@@ -35,7 +35,12 @@ contract CommandGate is
         IAuthority authority_,
         ITreasury mainVault_,
         address[] memory vaults_
-    ) payable Manager(authority_, 0) FundForwarder(address(mainVault_)) {
+    )
+        payable
+        MultiDelegatecall()
+        Manager(authority_, 0)
+        FundForwarder(address(mainVault_))
+    {
         __whitelistVaults(vaults_);
     }
 
@@ -48,7 +53,6 @@ contract CommandGate is
     function updateTreasury(
         ITreasury treasury_
     ) external onlyRole(Roles.OPERATOR_ROLE) {
-        emit VaultUpdated(vault, address(treasury_));
         _changeVault(address(treasury_));
     }
 
@@ -68,6 +72,9 @@ contract CommandGate is
         bytes4 fnSig_,
         bytes calldata params_
     ) external payable whenNotPaused {
+        address sender = _msgSender();
+        __checkUser(sender);
+
         if (!__isWhitelisted.get(contract_.fillLast96Bits()))
             revert CommandGate__UnknownAddress(contract_);
         if (
@@ -76,8 +83,6 @@ contract CommandGate is
 
         _safeNativeTransfer(vault_, msg.value);
 
-        address sender = _msgSender();
-        __checkUser(sender);
         __executeTx(
             contract_,
             fnSig_,
@@ -103,14 +108,13 @@ contract CommandGate is
         address contract_,
         bytes memory data_
     ) external whenNotPaused {
+        address user = _msgSender();
+        __checkUser(user);
         if (!__isWhitelisted.get(contract_.fillLast96Bits()))
             revert CommandGate__UnknownAddress(contract_);
         if (
             vault_ != vault && !__whitelistedVaults.get(vault_.fillLast96Bits())
         ) revert CommandGate__UnknownAddress(vault_);
-
-        address user = _msgSender();
-        __checkUser(user);
 
         _safeERC20TransferFrom(token_, user, vault_, value_);
         data_ = __concatDepositData(user, address(token_), value_, data_);
@@ -220,9 +224,16 @@ contract CommandGate is
         }
     }
 
+    function isVaultWhitelisted(address addr_) external view returns (bool) {
+        return __whitelistedVaults.get(addr_.fillLast96Bits());
+    }
+
+    function isTargetWhitelisted(address addr_) external view returns (bool) {
+        return __isWhitelisted.get(addr_.fillLast96Bits());
+    }
+
     function __whitelistVaults(address[] memory vaults_) private {
         uint256 length = vaults_.length;
-
         uint256[] memory uintVaults = new uint256[](length);
 
         assembly {

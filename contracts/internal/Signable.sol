@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "../oz/utils/cryptography/draft-EIP712.sol";
+import "../oz/utils/Context.sol";
+import {ECDSA, EIP712} from "../oz/utils/cryptography/draft-EIP712.sol";
 
 import "./interfaces/ISignable.sol";
 
@@ -11,12 +12,12 @@ import "../libraries/Bytes32Address.sol";
  * @title Signable
  * @dev Abstract contract for signing and verifying typed data.
  */
-abstract contract Signable is EIP712, ISignable {
+abstract contract Signable is Context, EIP712, ISignable {
     using ECDSA for bytes32;
     using Bytes32Address for address;
 
     /**
-     * @dev Mapping of nonces for each address
+     * @dev Mapping of nonces for each id
      */
     mapping(bytes32 => uint256) internal _nonces;
 
@@ -29,11 +30,6 @@ abstract contract Signable is EIP712, ISignable {
         string memory name_,
         string memory version_
     ) payable EIP712(name_, version_) {}
-
-    /// @inheritdoc ISignable
-    function nonces(address sender_) external view virtual returns (uint256) {
-        return _nonce(sender_);
-    }
 
     /**
      * @dev Verifies that the signer of the typed data is the given address
@@ -101,68 +97,31 @@ abstract contract Signable is EIP712, ISignable {
 
     /**
      * @dev Increases the nonce for the given account by 1
-     * @param account_ Account to increase the nonce for
+     * @param id_ ID to increase the nonce for
      * @return nonce The new nonce for the account
      */
-    function _useNonce(
-        address account_
-    ) internal virtual returns (uint256 nonce) {
+    function _useNonce(bytes32 id_) internal virtual returns (uint256 nonce) {
         assembly {
-            mstore(0x00, account_)
+            mstore(0x00, id_)
             mstore(0x20, _nonces.slot)
             let key := keccak256(0x00, 0x40)
             nonce := sload(key)
             sstore(key, add(nonce, 1))
         }
+
+        emit NonceIncremented(_msgSender(), id_, nonce);
     }
 
     /**
      * @dev Returns the nonce for the given address
-     * @param sender_ Address to get the nonce for
+     * @param id_ ID to get the nonce for
      * @return nonce Nonce of the given address
      */
-    function _nonce(
-        address sender_
-    ) internal view virtual returns (uint256 nonce) {
+    function _nonce(bytes32 id_) internal view virtual returns (uint256 nonce) {
         assembly {
-            mstore(0x00, sender_)
+            mstore(0x00, id_)
             mstore(0x20, _nonces.slot)
             nonce := sload(keccak256(0x00, 0x40))
-        }
-    }
-
-    /**
-     * @dev Merges the ECDSA values into a single signature bytes
-     * @param v ECDSA recovery value
-     * @param r ECDSA r value
-     * @param s ECDSA s value
-     * @return signature Combined signature bytes
-     */
-    function _mergeSignature(
-        uint8 v,
-        bytes32 r,
-        bytes32 s
-    ) internal pure returns (bytes memory signature) {
-        signature = new bytes(65);
-        assembly {
-            mstore(add(signature, 0x20), r)
-            mstore(add(signature, 0x40), s)
-            mstore8(add(signature, 0x60), v)
-        }
-    }
-
-    /**
-     * @dev Splits the signature bytes into ECDSA values
-     * @param signature_ Signature bytes to split
-     * @return r s v Tuple of ECDSA values
-     */
-    function _splitSignature(
-        bytes calldata signature_
-    ) internal pure virtual returns (bytes32 r, bytes32 s, uint8 v) {
-        assembly {
-            r := calldataload(signature_.offset)
-            s := calldataload(add(signature_.offset, 0x20))
-            v := byte(0, calldataload(add(signature_.offset, 0x40)))
         }
     }
 

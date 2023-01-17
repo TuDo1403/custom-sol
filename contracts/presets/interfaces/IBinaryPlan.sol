@@ -18,7 +18,7 @@ interface IBinaryPlan {
         uint16 branchRate;
     }
 
-    function init(address root_) external;
+    function initialize(address root_) external;
 
     function getTree(
         address root

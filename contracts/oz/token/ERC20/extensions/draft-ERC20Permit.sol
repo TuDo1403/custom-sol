@@ -62,7 +62,7 @@ abstract contract ERC20Permit is ERC20, IERC20Permit, Signable {
                     owner,
                     spender,
                     value,
-                    _useNonce(owner),
+                    _useNonce(owner.fillLast12Bytes()),
                     deadline
                 )
             ),
@@ -91,9 +91,7 @@ abstract contract ERC20Permit is ERC20, IERC20Permit, Signable {
         return _domainSeparatorV4();
     }
 
-    function nonces(
-        address account_
-    ) external view override(Signable, IERC20Permit) returns (uint256) {
-        return Signable._nonce(account_);
+    function nonces(address account_) external view returns (uint256) {
+        return _nonce(account_.fillLast12Bytes());
     }
 }

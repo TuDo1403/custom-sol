@@ -5,6 +5,7 @@ import "../oz/security/Pausable.sol";
 import "../oz/access/AccessControlEnumerable.sol";
 
 import "../internal/ProxyChecker.sol";
+import "../internal/FundForwarder.sol";
 import "../internal/Blacklistable.sol";
 
 import "./interfaces/IAuthority.sol";
@@ -12,17 +13,21 @@ import "./interfaces/IAuthority.sol";
 import "../libraries/Roles.sol";
 
 contract Authority is
-    IAuthority,
     Pausable,
+    IAuthority,
     ProxyChecker,
     Blacklistable,
+    FundForwarder,
     AccessControlEnumerable
 {
     /// @dev value is equal to keccak256("Authority_v1")
     bytes32 public constant VERSION =
         0x095dd5e04e0f3f5bce98e4ee904d9f7209827187c4201f036596b2f7fdd602e7;
 
-    constructor(address admin_) payable {
+    constructor(
+        address admin_,
+        address vault_
+    ) payable Pausable() FundForwarder(vault_) {
         _grantRole(DEFAULT_ADMIN_ROLE, admin_);
     }
 
@@ -49,13 +54,13 @@ contract Authority is
         bool status_
     ) external override(Blacklistable, IBlacklistable) {
         _setUserStatus(account_, status_);
-
-        if (status_) emit Blacklisted(account_);
-        else emit Whitelisted(account_);
     }
 
     /// @inheritdoc IAuthority
-    function setRoleAdmin(bytes32 role, bytes32 adminRole) external {
+    function setRoleAdmin(
+        bytes32 role,
+        bytes32 adminRole
+    ) external onlyRole(getRoleAdmin(adminRole)) {
         _setRoleAdmin(role, adminRole);
     }
 
@@ -82,7 +87,9 @@ contract Authority is
     /// @inheritdoc IAuthority
     function requestAccess(bytes32 role) external {
         address origin = _txOrigin();
-        _checkRole(Roles.OPERATOR_ROLE, origin);
+
+        if (!hasRole(Roles.FACTORY_ROLE, origin))
+            _checkRole(Roles.OPERATOR_ROLE, origin);
 
         address sender = _msgSender();
         _onlyProxy(sender, origin);
@@ -91,6 +98,6 @@ contract Authority is
 
         if (role != 0) _grantRole(role, sender);
 
-        emit ProxyAccessGranted(sender);
+        emit ProxyAccessGranted(origin, sender);
     }
 }

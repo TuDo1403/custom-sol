@@ -8,7 +8,7 @@ import "../../internal/interfaces/IBlacklistable.sol";
 interface IAuthority is IBlacklistable, IAccessControlEnumerable {
     error Authority__InvalidRole();
 
-    event ProxyAccessGranted(address indexed proxy);
+    event ProxyAccessGranted(address indexed operator, address indexed proxy);
 
     /**
      * @dev Sets the admin of the specified role to the specified admin role.

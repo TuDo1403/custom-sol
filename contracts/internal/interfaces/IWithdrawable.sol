@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "../../oz/token/ERC20/IERC20.sol";
-
 interface IWithdrawable {
     event Withdrawn(
         address indexed token,
@@ -13,7 +11,18 @@ interface IWithdrawable {
     /**
      * @dev Event emitted when funds are received by the contract
      */
-    event Received(address indexed sender, uint256 indexed value);
+    event Received(
+        address indexed sender,
+        address indexed token,
+        bytes value,
+        bytes data
+    );
+
+    function notifyERCTransfer(
+        address token_,
+        bytes calldata value_,
+        bytes calldata data_
+    ) external returns (bytes4);
 
     /**
      * @dev Withdraws the given amount of tokens or Ether from the contract
@@ -21,5 +30,10 @@ interface IWithdrawable {
      * @param to_ Address to send the tokens or Ether to
      * @param amount_ Amount of tokens or Ether to withdraw
      */
-    function withdraw(address token_, address to_, uint256 amount_) external;
+    function withdraw(
+        address token_,
+        address to_,
+        uint256 amount_,
+        bytes calldata data_
+    ) external;
 }

@@ -68,4 +68,8 @@ interface ICommandGate {
         IERC721[] calldata contracts_,
         bytes[] calldata data_
     ) external;
+
+    function isVaultWhitelisted(address addr_) external view returns (bool);
+
+    function isTargetWhitelisted(address addr_) external view returns (bool);
 }

@@ -4,6 +4,8 @@ pragma solidity ^0.8.17;
 import "../oz/utils/Context.sol";
 import "../oz/utils/structs/BitMaps.sol";
 
+//import {ModuleIdentity} from "./Internal.sol";
+
 import "../libraries/Bytes32Address.sol";
 
 import "./interfaces/IBlacklistable.sol";
@@ -14,13 +16,14 @@ import "./interfaces/IBlacklistable.sol";
  * Users of this contract can add or remove an address from the blacklist.
  * Users can check if an address is blacklisted.
  */
-abstract contract Blacklistable is IBlacklistable {
+abstract contract Blacklistable is Context, IBlacklistable {
     using Bytes32Address for address;
     using BitMaps for BitMaps.BitMap;
+
     BitMaps.BitMap private __blacklisted;
 
     /// @inheritdoc IBlacklistable
-    function setUserStatus(address account_, bool status) external virtual;
+    function setUserStatus(address account_, bool status_) external virtual;
 
     /// @inheritdoc IBlacklistable
     function isBlacklisted(address account_) public view returns (bool) {
@@ -34,5 +37,6 @@ abstract contract Blacklistable is IBlacklistable {
      */
     function _setUserStatus(address account_, bool status_) internal {
         __blacklisted.setTo(account_.fillLast96Bits(), status_);
+        emit UserStatusSet(_msgSender(), account_, status_);
     }
 }

@@ -1,11 +1,13 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import {Create2Deployer} from "../internal/DeterministicDeployer.sol";
+import {Create2, Create2Deployer} from "../internal/DeterministicDeployer.sol";
 
 import "./interfaces/IMultichainDeployer.sol";
 
 contract MultichainDeployer is Create2Deployer, IMultichainDeployer {
+    using Create2 for bytes32;
+
     /// @dev value is equal to keccak256("MultichainDeployer_v1")
     bytes32 public constant VERSION =
         0x9eea8cb98c11fea36be219299200e6b67153ef85e64f26fbca079445a66e02d2;
@@ -16,5 +18,13 @@ contract MultichainDeployer is Create2Deployer, IMultichainDeployer {
         bytes calldata bytecode_
     ) external payable {
         _deploy(amount_, salt_, bytecode_);
+    }
+
+    function isDeployerOf(
+        address instance_,
+        bytes32 initCodehash_,
+        bytes32 salt_
+    ) external view returns (bool) {
+        return salt_.computeAddress(initCodehash_) == instance_;
     }
 }

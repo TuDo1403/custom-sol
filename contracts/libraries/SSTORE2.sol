@@ -5,8 +5,8 @@ pragma solidity ^0.8.17;
 /// @author Solmate (https://github.com/Rari-Capital/solmate/blob/main/src/utils/SSTORE2.sol)
 /// @author Modified from 0xSequence (https://github.com/0xSequence/sstore2/blob/master/contracts/SSTORE2.sol)
 library SSTORE2 {
-    error SSTORE2__DeploymentFailed();
     error SSTORE2__ReadOutOfBounds();
+    error SSTORE2__DeploymentFailed();
 
     // We skip the first byte as it's a STOP opcode to ensure the contract can't be called.
     uint256 internal constant DATA_OFFSET = 1;

@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
+import "../oz/utils/Context.sol";
 import "./interfaces/IProtocolFee.sol";
 
 /**
@@ -9,7 +10,7 @@ import "./interfaces/IProtocolFee.sol";
  * @dev An implementation of this contract should define the `_percentageFraction` function, which returns the percentage fraction of the fee.
  * @dev The fee amount is calculated as the product of the fee percentage and the fee value.
  */
-abstract contract ProtocolFee is IProtocolFee {
+abstract contract ProtocolFee is Context, IProtocolFee {
     FeeInfo private __feeInfo;
 
     /// @inheritdoc IProtocolFee
@@ -30,6 +31,8 @@ abstract contract ProtocolFee is IProtocolFee {
         assembly {
             sstore(__feeInfo.slot, or(shl(160, amount_), token_))
         }
+
+        emit ProtocolFeeUpdated(_msgSender(), token_, amount_);
     }
 
     /**
