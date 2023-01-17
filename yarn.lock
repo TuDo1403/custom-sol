@@ -887,17 +887,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@openzeppelin/contracts-upgradeable@npm:^4.8.0":
-  version: 4.8.0
-  resolution: "@openzeppelin/contracts-upgradeable@npm:4.8.0"
-  checksum: c39f3a719830c068d0ae413a8beee4072fa19f777b55bf6155fe21023414eab0633a641318845ac50929837b71848de1efbd00d4c181ddd6d8b735ceb0a82070
+"@openzeppelin/contracts-upgradeable@npm:^4.8.1":
+  version: 4.8.1
+  resolution: "@openzeppelin/contracts-upgradeable@npm:4.8.1"
+  checksum: 6af2fbddf263214c02d80430b218cb3ca8482e77b1cc070d07ca4f79d42460941e7ea1bb89a096bd292841040652e10d779b491cd19c201008d92e9e689d9000
   languageName: node
   linkType: hard
 
-"@openzeppelin/contracts@npm:^4.8.0":
-  version: 4.8.0
-  resolution: "@openzeppelin/contracts@npm:4.8.0"
-  checksum: dfab51a7f91735cfb1e94dd5074736b0dac0207e4ebf26eb46b32defd3b67adce5a36b248daa7b841c21be74863c1e37cf92ed194a9c36d3f8c5326d1a24242a
+"@openzeppelin/contracts@npm:^4.8.1":
+  version: 4.8.1
+  resolution: "@openzeppelin/contracts@npm:4.8.1"
+  checksum: 99acefde1ae42c2d935ec9b4ebd327e786c499a4ec76b9582eb9adb0ff94a77c48047332fba44fb97b82b5a46d80e74d3e5d8cf73d5defa7f746f2a67f070281
   languageName: node
   linkType: hard
 
@@ -5160,8 +5160,8 @@ __metadata:
     "@nomicfoundation/hardhat-toolbox": ^2.0.1
     "@nomiclabs/hardhat-ethers": ^2.2.2
     "@nomiclabs/hardhat-etherscan": ^3.1.5
-    "@openzeppelin/contracts": ^4.8.0
-    "@openzeppelin/contracts-upgradeable": ^4.8.0
+    "@openzeppelin/contracts": ^4.8.1
+    "@openzeppelin/contracts-upgradeable": ^4.8.1
     "@typechain/ethers-v5": ^10.2.0
     "@typechain/hardhat": ^6.1.5
     "@types/chai": ^4.3.4
@@ -5177,7 +5177,7 @@ __metadata:
     husky: ^8.0.3
     pinst: ^3.0.0
     postinstall: ^0.8.0
-    prettier: ^2.8.2
+    prettier: ^2.8.3
     prettier-plugin-solidity: ^1.1.1
     shx: ^0.3.4
     solidity-coverage: ^0.8.2
@@ -5410,12 +5410,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prettier@npm:^2.8.2":
-  version: 2.8.2
-  resolution: "prettier@npm:2.8.2"
+"prettier@npm:^2.8.3":
+  version: 2.8.3
+  resolution: "prettier@npm:2.8.3"
   bin:
     prettier: bin-prettier.js
-  checksum: 740c56c2128d587d656ea1dde9bc9c3503dfc94db4f3ac387259215eeb2e216680bdad9d18a0c9feecc6b42cfa188d6fa777df4c36c1d00cedd4199074fbfbd2
+  checksum: 92f2ceb522d454370e02082aa74ad27388672f7cee8975028b59517c069fe643bdc73e322675c8faf2ff173d7a626d1a6389f26b474000308e793aa25fff46e5
   languageName: node
   linkType: hard
 
