@@ -37,11 +37,15 @@ abstract contract SignableUpgradeable is
         string calldata name_,
         string calldata version_
     ) internal onlyInitializing {
-        __Signable_init_unchained();
-        __EIP712_init_unchained(name_, version_);
+        __Signable_init_unchained(name_, version_);
     }
 
-    function __Signable_init_unchained() internal onlyInitializing {}
+    function __Signable_init_unchained(
+        string memory name_,
+        string memory version_
+    ) internal onlyInitializing {
+        __EIP712_init_unchained(name_, version_);
+    }
 
     /**
      * @dev Verifies that the signer of the typed data is the given address
