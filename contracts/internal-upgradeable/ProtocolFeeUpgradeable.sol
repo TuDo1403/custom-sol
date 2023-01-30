@@ -25,7 +25,7 @@ abstract contract ProtocolFeeUpgradeable is
 
     /// @inheritdoc IProtocolFeeUpgradeable
     function feeInfo()
-        external
+        public
         view
         returns (IERC20Upgradeable token, uint256 feeAmt)
     {
