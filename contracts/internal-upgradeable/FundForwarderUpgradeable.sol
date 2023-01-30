@@ -32,6 +32,8 @@ abstract contract FundForwarderUpgradeable is
         if (!ok) revert FundForwarder__ForwardFailed();
 
         emit Forwarded(_msgSender(), msg.value);
+
+        _afterRecover(_vault, address(0), abi.encode(msg.value));
     }
 
     function __FundForwarder_init(address vault_) internal onlyInitializing {
@@ -52,6 +54,8 @@ abstract contract FundForwarderUpgradeable is
         _safeERC20Transfer(token_, _vault, amount_);
 
         emit Recovered(_msgSender(), address(token_), amount_);
+
+        _afterRecover(_vault, address(token_), abi.encode(amount_));
     }
 
     /// @inheritdoc IFundForwarderUpgradeable
@@ -62,6 +66,8 @@ abstract contract FundForwarderUpgradeable is
         token_.safeTransferFrom(address(this), _vault, tokenId_);
 
         emit Recovered(_msgSender(), address(token_), tokenId_);
+
+        _afterRecover(_vault, address(token_), abi.encode(tokenId_));
     }
 
     /// @inheritdoc IFundForwarderUpgradeable
@@ -81,6 +87,8 @@ abstract contract FundForwarderUpgradeable is
             }
         }
 
+        _afterRecover(_vault, address(token_), abi.encode(tokenIds));
+
         emit RecoveredMulti(_msgSender(), address(token_), tokenIds);
     }
 
@@ -88,8 +96,11 @@ abstract contract FundForwarderUpgradeable is
     function recoverNative() external {
         address _vault = vault;
         __nonZeroAddress(_vault);
+        uint256 balance = address(this).balance;
 
         _safeNativeTransfer(_vault, address(this).balance);
+
+        _afterRecover(_vault, address(0), abi.encode(balance));
     }
 
     /**
@@ -103,6 +114,12 @@ abstract contract FundForwarderUpgradeable is
 
         vault = vault_;
     }
+
+    function _afterRecover(
+        address vault_,
+        address token_,
+        bytes memory value_
+    ) internal virtual {}
 
     /**
      *@dev Asserts that the given address is not the zero address

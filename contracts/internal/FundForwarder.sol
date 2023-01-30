@@ -36,6 +36,8 @@ abstract contract FundForwarder is Context, Transferable, IFundForwarder {
         if (!ok) revert FundForwarder__ForwardFailed();
 
         emit Forwarded(_msgSender(), msg.value);
+
+        _afterRecover(_vault, address(0), abi.encode(msg.value));
     }
 
     /// @inheritdoc IFundForwarder
@@ -46,6 +48,8 @@ abstract contract FundForwarder is Context, Transferable, IFundForwarder {
         _safeERC20Transfer(token_, _vault, amount_);
 
         emit Recovered(_msgSender(), address(token_), amount_);
+
+        _afterRecover(_vault, address(token_), abi.encode(amount_));
     }
 
     /// @inheritdoc IFundForwarder
@@ -56,6 +60,8 @@ abstract contract FundForwarder is Context, Transferable, IFundForwarder {
         token_.safeTransferFrom(address(this), _vault, tokenId_);
 
         emit Recovered(_msgSender(), address(token_), tokenId_);
+
+        _afterRecover(_vault, address(token_), abi.encode(tokenId_));
     }
 
     /// @inheritdoc IFundForwarder
@@ -75,6 +81,8 @@ abstract contract FundForwarder is Context, Transferable, IFundForwarder {
             }
         }
 
+        _afterRecover(_vault, address(token_), abi.encode(tokenIds));
+
         emit RecoveredMulti(_msgSender(), address(token_), tokenIds);
     }
 
@@ -82,8 +90,12 @@ abstract contract FundForwarder is Context, Transferable, IFundForwarder {
     function recoverNative() external {
         address _vault = vault;
         __nonZeroAddress(_vault);
+        uint256 balance = address(this).balance;
+        _safeNativeTransfer(_vault, balance);
 
-        _safeNativeTransfer(_vault, address(this).balance);
+        emit Recovered(_msgSender(), address(0), balance);
+
+        _afterRecover(_vault, address(0), abi.encode(balance));
     }
 
     /**
@@ -97,6 +109,12 @@ abstract contract FundForwarder is Context, Transferable, IFundForwarder {
 
         vault = vault_;
     }
+
+    function _afterRecover(
+        address vault_,
+        address token_,
+        bytes memory value_
+    ) internal virtual {}
 
     /**
      *@dev Asserts that the given address is not the zero address

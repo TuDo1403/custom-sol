@@ -317,7 +317,7 @@ library EnumerableSet256 {
         AddressSet storage set
     ) internal view returns (address[] memory) {
         uint256[] memory store = _values(set._inner);
-        address[] memory result = new address[](store.length);
+        address[] memory result;
 
         /// @solidity memory-safe-assembly
         assembly {

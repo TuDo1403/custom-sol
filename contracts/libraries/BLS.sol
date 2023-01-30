@@ -54,7 +54,7 @@ library BLS {
     function verifySingle(
         uint256[2] memory signature,
         uint256[4] memory pubkey,
-        uint256[2] calldata message
+        uint256[2] memory message
     ) internal view returns (bool) {
         uint256[12] memory input = [
             signature[0],
