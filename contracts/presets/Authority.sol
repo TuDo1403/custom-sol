@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.17;
 
-import {ITreasury, Treasury} from "./Treasury.sol";
 import "../oz/security/Pausable.sol";
 import "../oz/access/AccessControlEnumerable.sol";
 
@@ -14,7 +13,7 @@ import "./interfaces/IAuthority.sol";
 
 import "../libraries/Roles.sol";
 
-contract Authority is
+abstract contract Authority is
     Pausable,
     IAuthority,
     ProxyChecker,
@@ -31,20 +30,7 @@ contract Authority is
         address admin_,
         address[] memory operators_,
         bytes32[] memory roles_
-    )
-        payable
-        Pausable()
-        FundForwarder(
-            _deploy(
-                address(this).balance,
-                keccak256(abi.encode(admin_, address(this), VERSION)),
-                abi.encodePacked(
-                    type(Treasury).creationCode,
-                    abi.encode(admin_, "GlobalTreasury")
-                )
-            )
-        )
-    {
+    ) payable Pausable() FundForwarder(_deployDefaultTreasury()) {
         _grantRole(Roles.PAUSER_ROLE, admin_);
         _grantRole(Roles.SIGNER_ROLE, admin_);
         _grantRole(DEFAULT_ADMIN_ROLE, admin_);
@@ -132,4 +118,6 @@ contract Authority is
 
         emit ProxyAccessGranted(origin, sender);
     }
+
+    function _deployDefaultTreasury() internal virtual returns (address);
 }

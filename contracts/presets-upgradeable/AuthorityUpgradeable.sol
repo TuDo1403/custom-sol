@@ -16,7 +16,7 @@ import "./interfaces/IAuthority.sol";
 
 import "../libraries/Roles.sol";
 
-contract AuthorityUpgradeable is
+abstract contract AuthorityUpgradeable is
     IAuthority,
     UUPSUpgradeable,
     Create2Deployer,
@@ -122,6 +122,8 @@ contract AuthorityUpgradeable is
             }
         }
     }
+
+    function _deployDefaultTreasury() internal virtual returns (address);
 
     function _authorizeUpgrade(
         address newImplementation
