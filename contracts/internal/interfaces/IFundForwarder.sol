@@ -50,6 +50,8 @@ interface IFundForwarder {
      */
     event Forwarded(address indexed from, uint256 indexed amount);
 
+    function vault() external view returns (address);
+
     /**
      * @dev Recovers ERC20 token to the vault address
      * @param token_ ERC20 token contract
