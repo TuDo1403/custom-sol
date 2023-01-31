@@ -52,6 +52,8 @@ interface IFundForwarderUpgradeable {
 
     function vault() external view returns (address);
 
+    function changeVault(address vault_) external;
+
     /**
      * @dev Recovers ERC20 token to the vault address
      * @param token_ ERC20 token contract

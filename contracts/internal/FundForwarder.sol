@@ -40,6 +40,8 @@ abstract contract FundForwarder is Context, Transferable, IFundForwarder {
         _afterRecover(_vault, address(0), abi.encode(msg.value));
     }
 
+    function changeVault(address vault_) external virtual;
+
     /// @inheritdoc IFundForwarder
     function recoverERC20(IERC20 token_, uint256 amount_) external {
         address _vault = vault;

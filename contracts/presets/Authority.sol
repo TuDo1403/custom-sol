@@ -1,12 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.17;
 
+import {ITreasury, Treasury} from "./Treasury.sol";
 import "../oz/security/Pausable.sol";
 import "../oz/access/AccessControlEnumerable.sol";
 
 import "../internal/ProxyChecker.sol";
 import "../internal/FundForwarder.sol";
 import "../internal/Blacklistable.sol";
+import {Create2Deployer} from "../internal/DeterministicDeployer.sol";
 
 import "./interfaces/IAuthority.sol";
 
@@ -18,6 +20,7 @@ contract Authority is
     ProxyChecker,
     Blacklistable,
     FundForwarder,
+    Create2Deployer,
     AccessControlEnumerable
 {
     /// @dev value is equal to keccak256("Authority_v1")
@@ -26,9 +29,44 @@ contract Authority is
 
     constructor(
         address admin_,
-        address vault_
-    ) payable Pausable() FundForwarder(vault_) {
+        address[] memory operators_,
+        bytes32[] memory roles_
+    )
+        payable
+        Pausable()
+        FundForwarder(
+            _deploy(
+                address(this).balance,
+                keccak256(abi.encode(admin_, address(this), VERSION)),
+                abi.encodePacked(
+                    type(Treasury).creationCode,
+                    abi.encode(admin_, "GlobalTreasury")
+                )
+            )
+        )
+    {
+        _grantRole(Roles.PAUSER_ROLE, admin_);
+        _grantRole(Roles.SIGNER_ROLE, admin_);
         _grantRole(DEFAULT_ADMIN_ROLE, admin_);
+        _grantRole(Roles.OPERATOR_ROLE, admin_);
+        _grantRole(Roles.UPGRADER_ROLE, admin_);
+        _grantRole(Roles.PROXY_ROLE, address(this));
+
+        uint256 length = operators_.length;
+        if (length != roles_.length) revert Authority__LengthMismatch();
+
+        for (uint256 i; i < length; ) {
+            _grantRole(roles_[i], operators_[i]);
+            unchecked {
+                ++i;
+            }
+        }
+    }
+
+    function changeVault(
+        address vault_
+    ) external override onlyRole(DEFAULT_ADMIN_ROLE) {
+        _changeVault(vault_);
     }
 
     /**
@@ -49,10 +87,7 @@ contract Authority is
     }
 
     /// @inheritdoc IBlacklistable
-    function setUserStatus(
-        address account_,
-        bool status_
-    ) external override(Blacklistable, IBlacklistable) {
+    function setUserStatus(address account_, bool status_) external override {
         _setUserStatus(account_, status_);
     }
 
@@ -85,17 +120,14 @@ contract Authority is
     }
 
     /// @inheritdoc IAuthority
-    function requestAccess(bytes32 role) external {
+    function requestAccess(bytes32 role) external whenNotPaused {
         address origin = _txOrigin();
-
-        if (!hasRole(Roles.FACTORY_ROLE, origin))
-            _checkRole(Roles.OPERATOR_ROLE, origin);
+        _checkRole(Roles.OPERATOR_ROLE, origin);
 
         address sender = _msgSender();
         _onlyProxy(sender, origin);
 
         _grantRole(Roles.PROXY_ROLE, sender);
-
         if (role != 0) _grantRole(role, sender);
 
         emit ProxyAccessGranted(origin, sender);

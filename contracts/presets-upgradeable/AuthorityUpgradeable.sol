@@ -30,6 +30,12 @@ contract AuthorityUpgradeable is
     bytes32 public constant VERSION =
         0x095dd5e04e0f3f5bce98e4ee904d9f7209827187c4201f036596b2f7fdd602e7;
 
+    function changeVault(
+        address vault_
+    ) external override onlyRole(DEFAULT_ADMIN_ROLE) {
+        _changeVault(vault_);
+    }
+
     function setRoleAdmin(
         bytes32 role_,
         bytes32 adminRole_

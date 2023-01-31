@@ -50,6 +50,8 @@ interface IFundForwarder {
      */
     event Forwarded(address indexed from, uint256 indexed amount);
 
+    function changeVault(address vault_) external;
+
     function vault() external view returns (address);
 
     /**

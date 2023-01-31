@@ -4,7 +4,8 @@ pragma solidity ^0.8.17;
 import "../../oz/utils/Context.sol";
 
 import "./interfaces/IManager.sol";
-import {IBlacklistable, IAccessControl} from "../interfaces/IAuthority.sol";
+import "../../oz/access/IAccessControl.sol";
+import "../../internal/interfaces/IBlacklistable.sol";
 
 import "../../libraries/Roles.sol";
 

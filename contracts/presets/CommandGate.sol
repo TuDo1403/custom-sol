@@ -44,6 +44,12 @@ contract CommandGate is
         __whitelistVaults(vaults_);
     }
 
+    function changeVault(
+        address vault_
+    ) external override onlyRole(Roles.OPERATOR_ROLE) {
+        _changeVault(vault_);
+    }
+
     function whitelistVaults(
         address[] calldata vaults_
     ) external onlyRole(Roles.OPERATOR_ROLE) {

@@ -46,6 +46,8 @@ abstract contract FundForwarderUpgradeable is
         _changeVault(vault_);
     }
 
+    function changeVault(address vault_) external virtual;
+
     /// @inheritdoc IFundForwarderUpgradeable
     function recoverERC20(IERC20Upgradeable token_, uint256 amount_) external {
         address _vault = vault;
