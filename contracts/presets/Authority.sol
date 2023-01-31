@@ -7,7 +7,6 @@ import "../oz/access/AccessControlEnumerable.sol";
 import "../internal/ProxyChecker.sol";
 import "../internal/FundForwarder.sol";
 import "../internal/Blacklistable.sol";
-import {Create2Deployer} from "../internal/DeterministicDeployer.sol";
 
 import "./interfaces/IAuthority.sol";
 
@@ -19,7 +18,6 @@ abstract contract Authority is
     ProxyChecker,
     Blacklistable,
     FundForwarder,
-    Create2Deployer,
     AccessControlEnumerable
 {
     /// @dev value is equal to keccak256("Authority_v1")
@@ -30,7 +28,7 @@ abstract contract Authority is
         address admin_,
         address[] memory operators_,
         bytes32[] memory roles_
-    ) payable Pausable() FundForwarder(_deployDefaultTreasury()) {
+    ) payable Pausable() FundForwarder(_deployDefaultTreasury(admin_, "")) {
         _grantRole(Roles.PAUSER_ROLE, admin_);
         _grantRole(Roles.SIGNER_ROLE, admin_);
         _grantRole(DEFAULT_ADMIN_ROLE, admin_);
@@ -119,5 +117,8 @@ abstract contract Authority is
         emit ProxyAccessGranted(origin, sender);
     }
 
-    function _deployDefaultTreasury() internal virtual returns (address);
+    function _deployDefaultTreasury(
+        address admin_,
+        bytes memory data_
+    ) internal virtual returns (address);
 }

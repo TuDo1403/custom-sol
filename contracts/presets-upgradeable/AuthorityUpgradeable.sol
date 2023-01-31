@@ -10,7 +10,6 @@ import "../oz-upgradeable/access/AccessControlEnumerableUpgradeable.sol";
 import "../internal-upgradeable/ProxyCheckerUpgradeable.sol";
 import "../internal-upgradeable/FundForwarderUpgradeable.sol";
 import "../internal-upgradeable/BlacklistableUpgradeable.sol";
-import {Create2Deployer} from "../internal/DeterministicDeployer.sol";
 
 import "./interfaces/IAuthority.sol";
 
@@ -19,7 +18,6 @@ import "../libraries/Roles.sol";
 abstract contract AuthorityUpgradeable is
     IAuthority,
     UUPSUpgradeable,
-    Create2Deployer,
     PausableUpgradeable,
     ProxyCheckerUpgradeable,
     FundForwarderUpgradeable,
@@ -84,20 +82,10 @@ abstract contract AuthorityUpgradeable is
         address admin_,
         address[] calldata operators_,
         bytes32[] calldata roles_
-    ) internal onlyInitializing {
+    ) internal virtual onlyInitializing {
         __Pausable_init_unchained();
         __Authority_init_unchained(admin_, operators_, roles_);
-
-        __FundForwarder_init_unchained(
-            _deploy(
-                address(this).balance,
-                keccak256(abi.encode(admin_, address(this), VERSION)),
-                abi.encodePacked(
-                    type(Treasury).creationCode,
-                    abi.encode(admin_, "GlobalTreasury")
-                )
-            )
-        );
+        __FundForwarder_init_unchained(_deployDefaultTreasury(admin_, ""));
     }
 
     function __Authority_init_unchained(
@@ -123,7 +111,10 @@ abstract contract AuthorityUpgradeable is
         }
     }
 
-    function _deployDefaultTreasury() internal virtual returns (address);
+    function _deployDefaultTreasury(
+        address admin_,
+        bytes memory data_
+    ) internal virtual returns (address);
 
     function _authorizeUpgrade(
         address newImplementation
