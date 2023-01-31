@@ -52,6 +52,7 @@ contract Treasury is
         string memory name_
     )
         payable
+        onlyProxy
         Signable(name_, "1")
         Manager(
             address(admin_) == address(0) ? IAuthority(_msgSender()) : admin_,

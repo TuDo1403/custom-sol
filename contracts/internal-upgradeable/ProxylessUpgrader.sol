@@ -29,8 +29,8 @@ abstract contract ProxylessUpgrader is
         uint256 amount_,
         bytes32 salt_,
         bytes memory bytecode_
-    ) internal override {
-        address _instance = ProxyCreator.deploy(salt_, bytecode_, amount_);
+    ) internal override returns (address _instance) {
+        _instance = ProxyCreator.deploy(salt_, bytecode_, amount_);
 
         instance = IKillable(_instance);
 

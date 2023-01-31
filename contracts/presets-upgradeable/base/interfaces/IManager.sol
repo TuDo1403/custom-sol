@@ -1,11 +1,9 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import {
-    IAuthorityUpgradeable
-} from "../../interfaces/IAuthorityUpgradeable.sol";
+import {IAuthority} from "../../interfaces/IAuthority.sol";
 
-interface IManagerUpgradeable {
+interface IManager {
     error Manager__Paused();
     error Manager__NotPaused();
     error Manager__AlreadySet();
@@ -16,8 +14,8 @@ interface IManagerUpgradeable {
 
     event AuthorityUpdated(
         address indexed operator,
-        IAuthorityUpgradeable indexed from,
-        IAuthorityUpgradeable indexed to
+        IAuthority indexed from,
+        IAuthority indexed to
     );
     event RequestRoleCached(address indexed operator, bytes32 indexed role);
 
@@ -28,14 +26,11 @@ interface IManagerUpgradeable {
      * @custom:throws Manager__AlreadySet if the new authority is the same as the current authority.
      * @custom:throws Manager__RequestFailed if the request to the new authority contract fails.
      */
-    function updateAuthority(IAuthorityUpgradeable authority_) external;
+    function updateAuthority(IAuthority authority_) external;
 
     /**
      * @notice Returns the authority contract of this contract.
      * @return authority_ is The address of the authority contract.
      */
-    function authority()
-        external
-        view
-        returns (IAuthorityUpgradeable authority_);
+    function authority() external view returns (IAuthority authority_);
 }

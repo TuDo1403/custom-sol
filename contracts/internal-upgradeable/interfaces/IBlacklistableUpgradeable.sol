@@ -2,8 +2,11 @@
 pragma solidity ^0.8.17;
 
 interface IBlacklistableUpgradeable {
-    event Blacklisted(address indexed account);
-    event Whitelisted(address indexed account);
+    event UserStatusSet(
+        address indexed operator,
+        address indexed account,
+        bool indexed isBlacklisted
+    );
 
     /**
      * @dev Set the status of an account to either blacklisted or not blacklisted.

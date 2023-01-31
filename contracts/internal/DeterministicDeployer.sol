@@ -17,7 +17,7 @@ abstract contract DeterministicDeployer {
         uint256 amount_,
         bytes32 salt_,
         bytes memory bytecode_
-    ) internal virtual;
+    ) internal virtual returns (address instance);
 }
 
 abstract contract Create2Deployer is DeterministicDeployer {
@@ -33,8 +33,8 @@ abstract contract Create2Deployer is DeterministicDeployer {
         uint256 amount_,
         bytes32 salt_,
         bytes memory bytecode_
-    ) internal override {
-        address instance = Create2.deploy(amount_, salt_, bytecode_);
+    ) internal override returns (address instance) {
+        instance = Create2.deploy(amount_, salt_, bytecode_);
 
         emit Deployed(
             instance,
@@ -57,8 +57,8 @@ abstract contract Create3Deployer is DeterministicDeployer {
         uint256 amount_,
         bytes32 salt_,
         bytes memory bytecode_
-    ) internal override {
-        address instance = Create3.deploy(salt_, bytecode_, amount_);
+    ) internal override returns (address instance) {
+        instance = Create3.deploy(salt_, bytecode_, amount_);
 
         emit Deployed(
             instance,

@@ -15,6 +15,11 @@ error ProxyChecker__ProxyUnallowed();
  * @dev Abstract contract for checking if a call was made by a proxy contract or an externally owned account.
  */
 abstract contract ProxyChecker {
+    modifier onlyProxy() {
+        _onlyProxy(msg.sender);
+        _;
+    }
+
     /**
      * @dev Modifier to allow a function to be called only by an externally owned account
      */

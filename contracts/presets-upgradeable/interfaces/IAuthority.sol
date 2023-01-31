@@ -1,15 +1,9 @@
-//SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "../../oz-upgradeable/access/IAccessControlEnumerableUpgradeable.sol";
-
-import "../../internal-upgradeable/interfaces/IBlacklistableUpgradeable.sol";
-
-interface IAuthorityUpgradeable is
-    IBlacklistableUpgradeable,
-    IAccessControlEnumerableUpgradeable
-{
+interface IAuthority {
     error Authority__InvalidRole();
+    error Authority__LengthMismatch();
 
     event ProxyAccessGranted(address indexed operator, address indexed proxy);
 

@@ -30,14 +30,14 @@ abstract contract Withdrawable is Context, Transferable, IWithdrawable {
         );
     }
 
-    function notifyERCTransfer(
+    function notifyERC20Transfer(
         address token_,
-        bytes calldata value_,
+        uint256 value_,
         bytes calldata data_
     ) external virtual returns (bytes4) {
-        emit Received(_msgSender(), address(token_), value_, data_);
+        emit Received(_msgSender(), address(token_), abi.encode(value_), data_);
 
-        return IWithdrawable.notifyERCTransfer.selector;
+        return IWithdrawable.notifyERC20Transfer.selector;
     }
 
     /// @inheritdoc IWithdrawable

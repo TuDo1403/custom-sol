@@ -1,21 +1,15 @@
-//SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "../../oz-upgradeable/utils/ContextUpgradeable.sol";
-import "../../oz-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import "../../oz/utils/Context.sol";
 
 import "./interfaces/IManager.sol";
-
-import "../../oz-upgradeable/access/IAccessControlUpgradeable.sol";
-import "../../internal-upgradeable/interfaces/IBlacklistableUpgradeable.sol";
+import "../../oz/access/IAccessControl.sol";
+import "../../internal/interfaces/IBlacklistable.sol";
 
 import "../../libraries/Roles.sol";
 
-abstract contract ManagerUpgradeable is
-    IManager,
-    UUPSUpgradeable,
-    ContextUpgradeable
-{
+abstract contract Manager is Context, IManager {
     bytes32 private __authority;
     bytes32 private __requestedRole;
 
@@ -39,17 +33,7 @@ abstract contract ManagerUpgradeable is
         _;
     }
 
-    function __Manager_init(
-        IAuthority authority_,
-        bytes32 role_
-    ) internal onlyInitializing {
-        __Manager_init_unchained(authority_, role_);
-    }
-
-    function __Manager_init_unchained(
-        IAuthority authority_,
-        bytes32 role_
-    ) internal onlyInitializing {
+    constructor(IAuthority authority_, bytes32 role_) payable {
         assembly {
             sstore(__requestedRole.slot, role_)
         }
@@ -108,7 +92,7 @@ abstract contract ManagerUpgradeable is
      */
     function _checkBlacklist(address account_) internal view {
         (bool ok, ) = _authority().staticcall(
-            abi.encodeCall(IBlacklistableUpgradeable.isBlacklisted, (account_))
+            abi.encodeCall(IBlacklistable.isBlacklisted, (account_))
         );
         if (ok) revert Manager__Blacklisted();
     }
@@ -150,13 +134,7 @@ abstract contract ManagerUpgradeable is
         address account_
     ) internal view returns (bool ok) {
         (ok, ) = _authority().staticcall(
-            abi.encodeCall(IAccessControlUpgradeable.hasRole, (role_, account_))
+            abi.encodeCall(IAccessControl.hasRole, (role_, account_))
         );
     }
-
-    function _authorizeUpgrade(
-        address implement_
-    ) internal override onlyRole(Roles.UPGRADER_ROLE) {}
-
-    uint256[48] private __gap;
 }

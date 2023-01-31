@@ -18,9 +18,9 @@ interface IWithdrawable {
         bytes data
     );
 
-    function notifyERCTransfer(
+    function notifyERC20Transfer(
         address token_,
-        bytes calldata value_,
+        uint256 value_,
         bytes calldata data_
     ) external returns (bytes4);
 

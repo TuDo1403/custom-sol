@@ -73,6 +73,7 @@
     "verify:tomoTest": "hardhat verify --network tomoTest"
   },
   "devDependencies": {
+    "@chainlink/contracts": "^0.6.0",
     "dotenv": "^16.0.3",
     "shx": "^0.3.4",
     "solmate": "^6.6.1",

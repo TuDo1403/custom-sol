@@ -42,6 +42,7 @@ abstract contract BlacklistableUpgradeable is
      */
     function _setUserStatus(address account_, bool status_) internal {
         __blacklisted.setTo(account_.fillLast96Bits(), status_);
+        emit UserStatusSet(_msgSender(), account_, status_);
     }
 
     uint256[49] private __gap;
