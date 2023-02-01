@@ -130,6 +130,10 @@ abstract contract FundForwarderUpgradeable is
         }
     }
 
+    function safeRecoverHeader() public pure virtual returns (bytes memory);
+
+    function safeTransferHeader() public pure virtual returns (bytes memory);
+
     function _afterRecover(
         address vault_,
         address token_,
