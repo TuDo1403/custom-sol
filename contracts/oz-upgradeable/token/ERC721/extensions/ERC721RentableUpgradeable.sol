@@ -27,13 +27,22 @@ abstract contract ERC721RentableUpgradeable is
         if (!_isApprovedOrOwner(_msgSender(), tokenId))
             revert Rentable__OnlyOwnerOrApproved();
 
-        UserInfo memory info = _users[tokenId];
+        bytes32 infoKey;
+        UserInfo memory info;
+        assembly {
+            mstore(0, tokenId)
+            mstore(32, _users.slot)
+            infoKey := keccak256(0, 64)
+            info := sload(infoKey)
+        }
         info.user = user;
         unchecked {
             info.expires = (block.timestamp + expires).toUint96();
         }
 
-        _users[tokenId] = info;
+        assembly {
+            sstore(infoKey, info)
+        }
 
         emit UserUpdated(tokenId, user, expires);
     }
@@ -66,10 +75,20 @@ abstract contract ERC721RentableUpgradeable is
     ) internal virtual override {
         super._beforeTokenTransfer(from, to, tokenId);
 
-        UserInfo memory info = _users[tokenId];
+        bytes32 infoKey;
+        UserInfo memory info;
+        assembly {
+            mstore(0, tokenId)
+            mstore(32, _users.slot)
+            infoKey := keccak256(0, 64)
+            info := sload(infoKey)
+        }
+
         if (block.timestamp < info.expires) revert Rentable__NotValidTransfer();
         if (from != to && info.user != address(0)) {
-            delete _users[tokenId];
+            assembly {
+                sstore(infoKey, 0)
+            }
 
             emit UserUpdated(tokenId, address(0), 0);
         }

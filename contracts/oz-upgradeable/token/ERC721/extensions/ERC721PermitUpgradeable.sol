@@ -19,8 +19,8 @@ abstract contract ERC721PermitUpgradeable is
         string calldata name_,
         string calldata symbol_
     ) internal onlyInitializing {
-        __ERC721_init_unchained(name_, symbol_);
         __EIP712_init_unchained(name_, "1");
+        __ERC721_init_unchained(name_, symbol_);
     }
 
     function __ERC721Permit_init_unchained() internal onlyInitializing {}

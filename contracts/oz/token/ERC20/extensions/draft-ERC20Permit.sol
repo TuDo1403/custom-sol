@@ -71,7 +71,7 @@ abstract contract ERC20Permit is ERC20, IERC20Permit, Signable {
             s
         );
 
-        _allowance[owner.fillLast12Bytes()][spender.fillLast12Bytes()] = value;
+        _allowance[owner][spender] = value;
     }
 
     /**

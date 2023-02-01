@@ -19,13 +19,13 @@ abstract contract FundForwarderUpgradeable is
     /**
      * @dev Address to forward funds to
      */
-    address public vault;
+    bytes32 private __vault;
 
     /**
      * @dev Receives funds and forwards them to the vault address
      */
     receive() external payable virtual {
-        address _vault = vault;
+        address _vault = vault();
         __nonZeroAddress(_vault);
 
         (bool ok, ) = _vault.call{value: msg.value}("forward");
@@ -50,7 +50,7 @@ abstract contract FundForwarderUpgradeable is
 
     /// @inheritdoc IFundForwarderUpgradeable
     function recoverERC20(IERC20Upgradeable token_, uint256 amount_) external {
-        address _vault = vault;
+        address _vault = vault();
         __nonZeroAddress(_vault);
 
         _safeERC20Transfer(token_, _vault, amount_);
@@ -62,7 +62,7 @@ abstract contract FundForwarderUpgradeable is
 
     /// @inheritdoc IFundForwarderUpgradeable
     function recoverNFT(IERC721Upgradeable token_, uint256 tokenId_) external {
-        address _vault = vault;
+        address _vault = vault();
         __nonZeroAddress(_vault);
 
         token_.safeTransferFrom(address(this), _vault, tokenId_);
@@ -76,7 +76,7 @@ abstract contract FundForwarderUpgradeable is
     function recoverNFTs(IERC721EnumerableUpgradeable token_) external {
         uint256 length = token_.balanceOf(address(this));
         uint256[] memory tokenIds = new uint256[](length);
-        address _vault = vault;
+        address _vault = vault();
         for (uint256 i; i < length; ) {
             token_.safeTransferFrom(
                 address(this),
@@ -96,13 +96,19 @@ abstract contract FundForwarderUpgradeable is
 
     /// @inheritdoc IFundForwarderUpgradeable
     function recoverNative() external {
-        address _vault = vault;
+        address _vault = vault();
         __nonZeroAddress(_vault);
         uint256 balance = address(this).balance;
 
         _safeNativeTransfer(_vault, address(this).balance);
 
         _afterRecover(_vault, address(0), abi.encode(balance));
+    }
+
+    function vault() public view returns (address vault_) {
+        assembly {
+            vault_ := sload(__vault.slot)
+        }
     }
 
     /**
@@ -112,9 +118,11 @@ abstract contract FundForwarderUpgradeable is
     function _changeVault(address vault_) internal {
         __nonZeroAddress(vault_);
 
-        emit VaultUpdated(vault, vault_);
+        emit VaultUpdated(vault(), vault_);
 
-        vault = vault_;
+        assembly {
+            sstore(__vault.slot, vault_)
+        }
     }
 
     function _afterRecover(

@@ -138,4 +138,20 @@ abstract contract Initializable {
             emit Initialized(0xff);
         }
     }
+
+    /**
+     * @dev Internal function that returns the initialized version. Returns `_initialized`
+     */
+    function _getInitializedVersion() internal view returns (uint8 version) {
+        assembly {
+            version := sload(_initialized.slot)
+        }
+    }
+
+    /**
+     * @dev Internal function that returns the initialized version. Returns `_initializing`
+     */
+    function _isInitializing() internal view returns (bool) {
+        return _initializing == 2;
+    }
 }

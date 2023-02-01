@@ -3,8 +3,6 @@ pragma solidity ^0.8.17;
 
 import "../oz/proxy/Clones.sol";
 
-//import {ModuleIdentity} from "./Internal.sol";
-
 import "./interfaces/ICloner.sol";
 
 import "../libraries/Bytes32Address.sol";

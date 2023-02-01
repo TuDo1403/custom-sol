@@ -23,8 +23,11 @@ library ERC165Checker {
         // Any contract that implements ERC165 must explicitly indicate support of
         // InterfaceId_ERC165 and explicitly indicate non-support of InterfaceId_Invalid
         return
-            _supportsERC165Interface(account, type(IERC165).interfaceId) &&
-            !_supportsERC165Interface(account, _INTERFACE_ID_INVALID);
+            supportsERC165InterfaceUnchecked(
+                account,
+                type(IERC165).interfaceId
+            ) &&
+            !supportsERC165InterfaceUnchecked(account, _INTERFACE_ID_INVALID);
     }
 
     /**
@@ -40,7 +43,7 @@ library ERC165Checker {
         // query support of both ERC165 as per the spec and support of _interfaceId
         return
             supportsERC165(account) &&
-            _supportsERC165Interface(account, interfaceId);
+            supportsERC165InterfaceUnchecked(account, interfaceId);
     }
 
     /**
@@ -56,22 +59,25 @@ library ERC165Checker {
     function getSupportedInterfaces(
         address account,
         bytes4[] memory interfaceIds
-    ) internal view returns (bool[] memory) {
+    ) internal view returns (bool[] memory interfaceIdsSupported) {
+        uint256 length = interfaceIds.length;
+
         // an array of booleans corresponding to interfaceIds and whether they're supported or not
-        bool[] memory interfaceIdsSupported = new bool[](interfaceIds.length);
+        interfaceIdsSupported = new bool[](length);
 
         // query support of ERC165 itself
         if (supportsERC165(account)) {
             // query support of each interface in interfaceIds
-            for (uint256 i = 0; i < interfaceIds.length; i++) {
-                interfaceIdsSupported[i] = _supportsERC165Interface(
+            for (uint256 i; i < length; ) {
+                interfaceIdsSupported[i] = supportsERC165InterfaceUnchecked(
                     account,
                     interfaceIds[i]
                 );
+                unchecked {
+                    ++i;
+                }
             }
         }
-
-        return interfaceIdsSupported;
     }
 
     /**
@@ -88,14 +94,16 @@ library ERC165Checker {
         bytes4[] memory interfaceIds
     ) internal view returns (bool) {
         // query support of ERC165 itself
-        if (!supportsERC165(account)) {
-            return false;
-        }
+        if (!supportsERC165(account)) return false;
 
+        uint256 length = interfaceIds.length;
         // query support of each interface in _interfaceIds
-        for (uint256 i = 0; i < interfaceIds.length; i++) {
-            if (!_supportsERC165Interface(account, interfaceIds[i])) {
+        for (uint256 i; i < length; ) {
+            if (!supportsERC165InterfaceUnchecked(account, interfaceIds[i]))
                 return false;
+
+            unchecked {
+                ++i;
             }
         }
 
@@ -114,16 +122,12 @@ library ERC165Checker {
      * with {supportsERC165}.
      * Interface identification is specified in ERC-165.
      */
-    function _supportsERC165Interface(
+    function supportsERC165InterfaceUnchecked(
         address account,
         bytes4 interfaceId
-    ) private view returns (bool) {
-        bytes memory encodedParams = abi.encodeCall(
-            IERC165.supportsInterface,
-            (interfaceId)
-        );
-        (bool success, bytes memory result) = account.staticcall{gas: 30_000}(
-            encodedParams
+    ) internal view returns (bool) {
+        (bool success, bytes memory result) = account.staticcall{gas: 30000}(
+            abi.encodeCall(IERC165.supportsInterface, (interfaceId))
         );
         if (result.length < 32) return false;
         return success && abi.decode(result, (bool));

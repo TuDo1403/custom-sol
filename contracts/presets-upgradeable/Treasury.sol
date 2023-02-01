@@ -69,15 +69,12 @@ contract Treasury is
 
     fallback() external payable virtual override {
         if (msg.value == 0) revert Treasury__InvalidFunctionCall();
-
-        safeReceivedNativeBalance += msg.value;
-
         _checkMesage(msg.data);
-
         address operator = _msgSender();
         _checkBlacklist(operator);
-
         emit Received(operator, address(0), abi.encode(msg.value), msg.data);
+
+        safeReceivedNativeBalance += msg.value;
     }
 
     function onERC1155Received(
@@ -111,6 +108,8 @@ contract Treasury is
         uint256[] calldata values_,
         bytes calldata data_
     ) external returns (bytes4) {
+        uint256 length = ids_.length;
+        if (length != values_.length) revert Treasury__LengthMismatch();
         _checkMesage(data_);
 
         address token = _msgSender();
@@ -118,10 +117,26 @@ contract Treasury is
         _checkBlacklist(operator_);
         __checkInterface(token, type(IERC1155).interfaceId);
 
-        uint256 length = ids_.length;
-        if (length != values_.length) revert Treasury__LengthMismatch();
+        assembly {
+            mstore(0, token)
+            mstore(32, erc1155Balances.slot)
+            mstore(32, keccak256(0, 64))
+        }
+
+        bytes32 key;
         for (uint256 i; i < length; ) {
-            erc1155Balances[token][ids_[i]] += values_[i];
+            assembly {
+                let idx := shl(i, 5)
+                mstore(0, calldataload(add(add(ids_.offset, 0x20), idx)))
+                key := keccak256(0, 64)
+                sstore(
+                    key,
+                    add(
+                        sload(key),
+                        calldataload(add(add(values_.offset, 0x20), idx))
+                    )
+                )
+            }
             unchecked {
                 ++i;
             }
@@ -183,9 +198,10 @@ contract Treasury is
         uint256 deadline_,
         bytes calldata signature_
     ) external onlyEOA whenNotPaused {
+        if (block.timestamp > deadline_) revert Treasury__Expired();
+
         _checkBlacklist(to_);
 
-        if (block.timestamp > deadline_) revert Treasury__Expired();
         if (
             !_hasRole(
                 Roles.SIGNER_ROLE,
@@ -216,6 +232,10 @@ contract Treasury is
         bytes calldata data_
     ) external virtual override onlyRole(Roles.TREASURER_ROLE) {
         _withdraw(token_, to_, value_, data_);
+    }
+
+    function nonces(address account_) external view returns (uint256) {
+        return _nonces[account_.fillLast12Bytes()];
     }
 
     function ownerOf(

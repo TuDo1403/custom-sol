@@ -11,8 +11,6 @@ import "../ERC20.sol";
  * recognized off-chain (via event analysis).
  */
 abstract contract ERC20Burnable is ERC20 {
-    using Bytes32Address for address;
-
     /**
      * @dev Destroys `amount` tokens from the caller.
      *
@@ -34,11 +32,7 @@ abstract contract ERC20Burnable is ERC20 {
      * `amount`.
      */
     function burnFrom(address account, uint256 amount) public virtual {
-        _spendAllowance(
-            account.fillLast12Bytes(),
-            _msgSender().fillLast12Bytes(),
-            amount
-        );
+        _spendAllowance(account, _msgSender(), amount);
         _burn(account, amount);
     }
 }

@@ -50,8 +50,8 @@ abstract contract EIP712Upgradeable is Initializable {
      * contract upgrade].
      */
     function __EIP712_init(
-        string memory name,
-        string memory version
+        string calldata name,
+        string calldata version
     ) internal onlyInitializing {
         __EIP712_init_unchained(name, version);
     }

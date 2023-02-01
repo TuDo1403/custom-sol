@@ -141,21 +141,45 @@ abstract contract ERC721EnumerableUpgradeable is
         // To prevent a gap in from's tokens array, we store the last token in the index of the token to delete, and
         // then delete the last slot (swap and pop).
 
-        uint256 lastTokenIndex = balanceOf(from) - 1;
-        uint256 tokenIndex = _ownedTokensIndex[tokenId];
+        bytes32 tokenIndexKey;
+        uint256 tokenIndex;
+        assembly {
+            mstore(0, tokenId)
+            mstore(32, _ownedTokensIndex.slot)
+            tokenIndexKey := keccak256(0, 64)
+            tokenIndex := sload(tokenIndexKey)
+        }
 
-        bytes32 _from = from.fillLast12Bytes();
+        bytes32 lastTokenIdKey;
+        uint256 lastTokenIndex = balanceOf(from) - 1;
+        assembly {
+            mstore(0, from)
+            mstore(32, _ownedTokens.slot)
+            mstore(32, keccak256(0, 64))
+            mstore(0, lastTokenIndex)
+
+            lastTokenIdKey := keccak256(0, 64)
+        }
         // When the token to delete is the last token, the swap operation is unnecessary
         if (tokenIndex != lastTokenIndex) {
-            uint256 lastTokenId = _ownedTokens[_from][lastTokenIndex];
+            //uint256 lastTokenId;
+            assembly {
+                let lastTokenId := sload(lastTokenIdKey)
+                mstore(0, tokenIndex)
+                sstore(keccak256(0, 64), lastTokenId)
 
-            _ownedTokens[_from][tokenIndex] = lastTokenId; // Move the last token to the slot of the to-delete token
-            _ownedTokensIndex[lastTokenId] = tokenIndex; // Update the moved token's index
+                mstore(0, lastTokenId)
+                mstore(32, _ownedTokensIndex.slot)
+            }
+            //_ownedTokensIndex[lastTokenId] = tokenIndex; // Update the moved token's index
         }
 
         // This also deletes the contents at the last position of the array
-        delete _ownedTokensIndex[tokenId];
-        delete _ownedTokens[_from][lastTokenIndex];
+
+        assembly {
+            sstore(tokenIndexKey, 0)
+            sstore(lastTokenIdKey, 0)
+        }
     }
 
     /**
@@ -167,7 +191,14 @@ abstract contract ERC721EnumerableUpgradeable is
         // To prevent a gap in the tokens array, we store the last token in the index of the token to delete, and
         // then delete the last slot (swap and pop).
 
-        uint256 tokenIndex = _allTokensIndex[tokenId];
+        bytes32 tokenIndexKey;
+        uint256 tokenIndex;
+        assembly {
+            mstore(0, tokenId)
+            mstore(32, _allTokensIndex.slot)
+            tokenIndexKey := keccak256(0, 64)
+            tokenIndex := sload(tokenIndexKey)
+        }
 
         // When the token to delete is the last token, the swap operation is unnecessary. However, since this occurs so
         // rarely (when the last minted token is burnt) that we still do the swap here to avoid the gas cost of adding
@@ -175,10 +206,15 @@ abstract contract ERC721EnumerableUpgradeable is
         uint256 lastTokenId = _allTokens[_allTokens.length - 1];
 
         _allTokens[tokenIndex] = lastTokenId; // Move the last token to the slot of the to-delete token
-        _allTokensIndex[lastTokenId] = tokenIndex; // Update the moved token's index
 
         // This also deletes the contents at the last position of the array
-        delete _allTokensIndex[tokenId];
+        assembly {
+            mstore(0, lastTokenId)
+            sstore(keccak256(0, 64), tokenIndex)
+
+            sstore(tokenIndexKey, 0)
+        }
+
         _allTokens.pop();
     }
 

@@ -42,13 +42,13 @@ abstract contract ERC20PermitUpgradeable is
      *
      * It's a good idea to use the same `name` that is defined as the ERC20 token name.
      */
-    function __ERC20Permit_init(string memory name_) internal onlyInitializing {
+    function __ERC20Permit_init(
+        string calldata name_
+    ) internal onlyInitializing {
         __EIP712_init_unchained(name_, "1");
     }
 
-    function __ERC20Permit_init_unchained(
-        string memory
-    ) internal onlyInitializing {}
+    function __ERC20Permit_init_unchained() internal onlyInitializing {}
 
     /**
      * @dev See {IERC20Permit-permit}.
@@ -81,7 +81,7 @@ abstract contract ERC20PermitUpgradeable is
             s
         );
 
-        _allowance[owner.fillLast12Bytes()][spender.fillLast12Bytes()] = value;
+        _allowance[owner][spender] = value;
     }
 
     /**

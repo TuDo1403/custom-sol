@@ -37,6 +37,7 @@ abstract contract MultiDelegatecall {
     ) internal returns (bytes[] memory results) {
         if (address(this) != __original)
             revert MultiDelegatecall__OnlyDelegate();
+
         uint256 length = data_.length;
         results = new bytes[](length);
         bool ok;

@@ -11,8 +11,6 @@ import "../ERC20Upgradeable.sol";
  * recognized off-chain (via event analysis).
  */
 abstract contract ERC20BurnableUpgradeable is ERC20Upgradeable {
-    using Bytes32Address for address;
-
     function __ERC20Burnable_init() internal onlyInitializing {}
 
     function __ERC20Burnable_init_unchained() internal onlyInitializing {}
@@ -38,11 +36,7 @@ abstract contract ERC20BurnableUpgradeable is ERC20Upgradeable {
      * `amount`.
      */
     function burnFrom(address account, uint256 amount) public virtual {
-        _spendAllowance(
-            account.fillLast12Bytes(),
-            _msgSender().fillLast12Bytes(),
-            amount
-        );
+        _spendAllowance(account, _msgSender(), amount);
         _burn(account, amount);
     }
 

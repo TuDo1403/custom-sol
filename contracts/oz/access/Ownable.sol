@@ -24,7 +24,7 @@ error Ownable__NonZeroAddress();
 abstract contract Ownable is Context {
     using Bytes32Address for *;
 
-    bytes32 private _owner;
+    bytes32 private __owner;
 
     event OwnershipTransferred(
         address indexed previousOwner,
@@ -50,14 +50,15 @@ abstract contract Ownable is Context {
      * @dev Returns the address of the current owner.
      */
     function owner() public view virtual returns (address) {
-        return _owner.fromFirst20Bytes();
+        return __owner.fromFirst20Bytes();
     }
 
     /**
      * @dev Throws if the sender is not the owner.
      */
     function _checkOwner(address sender_) internal view virtual {
-        if (_owner != sender_.fillLast12Bytes()) revert Ownable__Unauthorized();
+        if (__owner != sender_.fillLast12Bytes())
+            revert Ownable__Unauthorized();
     }
 
     /**
@@ -85,7 +86,7 @@ abstract contract Ownable is Context {
      * Internal function without access restriction.
      */
     function _transferOwnership(address newOwner) internal virtual {
-        emit OwnershipTransferred(_owner.fromFirst20Bytes(), newOwner);
-        _owner = newOwner.fillLast12Bytes();
+        emit OwnershipTransferred(__owner.fromFirst20Bytes(), newOwner);
+        __owner = newOwner.fillLast12Bytes();
     }
 }

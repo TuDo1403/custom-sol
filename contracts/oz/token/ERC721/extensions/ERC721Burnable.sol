@@ -24,6 +24,7 @@ abstract contract ERC721Burnable is ERC721 {
         //solhint-disable-next-line max-line-length
         if (!_isApprovedOrOwner(_msgSender(), tokenId))
             revert ERC721Burnable__OnlyOwnerOrApproved();
+
         _burn(tokenId);
     }
 }

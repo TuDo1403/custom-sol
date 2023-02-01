@@ -11,8 +11,6 @@ import "../../../libraries/Bytes32Address.sol";
 /// @author Modified from Uniswap (https://github.com/Uniswap/uniswap-v2-core/blob/master/contracts/UniswapV2ERC20.sol)
 /// @dev Do not manually set balances without updating totalSupply, as the sum of all user balances must not exceed it.
 abstract contract ERC20Upgradeable is ContextUpgradeable, IERC20Upgradeable {
-    using Bytes32Address for address;
-
     /*//////////////////////////////////////////////////////////////
                             METADATA STORAGE
     //////////////////////////////////////////////////////////////*/
@@ -29,17 +27,17 @@ abstract contract ERC20Upgradeable is ContextUpgradeable, IERC20Upgradeable {
 
     uint256 public totalSupply;
 
-    mapping(bytes32 => uint256) internal _balanceOf;
+    mapping(address => uint256) internal _balanceOf;
 
-    mapping(bytes32 => mapping(bytes32 => uint256)) internal _allowance;
+    mapping(address => mapping(address => uint256)) internal _allowance;
 
     /*//////////////////////////////////////////////////////////////
                                CONSTRUCTOR
     //////////////////////////////////////////////////////////////*/
 
     function __ERC20_init(
-        string memory name_,
-        string memory symbol_,
+        string calldata name_,
+        string calldata symbol_,
         uint256 decimals_
     ) internal onlyInitializing {
         __ERC20_init_unchained(name_, symbol_, decimals_);
@@ -64,9 +62,7 @@ abstract contract ERC20Upgradeable is ContextUpgradeable, IERC20Upgradeable {
         uint256 amount
     ) public virtual returns (bool) {
         address sender = _msgSender();
-        _allowance[sender.fillLast12Bytes()][
-            spender.fillLast12Bytes()
-        ] = amount;
+        _allowance[sender][spender] = amount;
 
         emit Approval(sender, spender, amount);
 
@@ -79,12 +75,12 @@ abstract contract ERC20Upgradeable is ContextUpgradeable, IERC20Upgradeable {
     ) public virtual returns (bool) {
         address sender = _msgSender();
         _beforeTokenTransfer(sender, to, amount);
-        _balanceOf[sender.fillLast12Bytes()] -= amount;
+        _balanceOf[sender] -= amount;
 
         // Cannot overflow because the sum of all user
         // balances can't exceed the max uint256 value.
         unchecked {
-            _balanceOf[to.fillLast12Bytes()] += amount;
+            _balanceOf[to] += amount;
         }
 
         emit Transfer(sender, to, amount);
@@ -101,15 +97,14 @@ abstract contract ERC20Upgradeable is ContextUpgradeable, IERC20Upgradeable {
     ) public virtual returns (bool) {
         _beforeTokenTransfer(from, to, amount);
 
-        bytes32 _from = from.fillLast12Bytes();
-        _spendAllowance(_from, _msgSender().fillLast12Bytes(), amount);
+        _spendAllowance(from, _msgSender(), amount);
 
-        _balanceOf[_from] -= amount;
+        _balanceOf[from] -= amount;
 
         // Cannot overflow because the sum of all user
         // balances can't exceed the max uint256 value.
         unchecked {
-            _balanceOf[to.fillLast12Bytes()] += amount;
+            _balanceOf[to] += amount;
         }
 
         emit Transfer(from, to, amount);
@@ -121,27 +116,41 @@ abstract contract ERC20Upgradeable is ContextUpgradeable, IERC20Upgradeable {
     function balanceOf(
         address account
     ) external view override returns (uint256) {
-        return _balanceOf[account.fillLast12Bytes()];
+        return _balanceOf[account];
     }
 
     function allowance(
         address owner,
         address spender
     ) external view override returns (uint256) {
-        return _allowance[owner.fillLast12Bytes()][spender.fillLast12Bytes()];
+        return _allowance[owner][spender];
     }
 
     /*//////////////////////////////////////////////////////////////
                         INTERNAL MINT/BURN LOGIC
     //////////////////////////////////////////////////////////////*/
     function _spendAllowance(
-        bytes32 owner_,
-        bytes32 spender_,
+        address owner_,
+        address spender_,
         uint256 amount_
     ) internal virtual {
-        uint256 allowed = _allowance[owner_][spender_]; // Saves gas for limited approvals.
-        if (allowed != ~uint256(0))
-            _allowance[owner_][spender_] = allowed - amount_;
+        bytes32 allowanceKey;
+        uint256 allowed;
+        assembly {
+            mstore(0, owner_)
+            mstore(32, _allowance.slot)
+            mstore(32, keccak256(0, 64))
+            mstore(0, spender_)
+            allowanceKey := keccak256(0, 64)
+            allowed := sload(allowanceKey)
+        }
+
+        if (allowed == ~uint256(0)) return;
+
+        allowed -= amount_;
+        assembly {
+            sstore(allowanceKey, allowed)
+        }
     }
 
     function _beforeTokenTransfer(
@@ -163,10 +172,12 @@ abstract contract ERC20Upgradeable is ContextUpgradeable, IERC20Upgradeable {
         // Cannot overflow because the sum of all user
         // balances can't exceed the max uint256 value.
         unchecked {
-            _balanceOf[to.fillLast12Bytes()] += amount;
+            _balanceOf[to] += amount;
         }
 
         emit Transfer(address(0), to, amount);
+
+        _afterTokenTransfer(address(0), to, amount);
 
         _afterTokenTransfer(address(0), to, amount);
     }
@@ -174,7 +185,7 @@ abstract contract ERC20Upgradeable is ContextUpgradeable, IERC20Upgradeable {
     function _burn(address from, uint256 amount) internal virtual {
         _beforeTokenTransfer(from, address(0), amount);
 
-        _balanceOf[from.fillLast12Bytes()] -= amount;
+        _balanceOf[from] -= amount;
 
         // Cannot underflow because a user's balance
         // will never be larger than the total supply.

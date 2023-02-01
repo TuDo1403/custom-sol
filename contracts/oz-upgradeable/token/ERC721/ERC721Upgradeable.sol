@@ -17,11 +17,9 @@ abstract contract ERC721Upgradeable is
     IERC721Upgradeable,
     IERC721MetadataUpgradeable
 {
-    using Bytes32Address for address;
-    using Bytes32Address for bytes32;
-    using Bytes32Address for uint256;
-
+    using Bytes32Address for *;
     using BitMapsUpgradeable for BitMapsUpgradeable.BitMap;
+
     /*//////////////////////////////////////////////////////////////
                          METADATA STORAGE/LOGIC
     //////////////////////////////////////////////////////////////*/
@@ -38,21 +36,30 @@ abstract contract ERC721Upgradeable is
     //////////////////////////////////////////////////////////////*/
 
     mapping(uint256 => bytes32) internal _ownerOf;
-    mapping(bytes32 => uint256) internal _balanceOf;
+    mapping(address => uint256) internal _balanceOf;
 
     function ownerOf(
         uint256 id
     ) public view virtual override returns (address owner) {
-        if ((owner = _ownerOf[id].fromFirst20Bytes()) == address(0))
-            revert ERC721__NotMinted();
+        assembly {
+            mstore(0, id)
+            mstore(32, _ownerOf.slot)
+            owner := sload(keccak256(0, 64))
+        }
+
+        if (owner == address(0)) revert ERC721__NotMinted();
     }
 
     function balanceOf(
         address owner
-    ) public view virtual override returns (uint256) {
+    ) public view virtual returns (uint256 balance_) {
         if (owner == address(0)) revert ERC721__NonZeroAddress();
 
-        return _balanceOf[owner.fillLast12Bytes()];
+        assembly {
+            mstore(0, owner)
+            mstore(32, _balanceOf.slot)
+            balance_ := sload(keccak256(0, 64))
+        }
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -61,7 +68,7 @@ abstract contract ERC721Upgradeable is
 
     mapping(uint256 => bytes32) internal _getApproved;
 
-    mapping(bytes32 => BitMapsUpgradeable.BitMap) internal _isApprovedForAll;
+    mapping(address => BitMapsUpgradeable.BitMap) internal _isApprovedForAll;
 
     /*//////////////////////////////////////////////////////////////
                                CONSTRUCTOR
@@ -71,8 +78,8 @@ abstract contract ERC721Upgradeable is
      * @dev Initializes the contract by setting a `name` and a `symbol` to the token collection.
      */
     function __ERC721_init(
-        string memory name_,
-        string memory symbol_
+        string calldata name_,
+        string calldata symbol_
     ) internal onlyInitializing {
         __ERC721_init_unchained(name_, symbol_);
     }
@@ -91,30 +98,33 @@ abstract contract ERC721Upgradeable is
                               ERC721 LOGIC
     //////////////////////////////////////////////////////////////*/
 
-    function approve(address spender, uint256 id) public virtual override {
-        address owner = _ownerOf[id].fromFirst20Bytes();
+    function approve(address spender, uint256 id) public virtual {
+        address owner;
+        assembly {
+            mstore(0, id)
+            mstore(32, _ownerOf.slot)
+            owner := sload(keccak256(0, 64))
+        }
+
         address sender = _msgSender();
         if (
             sender != owner &&
-            !_isApprovedForAll[owner.fillLast12Bytes()].get(
-                sender.fillLast96Bits()
-            )
+            !_isApprovedForAll[owner].get(sender.fillLast96Bits())
         ) revert ERC721__Unauthorized();
 
-        _getApproved[id] = spender.fillLast12Bytes();
+        assembly {
+            //mstore(0, id)
+            mstore(32, _getApproved.slot)
+            sstore(keccak256(0, 64), spender)
+        }
 
         emit Approval(owner, spender, id);
     }
 
-    function setApprovalForAll(
-        address operator,
-        bool approved
-    ) public virtual override {
+    function setApprovalForAll(address operator, bool approved) public virtual {
         address sender = _msgSender();
-        _isApprovedForAll[sender.fillLast12Bytes()].setTo(
-            operator.fillLast96Bits(),
-            approved
-        );
+
+        _isApprovedForAll[sender].setTo(operator.fillLast96Bits(), approved);
 
         emit ApprovalForAll(sender, operator, approved);
     }
@@ -128,11 +138,8 @@ abstract contract ERC721Upgradeable is
     function isApprovedForAll(
         address owner,
         address operator
-    ) external view override returns (bool) {
-        return
-            _isApprovedForAll[owner.fillLast12Bytes()].get(
-                operator.fillLast96Bits()
-            );
+    ) external view returns (bool) {
+        return _isApprovedForAll[owner].get(operator.fillLast96Bits());
     }
 
     function _isApprovedOrOwner(
@@ -140,11 +147,10 @@ abstract contract ERC721Upgradeable is
         uint256 tokenId
     ) internal view virtual returns (bool) {
         address owner = ownerOf(tokenId);
-        return (spender == owner ||
-            _isApprovedForAll[owner.fillLast12Bytes()].get(
-                spender.fillLast96Bits()
-            ) ||
-            _getApproved[tokenId] == spender.fillLast12Bytes());
+        return
+            (spender == owner ||
+                _getApproved[tokenId] == spender.fillLast12Bytes()) ||
+            _isApprovedForAll[owner].get(spender.fillLast96Bits());
     }
 
     function _beforeTokenTransfer(
@@ -164,23 +170,49 @@ abstract contract ERC721Upgradeable is
         address to,
         uint256 id
     ) public virtual override {
+        if (to == address(0)) revert ERC721__InvalidRecipient();
+
+        bytes32 ownerOfKey;
+        address owner;
+        assembly {
+            mstore(0, id)
+            mstore(32, _ownerOf.slot)
+            ownerOfKey := keccak256(0, 64)
+            owner := sload(ownerOfKey)
+        }
+        if (from != owner) revert ERC721__WrongFrom();
+
+        _beforeTokenTransfer(from, to, id);
+
         address sender = _msgSender();
         if (
             sender != from &&
-            !_isApprovedForAll[from.fillLast12Bytes()].get(
-                sender.fillLast96Bits()
-            ) &&
-            sender.fillLast12Bytes() != _getApproved[id]
+            sender.fillLast12Bytes() != _getApproved[id] &&
+            !_isApprovedForAll[from].get(sender.fillLast96Bits())
         ) revert ERC721__Unauthorized();
 
-        _transfer(from, to, id);
+        // Underflow of the sender's balance is impossible because we check for
+        // ownership above and the recipient's balance can't realistically overflow.
+        unchecked {
+            ++_balanceOf[to];
+            --_balanceOf[from];
+        }
+
+        assembly {
+            sstore(ownerOfKey, to)
+        }
+        delete _getApproved[id];
+
+        emit Transfer(from, to, id);
+
+        _afterTokenTransfer(from, to, id);
     }
 
     function safeTransferFrom(
         address from,
         address to,
         uint256 id
-    ) public virtual override {
+    ) public virtual {
         transferFrom(from, to, id);
 
         if (
@@ -200,19 +232,28 @@ abstract contract ERC721Upgradeable is
         address to,
         uint256 tokenId
     ) internal virtual {
-        if (from != _ownerOf[tokenId].fromFirst20Bytes())
-            revert ERC721__WrongFrom();
         if (to == address(0)) revert ERC721__InvalidRecipient();
+
+        address owner;
+        bytes32 key;
+        assembly {
+            mstore(0, tokenId)
+            mstore(32, _ownerOf.slot)
+            key := keccak256(0, 64)
+            owner := sload(key)
+        }
+        if (from != owner) revert ERC721__WrongFrom();
 
         _beforeTokenTransfer(from, to, tokenId);
 
-        bytes32 _to = to.fillLast12Bytes();
-
         unchecked {
-            --_balanceOf[from.fillLast12Bytes()];
-            ++_balanceOf[_to];
+            ++_balanceOf[to];
+            --_balanceOf[from];
         }
-        _ownerOf[tokenId] = _to;
+
+        assembly {
+            sstore(key, to)
+        }
 
         delete _getApproved[tokenId];
 
@@ -221,38 +262,20 @@ abstract contract ERC721Upgradeable is
         _afterTokenTransfer(from, to, tokenId);
     }
 
-    function _safeTransfer(
-        address from_,
-        address to_,
-        uint256 tokenId_
-    ) internal virtual {
-        _transfer(from_, to_, tokenId_);
-        __checkOnERC721Received(from_, to_, tokenId_, "");
-    }
-
     function safeTransferFrom(
         address from,
         address to,
         uint256 id,
         bytes calldata data
-    ) public virtual override {
+    ) public virtual {
         transferFrom(from, to, id);
-        __checkOnERC721Received(from, to, id, data);
-    }
-
-    function __checkOnERC721Received(
-        address from_,
-        address to_,
-        uint256 tokenId_,
-        bytes memory data_
-    ) private {
         if (
-            to_.code.length != 0 &&
-            ERC721TokenReceiverUpgradeable(to_).onERC721Received(
+            to.code.length != 0 &&
+            ERC721TokenReceiverUpgradeable(to).onERC721Received(
                 _msgSender(),
-                from_,
-                tokenId_,
-                data_
+                from,
+                id,
+                data
             ) !=
             ERC721TokenReceiverUpgradeable.onERC721Received.selector
         ) revert ERC721__UnsafeRecipient();
@@ -283,15 +306,27 @@ abstract contract ERC721Upgradeable is
 
     function _mint(address to, uint256 id) internal virtual {
         if (to == address(0)) revert ERC721__InvalidRecipient();
-        if (_ownerOf[id] != 0) revert ERC721__AlreadyMinted();
+
+        bytes32 key;
+        bytes32 owner;
+        assembly {
+            mstore(0, id)
+            mstore(32, _ownerOf.slot)
+            key := keccak256(0, 64)
+            owner := sload(key)
+        }
+        if (owner != 0) revert ERC721__AlreadyMinted();
 
         _beforeTokenTransfer(address(0), to, id);
-        bytes32 _to = to.fillLast12Bytes();
+
         // Counter overflow is incredibly unrealistic.
         unchecked {
-            _balanceOf[_to]++;
+            ++_balanceOf[to];
         }
-        _ownerOf[id] = _to;
+
+        assembly {
+            sstore(key, to)
+        }
 
         emit Transfer(address(0), to, id);
 
@@ -299,19 +334,25 @@ abstract contract ERC721Upgradeable is
     }
 
     function _burn(uint256 id) internal virtual {
-        address owner = _ownerOf[id].fromFirst20Bytes();
-
+        bytes32 key;
+        address owner;
+        assembly {
+            mstore(0, id)
+            mstore(32, _ownerOf.slot)
+            key := keccak256(0, 64)
+            owner := sload(key)
+        }
         if (owner == address(0)) revert ERC721__NotMinted();
 
         _beforeTokenTransfer(owner, address(0), id);
 
         // Ownership check above ensures no underflow.
         unchecked {
-            _balanceOf[owner.fillLast12Bytes()]--;
+            --_balanceOf[owner];
         }
-
-        delete _ownerOf[id];
-
+        assembly {
+            sstore(key, 0)
+        }
         delete _getApproved[id];
 
         emit Transfer(owner, address(0), id);
@@ -344,7 +385,6 @@ abstract contract ERC721Upgradeable is
         bytes memory data
     ) internal virtual {
         _mint(to, id);
-
         if (
             to.code.length != 0 &&
             ERC721TokenReceiverUpgradeable(to).onERC721Received(
