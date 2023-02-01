@@ -43,8 +43,9 @@ abstract contract UUPSUpgradeable is
      * fail.
      */
     modifier onlyProxy() {
-        if (address(this) == __self) revert UUPSUpgradeable__OnlyDelegateCall();
-        if (_getImplementation() != __self)
+        address self;
+        if (address(this) == self) revert UUPSUpgradeable__OnlyDelegateCall();
+        if (_getImplementation() != self)
             revert UUPSUpgradeable__OnlyActiveProxy();
         _;
     }
@@ -86,7 +87,7 @@ abstract contract UUPSUpgradeable is
      */
     function upgradeTo(address newImplementation) external virtual onlyProxy {
         _authorizeUpgrade(newImplementation);
-        _upgradeToAndCallUUPS(newImplementation, new bytes(0), false);
+        _upgradeToAndCallUUPS(newImplementation, "", false);
     }
 
     /**

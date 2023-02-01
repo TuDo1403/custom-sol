@@ -15,7 +15,7 @@ abstract contract FundForwarder is Context, Transferable, IFundForwarder {
     /**
      * @dev Address to forward funds to
      */
-    address public vault;
+    bytes32 private __vault;
 
     /**
      * @dev Constructor that sets the vault address
@@ -29,10 +29,10 @@ abstract contract FundForwarder is Context, Transferable, IFundForwarder {
      * @dev Receives funds and forwards them to the vault address
      */
     receive() external payable virtual {
-        address _vault = vault;
-        __nonZeroAddress(_vault);
+        address _vault = vault();
+        __checkValidAddress(_vault);
 
-        (bool ok, ) = _vault.call{value: msg.value}("forward");
+        (bool ok, ) = _vault.call{value: msg.value}(safeRecoverHeader());
         if (!ok) revert FundForwarder__ForwardFailed();
 
         emit Forwarded(_msgSender(), msg.value);
@@ -40,12 +40,11 @@ abstract contract FundForwarder is Context, Transferable, IFundForwarder {
         _afterRecover(_vault, address(0), abi.encode(msg.value));
     }
 
-    function changeVault(address vault_) external virtual;
-
     /// @inheritdoc IFundForwarder
     function recoverERC20(IERC20 token_, uint256 amount_) external {
-        address _vault = vault;
-        __nonZeroAddress(_vault);
+        __checkValidAddress(address(token_));
+        address _vault = vault();
+        __checkValidAddress(_vault);
 
         _safeERC20Transfer(token_, _vault, amount_);
 
@@ -56,10 +55,16 @@ abstract contract FundForwarder is Context, Transferable, IFundForwarder {
 
     /// @inheritdoc IFundForwarder
     function recoverNFT(IERC721 token_, uint256 tokenId_) external {
-        address _vault = vault;
-        __nonZeroAddress(_vault);
+        __checkValidAddress(address(token_));
+        address _vault = vault();
+        __checkValidAddress(_vault);
 
-        token_.safeTransferFrom(address(this), _vault, tokenId_);
+        token_.safeTransferFrom(
+            address(this),
+            _vault,
+            tokenId_,
+            safeRecoverHeader()
+        );
 
         emit Recovered(_msgSender(), address(token_), tokenId_);
 
@@ -68,14 +73,18 @@ abstract contract FundForwarder is Context, Transferable, IFundForwarder {
 
     /// @inheritdoc IFundForwarder
     function recoverNFTs(IERC721Enumerable token_) external {
+        __checkValidAddress(address(token_));
+        address _vault = vault();
+        __checkValidAddress(_vault);
         uint256 length = token_.balanceOf(address(this));
         uint256[] memory tokenIds = new uint256[](length);
-        address _vault = vault;
+        bytes memory recoverHeader = safeRecoverHeader();
         for (uint256 i; i < length; ) {
             token_.safeTransferFrom(
                 address(this),
                 _vault,
-                tokenIds[i] = token_.tokenOfOwnerByIndex(address(this), i)
+                tokenIds[i] = token_.tokenOfOwnerByIndex(address(this), i),
+                recoverHeader
             );
 
             unchecked {
@@ -90,8 +99,8 @@ abstract contract FundForwarder is Context, Transferable, IFundForwarder {
 
     /// @inheritdoc IFundForwarder
     function recoverNative() external {
-        address _vault = vault;
-        __nonZeroAddress(_vault);
+        address _vault = vault();
+        __checkValidAddress(_vault);
         uint256 balance = address(this).balance;
         _safeNativeTransfer(_vault, balance);
 
@@ -100,16 +109,28 @@ abstract contract FundForwarder is Context, Transferable, IFundForwarder {
         _afterRecover(_vault, address(0), abi.encode(balance));
     }
 
+    function vault() public view returns (address vault_) {
+        assembly {
+            vault_ := sload(__vault.slot)
+        }
+    }
+
+    function safeRecoverHeader() public pure virtual returns (bytes memory);
+
+    function safeTransferHeader() public pure virtual returns (bytes memory);
+
     /**
      * @dev Changes the vault address
      * @param vault_ New vault address
      */
     function _changeVault(address vault_) internal {
-        __nonZeroAddress(vault_);
+        __checkValidAddress(vault_);
 
-        emit VaultUpdated(vault, vault_);
+        emit VaultUpdated(vault(), vault_);
 
-        vault = vault_;
+        assembly {
+            sstore(__vault.slot, vault_)
+        }
     }
 
     function _afterRecover(
@@ -123,7 +144,8 @@ abstract contract FundForwarder is Context, Transferable, IFundForwarder {
      *@param addr_ The address to check
      *@custom:throws FundForwarder__InvalidArgument if the address is the zero address
      */
-    function __nonZeroAddress(address addr_) private pure {
-        if (addr_ == address(0)) revert FundForwarder__InvalidArgument();
+    function __checkValidAddress(address addr_) private view {
+        if (addr_ == address(0) || addr_ == address(this))
+            revert FundForwarder__InvalidArgument();
     }
 }

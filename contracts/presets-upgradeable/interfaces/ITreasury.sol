@@ -14,6 +14,10 @@ interface ITreasury {
 
     event BalanceInitiated(address indexed operator, uint256 indexed balance);
 
+    function safeRecoverHeader() external pure returns (bytes32);
+
+    function safeTransferHeader() external pure returns (bytes32);
+
     function withdraw(
         address token_,
         address to_,
@@ -27,4 +31,6 @@ interface ITreasury {
         address token_,
         uint256 tokenId_
     ) external view returns (bool);
+
+    function nonces(address account_) external view returns (uint256);
 }

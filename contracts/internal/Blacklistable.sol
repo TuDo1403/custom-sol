@@ -23,9 +23,6 @@ abstract contract Blacklistable is Context, IBlacklistable {
     BitMaps.BitMap private __blacklisted;
 
     /// @inheritdoc IBlacklistable
-    function setUserStatus(address account_, bool status_) external virtual;
-
-    /// @inheritdoc IBlacklistable
     function isBlacklisted(address account_) public view returns (bool) {
         return __blacklisted.get(account_.fillLast96Bits());
     }

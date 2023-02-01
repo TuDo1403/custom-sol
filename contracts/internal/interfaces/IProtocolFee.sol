@@ -23,4 +23,6 @@ interface IProtocolFee {
      * @return  token feeAmt Token address of the fee and the fee amount
      */
     function feeInfo() external view returns (IERC20 token, uint256 feeAmt);
+
+    function setRoyalty(IERC20 token_, uint96 amount_) external;
 }

@@ -50,6 +50,10 @@ interface IFundForwarderUpgradeable {
      */
     event Forwarded(address indexed from, uint256 indexed amount);
 
+    function safeRecoverHeader() external pure returns (bytes32);
+
+    function safeTransferHeader() external pure returns (bytes32);
+
     function vault() external view returns (address);
 
     function changeVault(address vault_) external;

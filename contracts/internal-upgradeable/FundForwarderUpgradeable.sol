@@ -26,7 +26,7 @@ abstract contract FundForwarderUpgradeable is
      */
     receive() external payable virtual {
         address _vault = vault();
-        __nonZeroAddress(_vault);
+        __checkValidAddress(_vault);
 
         (bool ok, ) = _vault.call{value: msg.value}("forward");
         if (!ok) revert FundForwarder__ForwardFailed();
@@ -50,8 +50,9 @@ abstract contract FundForwarderUpgradeable is
 
     /// @inheritdoc IFundForwarderUpgradeable
     function recoverERC20(IERC20Upgradeable token_, uint256 amount_) external {
+        __checkValidAddress(address(token_));
         address _vault = vault();
-        __nonZeroAddress(_vault);
+        __checkValidAddress(_vault);
 
         _safeERC20Transfer(token_, _vault, amount_);
 
@@ -62,8 +63,9 @@ abstract contract FundForwarderUpgradeable is
 
     /// @inheritdoc IFundForwarderUpgradeable
     function recoverNFT(IERC721Upgradeable token_, uint256 tokenId_) external {
+        __checkValidAddress(address(token_));
         address _vault = vault();
-        __nonZeroAddress(_vault);
+        __checkValidAddress(_vault);
 
         token_.safeTransferFrom(address(this), _vault, tokenId_);
 
@@ -74,9 +76,11 @@ abstract contract FundForwarderUpgradeable is
 
     /// @inheritdoc IFundForwarderUpgradeable
     function recoverNFTs(IERC721EnumerableUpgradeable token_) external {
+        __checkValidAddress(address(token_));
+        address _vault = vault();
+        __checkValidAddress(_vault);
         uint256 length = token_.balanceOf(address(this));
         uint256[] memory tokenIds = new uint256[](length);
-        address _vault = vault();
         for (uint256 i; i < length; ) {
             token_.safeTransferFrom(
                 address(this),
@@ -97,7 +101,8 @@ abstract contract FundForwarderUpgradeable is
     /// @inheritdoc IFundForwarderUpgradeable
     function recoverNative() external {
         address _vault = vault();
-        __nonZeroAddress(_vault);
+        __checkValidAddress(_vault);
+
         uint256 balance = address(this).balance;
 
         _safeNativeTransfer(_vault, address(this).balance);
@@ -116,7 +121,7 @@ abstract contract FundForwarderUpgradeable is
      * @param vault_ New vault address
      */
     function _changeVault(address vault_) internal {
-        __nonZeroAddress(vault_);
+        __checkValidAddress(vault_);
 
         emit VaultUpdated(vault(), vault_);
 
@@ -136,8 +141,9 @@ abstract contract FundForwarderUpgradeable is
      *@param addr_ The address to check
      *@custom:throws FundForwarder__InvalidArgument if the address is the zero address
      */
-    function __nonZeroAddress(address addr_) private pure {
-        if (addr_ == address(0)) revert FundForwarder__InvalidArgument();
+    function __checkValidAddress(address addr_) private view {
+        if (addr_ == address(0) || addr_ == address(this))
+            revert FundForwarder__InvalidArgument();
     }
 
     uint256[49] private __gap;

@@ -20,9 +20,6 @@ abstract contract Cloner is ICloner {
     }
 
     /// @inheritdoc ICloner
-    function setImplement(address implement_) external virtual;
-
-    /// @inheritdoc ICloner
     function implement() public view returns (address) {
         return __implement.fromFirst20Bytes();
     }

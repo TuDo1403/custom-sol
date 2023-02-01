@@ -44,6 +44,7 @@ abstract contract Manager is Context, IManager {
             abi.encodeCall(IAuthority.requestAccess, (role_))
         );
         if (!ok) revert Manager__RequestFailed();
+
         __updateAuthority(authority_);
         emit AuthorityUpdated(sender, IAuthority(address(0)), authority_);
     }

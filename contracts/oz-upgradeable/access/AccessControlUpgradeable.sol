@@ -60,10 +60,10 @@ abstract contract AccessControlUpgradeable is
 
     function __AccessControl_init_unchained() internal onlyInitializing {}
 
-    mapping(bytes32 => bytes32) private _adminRoles;
-    mapping(bytes32 => BitMap256.BitMap) private _roles;
-
     bytes32 public constant DEFAULT_ADMIN_ROLE = 0x00;
+
+    mapping(bytes32 => bytes32) private _adminRoles;
+    mapping(address => BitMap256.BitMap) private _roles;
 
     /**
      * @dev Modifier that checks that an account has a specific role. Reverts
@@ -98,14 +98,7 @@ abstract contract AccessControlUpgradeable is
         bytes32 role,
         address account
     ) public view virtual override returns (bool) {
-        return _hasRole(uint256(role), account.fillLast12Bytes());
-    }
-
-    function _hasRole(
-        uint256 role,
-        bytes32 bytes32Addr
-    ) internal view virtual returns (bool) {
-        return _roles[bytes32Addr].unsafeGet(role);
+        return _roles[account].unsafeGet(uint256(role));
     }
 
     /**
@@ -247,19 +240,10 @@ abstract contract AccessControlUpgradeable is
      * May emit a {RoleGranted} event.
      */
     function _grantRole(bytes32 role, address account) internal virtual {
-        if (_grantRole(uint256(role), account.fillLast12Bytes()))
+        if (!hasRole(role, account)) {
+            _roles[account].unsafeSet(uint256(role));
             emit RoleGranted(role, account, _msgSender());
-    }
-
-    function _grantRole(
-        uint256 role,
-        bytes32 account
-    ) internal virtual returns (bool) {
-        if (!_hasRole(role, account)) {
-            _roles[account].unsafeSet(role);
-            return true;
         }
-        return false;
     }
 
     /**
@@ -270,20 +254,10 @@ abstract contract AccessControlUpgradeable is
      * May emit a {RoleRevoked} event.
      */
     function _revokeRole(bytes32 role, address account) internal virtual {
-        if (_revokeRole(uint256(role), account.fillLast12Bytes())) {
+        if (hasRole(role, account)) {
+            _roles[account].unsafeUnset(uint256(role));
             emit RoleRevoked(role, account, _msgSender());
         }
-    }
-
-    function _revokeRole(
-        uint256 role,
-        bytes32 account
-    ) internal virtual returns (bool) {
-        if (_hasRole(role, account)) {
-            _roles[account].unsafeUnset(role);
-            return true;
-        }
-        return false;
     }
 
     /**

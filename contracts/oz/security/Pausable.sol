@@ -91,7 +91,8 @@ abstract contract Pausable is Context {
      *
      * - The contract must not be paused.
      */
-    function _pause() internal virtual whenNotPaused {
+    function _pause() internal virtual {
+        _requireNotPaused();
         _paused = 2;
         emit Paused(_msgSender());
     }
@@ -103,7 +104,8 @@ abstract contract Pausable is Context {
      *
      * - The contract must be paused.
      */
-    function _unpause() internal virtual whenPaused {
+    function _unpause() internal virtual {
+        _requirePaused();
         _paused = 1;
         emit Unpaused(_msgSender());
     }

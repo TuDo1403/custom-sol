@@ -65,7 +65,7 @@ contract CommandGate is
     function whitelistAddress(
         address addr_
     ) external onlyRole(Roles.OPERATOR_ROLE) {
-        if (addr_ == _authority() || addr_ == vault)
+        if (addr_ == _authority() || addr_ == vault())
             revert CommandGate__InvalidArgument();
         __isWhitelisted.set(addr_.fillLast96Bits());
 
@@ -84,7 +84,8 @@ contract CommandGate is
         if (!__isWhitelisted.get(contract_.fillLast96Bits()))
             revert CommandGate__UnknownAddress(contract_);
         if (
-            vault_ != vault && !__whitelistedVaults.get(vault_.fillLast96Bits())
+            vault_ != vault() &&
+            !__whitelistedVaults.get(vault_.fillLast96Bits())
         ) revert CommandGate__UnknownAddress(contract_);
 
         _safeNativeTransfer(vault_, msg.value);
@@ -119,7 +120,8 @@ contract CommandGate is
         if (!__isWhitelisted.get(contract_.fillLast96Bits()))
             revert CommandGate__UnknownAddress(contract_);
         if (
-            vault_ != vault && !__whitelistedVaults.get(vault_.fillLast96Bits())
+            vault_ != vault() &&
+            !__whitelistedVaults.get(vault_.fillLast96Bits())
         ) revert CommandGate__UnknownAddress(vault_);
 
         _safeERC20TransferFrom(token_, user, vault_, value_);
@@ -152,7 +154,8 @@ contract CommandGate is
         if (!__isWhitelisted.get(contract_.fillLast96Bits()))
             revert CommandGate__UnknownAddress(contract_);
         if (
-            vault_ != vault && !__whitelistedVaults.get(vault_.fillLast96Bits())
+            vault_ != vault() &&
+            !__whitelistedVaults.get(vault_.fillLast96Bits())
         ) revert CommandGate__UnknownAddress(vault_);
 
         address user = _msgSender();
@@ -184,7 +187,8 @@ contract CommandGate is
         if (!__isWhitelisted.get(target.fillLast96Bits()))
             revert CommandGate__UnknownAddress(target);
         if (
-            _vault != vault && !__whitelistedVaults.get(_vault.fillLast96Bits())
+            _vault != vault() &&
+            !__whitelistedVaults.get(_vault.fillLast96Bits())
         ) revert CommandGate__UnknownAddress(_vault);
 
         IERC721 nft = IERC721(_msgSender());
@@ -240,7 +244,7 @@ contract CommandGate is
 
     function __whitelistVaults(address[] memory vaults_) private {
         uint256 length = vaults_.length;
-        uint256[] memory uintVaults = new uint256[](length);
+        uint256[] memory uintVaults;
 
         assembly {
             uintVaults := vaults_
@@ -283,5 +287,25 @@ contract CommandGate is
             mstore(add(data_, 96), value_)
         }
         return data_;
+    }
+
+    function safeRecoverHeader() public pure override returns (bytes memory) {
+        /// @dev value is equal keccak256("SAFE_RECOVER_HEADER")
+        return
+            bytes.concat(
+                bytes32(
+                    0x556d79614195ebefcc31ab1ee514b9953934b87d25857902370689cbd29b49de
+                )
+            );
+    }
+
+    function safeTransferHeader() public pure override returns (bytes memory) {
+        /// @dev value is equal keccak256("SAFE_TRANSFER")
+        return
+            bytes.concat(
+                bytes32(
+                    0xc9627ddb76e5ee80829319617b557cc79498bbbc5553d8c632749a7511825f5d
+                )
+            );
     }
 }
