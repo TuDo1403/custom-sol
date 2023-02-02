@@ -27,7 +27,7 @@ abstract contract ProtocolFee is Context, IProtocolFee {
      * @param token_ Token address of the fee
      * @param amount_ Fee amount
      */
-    function _setRoyalty(IERC20 token_, uint96 amount_) internal {
+    function _setRoyalty(IERC20 token_, uint96 amount_) internal virtual {
         assembly {
             sstore(__feeInfo.slot, or(shl(160, amount_), token_))
         }

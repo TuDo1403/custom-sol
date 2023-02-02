@@ -124,22 +124,16 @@ contract Treasury is
             mstore(32, keccak256(0, 64))
         }
 
-        bytes32 key;
         for (uint256 i; i < length; ) {
             assembly {
-                let idx := shl(i, 5)
-                mstore(0, calldataload(add(add(ids_.offset, 0x20), idx)))
-                key := keccak256(0, 64)
+                let idx := shl(5, i)
+                mstore(0, calldataload(add(ids_.offset, idx)))
+                let key := keccak256(0, 64)
                 sstore(
                     key,
-                    add(
-                        sload(key),
-                        calldataload(add(add(values_.offset, 0x20), idx))
-                    )
+                    add(calldataload(add(values_.offset, idx)), sload(key))
                 )
-            }
-            unchecked {
-                ++i;
+                i := add(1, i)
             }
         }
 

@@ -30,7 +30,6 @@ abstract contract FundForwarder is Context, Transferable, IFundForwarder {
      */
     receive() external payable virtual {
         address _vault = vault();
-        __checkValidAddress(_vault);
 
         (bool ok, ) = _vault.call{value: msg.value}(safeRecoverHeader());
         if (!ok) revert FundForwarder__ForwardFailed();
@@ -44,7 +43,6 @@ abstract contract FundForwarder is Context, Transferable, IFundForwarder {
     function recoverERC20(IERC20 token_, uint256 amount_) external {
         __checkValidAddress(address(token_));
         address _vault = vault();
-        __checkValidAddress(_vault);
 
         _safeERC20Transfer(token_, _vault, amount_);
 
@@ -57,7 +55,6 @@ abstract contract FundForwarder is Context, Transferable, IFundForwarder {
     function recoverNFT(IERC721 token_, uint256 tokenId_) external {
         __checkValidAddress(address(token_));
         address _vault = vault();
-        __checkValidAddress(_vault);
 
         token_.safeTransferFrom(
             address(this),
@@ -75,7 +72,6 @@ abstract contract FundForwarder is Context, Transferable, IFundForwarder {
     function recoverNFTs(IERC721Enumerable token_) external {
         __checkValidAddress(address(token_));
         address _vault = vault();
-        __checkValidAddress(_vault);
         uint256 length = token_.balanceOf(address(this));
         uint256[] memory tokenIds = new uint256[](length);
         bytes memory recoverHeader = safeRecoverHeader();
@@ -100,7 +96,6 @@ abstract contract FundForwarder is Context, Transferable, IFundForwarder {
     /// @inheritdoc IFundForwarder
     function recoverNative() external {
         address _vault = vault();
-        __checkValidAddress(_vault);
         uint256 balance = address(this).balance;
         _safeNativeTransfer(_vault, balance);
 
@@ -113,6 +108,8 @@ abstract contract FundForwarder is Context, Transferable, IFundForwarder {
         assembly {
             vault_ := sload(__vault.slot)
         }
+
+        __checkValidAddress(vault_);
     }
 
     function safeRecoverHeader() public pure virtual returns (bytes memory);

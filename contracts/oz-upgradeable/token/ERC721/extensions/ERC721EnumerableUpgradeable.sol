@@ -203,9 +203,11 @@ abstract contract ERC721EnumerableUpgradeable is
         // When the token to delete is the last token, the swap operation is unnecessary. However, since this occurs so
         // rarely (when the last minted token is burnt) that we still do the swap here to avoid the gas cost of adding
         // an 'if' statement (like in _removeTokenFromOwnerEnumeration)
-        uint256 lastTokenId = _allTokens[_allTokens.length - 1];
+        uint256 lastTokenId;
 
-        _allTokens[tokenIndex] = lastTokenId; // Move the last token to the slot of the to-delete token
+        _allTokens[tokenIndex] = lastTokenId = _allTokens[
+            _allTokens.length - 1
+        ]; // Move the last token to the slot of the to-delete token
 
         // This also deletes the contents at the last position of the array
         assembly {

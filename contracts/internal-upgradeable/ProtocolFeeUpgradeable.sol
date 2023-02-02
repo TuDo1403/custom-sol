@@ -51,7 +51,10 @@ abstract contract ProtocolFeeUpgradeable is
      * @param token_ Token address of the fee
      * @param amount_ Fee amount
      */
-    function _setRoyalty(IERC20Upgradeable token_, uint96 amount_) internal {
+    function _setRoyalty(
+        IERC20Upgradeable token_,
+        uint96 amount_
+    ) internal virtual {
         assembly {
             sstore(__feeInfo.slot, or(shl(160, amount_), token_))
         }

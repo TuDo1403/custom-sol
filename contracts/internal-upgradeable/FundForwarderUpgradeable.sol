@@ -26,9 +26,8 @@ abstract contract FundForwarderUpgradeable is
      */
     receive() external payable virtual {
         address _vault = vault();
-        __checkValidAddress(_vault);
 
-        (bool ok, ) = _vault.call{value: msg.value}("forward");
+        (bool ok, ) = _vault.call{value: msg.value}(safeRecoverHeader());
         if (!ok) revert FundForwarder__ForwardFailed();
 
         emit Forwarded(_msgSender(), msg.value);
@@ -46,13 +45,10 @@ abstract contract FundForwarderUpgradeable is
         _changeVault(vault_);
     }
 
-    function changeVault(address vault_) external virtual;
-
     /// @inheritdoc IFundForwarderUpgradeable
     function recoverERC20(IERC20Upgradeable token_, uint256 amount_) external {
         __checkValidAddress(address(token_));
         address _vault = vault();
-        __checkValidAddress(_vault);
 
         _safeERC20Transfer(token_, _vault, amount_);
 
@@ -65,9 +61,13 @@ abstract contract FundForwarderUpgradeable is
     function recoverNFT(IERC721Upgradeable token_, uint256 tokenId_) external {
         __checkValidAddress(address(token_));
         address _vault = vault();
-        __checkValidAddress(_vault);
 
-        token_.safeTransferFrom(address(this), _vault, tokenId_);
+        token_.safeTransferFrom(
+            address(this),
+            _vault,
+            tokenId_,
+            safeRecoverHeader()
+        );
 
         emit Recovered(_msgSender(), address(token_), tokenId_);
 
@@ -78,14 +78,15 @@ abstract contract FundForwarderUpgradeable is
     function recoverNFTs(IERC721EnumerableUpgradeable token_) external {
         __checkValidAddress(address(token_));
         address _vault = vault();
-        __checkValidAddress(_vault);
         uint256 length = token_.balanceOf(address(this));
         uint256[] memory tokenIds = new uint256[](length);
+        bytes memory recoverHeader = safeRecoverHeader();
         for (uint256 i; i < length; ) {
             token_.safeTransferFrom(
                 address(this),
                 _vault,
-                tokenIds[i] = token_.tokenOfOwnerByIndex(address(this), i)
+                tokenIds[i] = token_.tokenOfOwnerByIndex(address(this), i),
+                recoverHeader
             );
 
             unchecked {
@@ -101,7 +102,6 @@ abstract contract FundForwarderUpgradeable is
     /// @inheritdoc IFundForwarderUpgradeable
     function recoverNative() external {
         address _vault = vault();
-        __checkValidAddress(_vault);
 
         uint256 balance = address(this).balance;
 
@@ -114,6 +114,8 @@ abstract contract FundForwarderUpgradeable is
         assembly {
             vault_ := sload(__vault.slot)
         }
+
+        __checkValidAddress(vault_);
     }
 
     /**

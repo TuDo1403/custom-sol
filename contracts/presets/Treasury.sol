@@ -130,22 +130,16 @@ contract Treasury is
             mstore(32, keccak256(0, 64))
         }
 
-        bytes32 key;
         for (uint256 i; i < length; ) {
             assembly {
-                let idx := shl(i, 5)
-                mstore(0, calldataload(add(add(ids_.offset, 0x20), idx)))
-                key := keccak256(0, 64)
+                let idx := shl(5, i)
+                mstore(0, calldataload(add(ids_.offset, idx)))
+                let key := keccak256(0, 64)
                 sstore(
                     key,
-                    add(
-                        sload(key),
-                        calldataload(add(add(values_.offset, 0x20), idx))
-                    )
+                    add(calldataload(add(values_.offset, idx)), sload(key))
                 )
-            }
-            unchecked {
-                ++i;
+                i := add(1, i)
             }
         }
 
@@ -191,7 +185,9 @@ contract Treasury is
             token_.supportsInterface(type(IERC1155).interfaceId)
         ) revert Treasury__InvalidTokenAddress();
 
-        erc20Balances[token_] += value_;
+        unchecked {
+            erc20Balances[token_] += value_;
+        }
 
         emit Received(
             abi.decode(data_, (address)),
@@ -238,15 +234,6 @@ contract Treasury is
         _withdraw(token_, to_, value_, abi.encode(amount_));
     }
 
-    // function safeRecoverHeader() external pure override returns (bytes32) {
-    //     /// @dev value is equal keccak256("SAFE_RECOVER_HEADER")
-    //     return 0x556d79614195ebefcc31ab1ee514b9953934b87d25857902370689cbd29b49de;
-    // }
-
-    // function safeTransferHeader() external pure override returns (bytes32) {
-    //     /// @dev value is equal keccak256("SAFE_TRANSFER")
-    //     return 0xc9627ddb76e5ee80829319617b557cc79498bbbc5553d8c632749a7511825f5d;
-    // }
 
     function withdraw(
         address token_,
