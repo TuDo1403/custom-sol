@@ -19,9 +19,19 @@ abstract contract ProtocolFeeUpgradeable is
 {
     FeeInfo private __feeInfo;
 
-    function __ProtocolFee_init() internal onlyInitializing {}
+    function __ProtocolFee_init(
+        IERC20Upgradeable token_,
+        uint96 feeAmt_
+    ) internal onlyInitializing {
+        __ProtocolFee_init_unchained(token_, feeAmt_);
+    }
 
-    function __ProtocolFee_init_unchained() internal onlyInitializing {}
+    function __ProtocolFee_init_unchained(
+        IERC20Upgradeable token_,
+        uint96 feeAmt_
+    ) internal onlyInitializing {
+        _setRoyalty(token_, feeAmt_);
+    }
 
     /// @inheritdoc IProtocolFeeUpgradeable
     function feeInfo()
