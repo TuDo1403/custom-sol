@@ -78,7 +78,7 @@ abstract contract AuthorityUpgradeable is
         _setUserStatus(account_, status_);
     }
 
-    function __Authority__init(
+    function __Authority_init(
         address admin_,
         bytes calldata data_,
         address[] calldata operators_,
