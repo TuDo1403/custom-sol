@@ -18,6 +18,8 @@ interface IProtocolFeeUpgradeable {
         uint96 indexed royalty
     );
 
+    function setRoyalty(IERC20Upgradeable token_, uint96 feeAmt_) external;
+
     /**
      * @dev Returns the fee information
      * @return  token feeAmt Token address of the fee and the fee amount
