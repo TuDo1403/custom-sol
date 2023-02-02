@@ -43,7 +43,7 @@ abstract contract UUPSUpgradeable is
      * fail.
      */
     modifier onlyProxy() {
-        address self;
+        address self = __self;
         if (address(this) == self) revert UUPSUpgradeable__OnlyDelegateCall();
         if (_getImplementation() != self)
             revert UUPSUpgradeable__OnlyActiveProxy();
