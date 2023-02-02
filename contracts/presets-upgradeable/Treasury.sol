@@ -59,8 +59,9 @@ contract Treasury is
         emit BalanceInitiated(_msgSender(), msg.value);
     }
 
-    receive() external payable virtual override {
-        revert Treasury__MistakenTransfer();
+    receive() external payable virtual override onlyRole(Roles.PROXY_ROLE) {
+        safeReceivedNativeBalance += msg.value;
+        emit Received(_msgSender(), address(0), abi.encode(msg.value), "");
     }
 
     fallback() external payable virtual override {
@@ -68,7 +69,8 @@ contract Treasury is
         if (_checkMesage(msg.data)) return;
 
         address operator = _msgSender();
-        _checkBlacklist(operator);
+        _checkRole(Roles.PROXY_ROLE, operator);
+
         emit Received(operator, address(0), abi.encode(msg.value), msg.data);
 
         safeReceivedNativeBalance += msg.value;
