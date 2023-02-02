@@ -234,7 +234,6 @@ contract Treasury is
         _withdraw(token_, to_, value_, abi.encode(amount_));
     }
 
-
     function withdraw(
         address token_,
         address to_,

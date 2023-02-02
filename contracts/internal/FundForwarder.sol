@@ -123,7 +123,11 @@ abstract contract FundForwarder is Context, Transferable, IFundForwarder {
     function _changeVault(address vault_) internal {
         __checkValidAddress(vault_);
 
-        emit VaultUpdated(vault(), vault_);
+        address old;
+        assembly {
+            old := sload(__vault.slot)
+        }
+        emit VaultUpdated(old, vault_);
 
         assembly {
             sstore(__vault.slot, vault_)
