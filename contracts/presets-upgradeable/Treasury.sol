@@ -44,14 +44,16 @@ contract Treasury is
     mapping(address => mapping(uint256 => uint256)) public erc1155Balances;
 
     constructor(
-        IAuthority admin_,
+        IAuthority authority_,
         string memory name_
     )
         payable
         onlyProxy
         Signable(name_, "1")
         Manager(
-            address(admin_) == address(0) ? IAuthority(_msgSender()) : admin_,
+            address(authority_) == address(0)
+                ? IAuthority(_msgSender())
+                : authority_,
             Roles.TREASURER_ROLE
         )
     {
