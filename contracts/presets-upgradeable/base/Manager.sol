@@ -137,5 +137,7 @@ abstract contract Manager is Context, IManager {
         (ok, ) = _authority().staticcall(
             abi.encodeCall(IAccessControl.hasRole, (role_, account_))
         );
+
+        if (!ok) revert Manager__Unauthorized();
     }
 }

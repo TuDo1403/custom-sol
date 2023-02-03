@@ -152,6 +152,8 @@ abstract contract ManagerUpgradeable is
         (ok, ) = _authority().staticcall(
             abi.encodeCall(IAccessControlUpgradeable.hasRole, (role_, account_))
         );
+
+        if (!ok) revert Manager__Unauthorized();
     }
 
     function _authorizeUpgrade(

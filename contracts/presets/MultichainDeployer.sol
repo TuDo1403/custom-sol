@@ -16,8 +16,8 @@ contract MultichainDeployer is Create2Deployer, IMultichainDeployer {
         uint256 amount_,
         bytes32 salt_,
         bytes calldata bytecode_
-    ) external payable {
-        _deploy(amount_, salt_, bytecode_);
+    ) external payable returns (address) {
+        return _deploy(amount_, salt_, bytecode_);
     }
 
     function isDeployerOf(
