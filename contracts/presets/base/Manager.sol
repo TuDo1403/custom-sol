@@ -91,10 +91,11 @@ abstract contract Manager is Context, IManager {
      * @custom:throws Manager__Blacklisted if the given account is blacklisted.
      */
     function _checkBlacklist(address account_) internal view {
-        (bool ok, ) = _authority().staticcall(
+        (bool ok, bytes memory returnData) = _authority().staticcall(
             abi.encodeCall(IBlacklistable.isBlacklisted, (account_))
         );
-        if (ok) revert Manager__Blacklisted();
+        if (!ok) revert Manager__ExecutionFailed();
+        if (abi.decode(returnData, (bool))) revert Manager__Blacklisted();
     }
 
     /**
@@ -116,25 +117,30 @@ abstract contract Manager is Context, IManager {
     }
 
     function _requirePaused() internal view {
-        (bool ok, ) = _authority().staticcall(
+        (bool ok, bytes memory returnData) = _authority().staticcall(
             abi.encodeCall(IAuthority.paused, ())
         );
-        if (!ok) revert Manager__NotPaused();
+        if (!ok) revert Manager__ExecutionFailed();
+        if (!abi.decode(returnData, (bool))) revert Manager__NotPaused();
     }
 
     function _requireNotPaused() internal view {
-        (bool ok, ) = _authority().staticcall(
+        (bool ok, bytes memory returnData) = _authority().staticcall(
             abi.encodeCall(IAuthority.paused, ())
         );
-        if (ok) revert Manager__Paused();
+        if (!ok) revert Manager__ExecutionFailed();
+        if (abi.decode(returnData, (bool))) revert Manager__Paused();
     }
 
     function _hasRole(
         bytes32 role_,
         address account_
-    ) internal view returns (bool ok) {
-        (ok, ) = _authority().staticcall(
+    ) internal view returns (bool) {
+        (bool ok, bytes memory returnData) = _authority().staticcall(
             abi.encodeCall(IAccessControl.hasRole, (role_, account_))
         );
+
+        if (!ok) revert Manager__ExecutionFailed();
+        return abi.decode(returnData, (bool));
     }
 }

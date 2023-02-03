@@ -11,6 +11,7 @@ interface IManager {
     error Manager__Unauthorized();
     error Manager__RequestFailed();
     error Manager__InvalidArgument();
+    error Manager__ExecutionFailed();
 
     event AuthorityUpdated(
         address indexed operator,
