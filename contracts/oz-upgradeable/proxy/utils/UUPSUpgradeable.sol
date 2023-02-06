@@ -43,10 +43,7 @@ abstract contract UUPSUpgradeable is
      * fail.
      */
     modifier onlyProxy() {
-        address self = __self;
-        if (address(this) == self) revert UUPSUpgradeable__OnlyDelegateCall();
-        if (_getImplementation() != self)
-            revert UUPSUpgradeable__OnlyActiveProxy();
+        __checkProxy();
         _;
     }
 
@@ -55,7 +52,7 @@ abstract contract UUPSUpgradeable is
      * callable on the implementing contract but not through proxies.
      */
     modifier notDelegated() {
-        if (address(this) != __self) revert UUPSUpgradeable__OnlyCall();
+        __checkDelegated();
         _;
     }
 
@@ -117,6 +114,17 @@ abstract contract UUPSUpgradeable is
      * ```
      */
     function _authorizeUpgrade(address newImplementation) internal virtual;
+
+    function __checkProxy() private view {
+        address self = __self;
+        if (address(this) == self) revert UUPSUpgradeable__OnlyDelegateCall();
+        if (_getImplementation() != self)
+            revert UUPSUpgradeable__OnlyActiveProxy();
+    }
+
+    function __checkDelegated() private view {
+        if (address(this) != __self) revert UUPSUpgradeable__OnlyCall();
+    }
 
     /**
      * @dev This empty reserved space is put in place to allow future versions to add new

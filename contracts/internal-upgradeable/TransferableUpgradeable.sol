@@ -1,8 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "../oz-upgradeable/proxy/utils/Initializable.sol";
-import "../oz-upgradeable/token/ERC20/IERC20Upgradeable.sol";
+import {Initializable} from "../oz-upgradeable/proxy/utils/Initializable.sol";
+import {
+    IERC20Upgradeable
+} from "../oz-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 
 error Transferable__TransferFailed();
 error Transferable__InvalidArguments();
@@ -23,18 +25,26 @@ abstract contract TransferableUpgradeable is Initializable {
      * @param value_ Amount of tokens or Ether to transfer
      */
     function _safeTransferFrom(
-        IERC20Upgradeable token_,
+        address token_,
         address from_,
         address to_,
-        uint256 value_
+        uint256 value_,
+        bytes memory data_
     ) internal virtual {
         __checkValidTransfer(to_, value_);
-        bool success;
-        if (address(token_) == address(0))
-            success = __nativeTransfer(to_, value_);
-        else success = __ERC20TransferFrom(token_, from_, to_, value_);
 
-        if (!success) revert Transferable__TransferFailed();
+        if (
+            token_ == address(0)
+                ? _nativeTransfer(to_, value_, data_)
+                : _ERC20TransferFrom(
+                    IERC20Upgradeable(token_),
+                    from_,
+                    to_,
+                    value_
+                )
+        ) return;
+
+        revert Transferable__TransferFailed();
     }
 
     /**
@@ -44,17 +54,20 @@ abstract contract TransferableUpgradeable is Initializable {
      * @param value_ Amount of tokens or Ether to transfer
      */
     function _safeTransfer(
-        IERC20Upgradeable token_,
+        address token_,
         address to_,
-        uint256 value_
+        uint256 value_,
+        bytes memory data_
     ) internal virtual {
         __checkValidTransfer(to_, value_);
-        bool success;
-        if (address(token_) == address(0))
-            success = __nativeTransfer(to_, value_);
-        else success = __ERC20Transfer(token_, to_, value_);
 
-        if (!success) revert Transferable__TransferFailed();
+        if (
+            token_ == address(0)
+                ? _nativeTransfer(to_, value_, data_)
+                : _ERC20Transfer(IERC20Upgradeable(token_), to_, value_)
+        ) return;
+
+        revert Transferable__TransferFailed();
     }
 
     /**
@@ -64,10 +77,11 @@ abstract contract TransferableUpgradeable is Initializable {
      */
     function _safeNativeTransfer(
         address to_,
-        uint256 amount_
+        uint256 amount_,
+        bytes memory data_
     ) internal virtual {
         __checkValidTransfer(to_, amount_);
-        if (!__nativeTransfer(to_, amount_))
+        if (!_nativeTransfer(to_, amount_, data_))
             revert Transferable__TransferFailed();
     }
 
@@ -77,7 +91,7 @@ abstract contract TransferableUpgradeable is Initializable {
         uint256 amount_
     ) internal virtual {
         __checkValidTransfer(to_, amount_);
-        if (!__ERC20Transfer(token_, to_, amount_))
+        if (!_ERC20Transfer(token_, to_, amount_))
             revert Transferable__TransferFailed();
     }
 
@@ -89,20 +103,19 @@ abstract contract TransferableUpgradeable is Initializable {
     ) internal virtual {
         __checkValidTransfer(to_, amount_);
 
-        if (!__ERC20TransferFrom(token_, from_, to_, amount_))
+        if (!_ERC20TransferFrom(token_, from_, to_, amount_))
             revert Transferable__TransferFailed();
     }
 
-    function __nativeTransfer(
+    function _nativeTransfer(
         address to_,
-        uint256 amount_
-    ) private returns (bool success) {
-        assembly {
-            success := call(gas(), to_, amount_, 0, 0, 0, 0)
-        }
+        uint256 amount_,
+        bytes memory data_
+    ) internal virtual returns (bool success) {
+        (success, ) = to_.call{value: amount_}(data_);
     }
 
-    function __ERC20Transfer(
+    function _ERC20Transfer(
         IERC20Upgradeable token_,
         address to_,
         uint256 value_
@@ -129,7 +142,7 @@ abstract contract TransferableUpgradeable is Initializable {
         }
     }
 
-    function __ERC20TransferFrom(
+    function _ERC20TransferFrom(
         IERC20Upgradeable token_,
         address from_,
         address to_,

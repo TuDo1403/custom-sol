@@ -14,7 +14,6 @@ abstract contract AccessControlEnumerable is
     IAccessControlEnumerable,
     AccessControl
 {
-    using BitMap256 for BitMap256.BitMap;
     using EnumerableSet256 for EnumerableSet256.AddressSet;
 
     mapping(bytes32 => EnumerableSet256.AddressSet) internal _roleMembers;

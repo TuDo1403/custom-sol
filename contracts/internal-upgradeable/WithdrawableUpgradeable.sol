@@ -1,11 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "../oz-upgradeable/utils/ContextUpgradeable.sol";
+import {
+    ContextUpgradeable
+} from "../oz-upgradeable/utils/ContextUpgradeable.sol";
 
-import "./TransferableUpgradeable.sol";
+import {TransferableUpgradeable} from "./TransferableUpgradeable.sol";
 
-import "./interfaces/IWithdrawableUpgradeable.sol";
+import {
+    IWithdrawableUpgradeable
+} from "./interfaces/IWithdrawableUpgradeable.sol";
 
 /**
  * @dev Allows tokens and Ether to be withdrawn from the contract

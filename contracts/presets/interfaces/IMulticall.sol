@@ -2,22 +2,23 @@
 pragma solidity ^0.8.17;
 
 interface IMulticall {
-    error Multicall__LengthMismatch();
-    error Multicall__ExecutionFailed();
-    error Multicall__NonDelegateCall();
+    error Multicall__DelegatecallNotAllowed();
+
+    struct CallData {
+        address target;
+        uint256 value;
+        bytes data;
+    }
 
     event BatchExecuted(
-        address indexed operator,
+        address indexed account,
         uint256 indexed value,
-        address[] targets,
-        uint256[] values,
-        bytes[] data,
+        CallData[] callData,
         bytes[] results
     );
 
     function multicall(
-        address[] calldata targets_,
-        uint256[] calldata values_,
-        bytes[] calldata data_
+        CallData[] calldata calldata_,
+        bytes calldata data_
     ) external payable returns (bytes[] memory results);
 }

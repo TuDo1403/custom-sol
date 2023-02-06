@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "../../oz/token/ERC20/IERC20.sol";
+import {IERC20} from "../../oz/token/ERC20/IERC20.sol";
 
 import {
     IERC721,
@@ -9,7 +9,6 @@ import {
 } from "../../oz/token/ERC721/extensions/IERC721Enumerable.sol";
 
 interface IFundForwarder {
-    error FundForwarder__ForwardFailed();
     error FundForwarder__InvalidArgument();
 
     /**

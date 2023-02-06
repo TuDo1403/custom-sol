@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "./BitMap256.sol";
+import {BitMap256} from "./BitMap256.sol";
 
 library Array {
     using BitMap256 for uint256;
@@ -17,8 +17,14 @@ library Array {
             for (uint256 i; i < length; ) {
                 unchecked {
                     val = arr_[i];
-                    while (length > i && bitmap.get(val)) val = arr_[--length];
-                    bitmap = bitmap.set(arr_[i] = val);
+                    while (
+                        length > i &&
+                        bitmap.get({value_: val, shouldHash_: true})
+                    ) val = arr_[--length];
+                    bitmap = bitmap.set({
+                        value_: arr_[i] = val,
+                        shouldHash_: true
+                    });
                     ++i;
                 }
             }

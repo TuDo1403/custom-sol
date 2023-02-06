@@ -49,8 +49,10 @@ abstract contract Ownable is Context {
     /**
      * @dev Returns the address of the current owner.
      */
-    function owner() public view virtual returns (address) {
-        return __owner.fromFirst20Bytes();
+    function owner() public view virtual returns (address _owner) {
+        assembly {
+            _owner := sload(__owner.slot)
+        }
     }
 
     /**
@@ -87,6 +89,8 @@ abstract contract Ownable is Context {
      */
     function _transferOwnership(address newOwner) internal virtual {
         emit OwnershipTransferred(__owner.fromFirst20Bytes(), newOwner);
-        __owner = newOwner.fillLast12Bytes();
+        assembly {
+            sstore(__owner.slot, newOwner)
+        }
     }
 }

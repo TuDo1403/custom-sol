@@ -35,8 +35,7 @@ library Create2Upgradeable {
         uint256 amount,
         bytes32 salt,
         bytes memory bytecode
-    ) internal returns (address) {
-        address addr;
+    ) internal returns (address addr) {
         if (address(this).balance < amount)
             revert Create2__InsufficientBalance();
         if (bytecode.length == 0) revert Create2__ZeroLengthByteCode();
@@ -45,7 +44,6 @@ library Create2Upgradeable {
             addr := create2(amount, add(bytecode, 0x20), mload(bytecode), salt)
         }
         if (addr == address(0)) revert Create2__DeploymentFailed();
-        return addr;
     }
 
     /**

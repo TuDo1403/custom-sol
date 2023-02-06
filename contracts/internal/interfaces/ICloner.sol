@@ -2,13 +2,11 @@
 pragma solidity ^0.8.17;
 
 interface ICloner {
-    error Cloner__InitCloneFailed();
-
     event Cloned(
-        address indexed implement,
+        address indexed cloner,
+        address implement,
         address indexed clone,
-        bytes32 indexed salt,
-        bytes32 bytecodeHash
+        bytes32 indexed salt
     );
 
     event ImplementChanged(address indexed from, address indexed to);

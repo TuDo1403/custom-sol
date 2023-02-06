@@ -1,15 +1,17 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "../oz-upgradeable/utils/ContextUpgradeable.sol";
+import {
+    ContextUpgradeable
+} from "../oz-upgradeable/utils/ContextUpgradeable.sol";
 import {
     ECDSAUpgradeable,
     EIP712Upgradeable
 } from "../oz-upgradeable/utils/cryptography/draft-EIP712Upgradeable.sol";
 
-import "./interfaces/ISignableUpgradeable.sol";
+import {ISignableUpgradeable} from "./interfaces/ISignableUpgradeable.sol";
 
-import "../libraries/Bytes32Address.sol";
+import {Bytes32Address} from "../libraries/Bytes32Address.sol";
 
 /**
  * @title SignableUpgradeable

@@ -18,10 +18,11 @@ library BitMaps {
         BitMap storage bitmap,
         uint256 index
     ) internal view returns (bool isSet) {
-        uint256 value = bitmap.map[index >> 8] & (1 << (index & 0xff));
-
         assembly {
-            isSet := value // Assign isSet to whether the value is non zero.
+            mstore(0, shr(8, index))
+            mstore(32, bitmap.slot)
+            // Assign isSet to whether the value is non zero.
+            isSet := and(sload(keccak256(0, 64)), shl(and(index, 0xff), 1))
         }
     }
 
@@ -33,9 +34,12 @@ library BitMaps {
         uint256 index,
         bool shouldSet
     ) internal {
-        uint256 value = bitmap.map[index >> 8];
-
         assembly {
+            mstore(0, shr(8, index))
+            mstore(32, bitmap.slot)
+            let mapKey := keccak256(0, 64)
+            let value := sload(mapKey)
+
             // The following sets the bit at `shift` without branching.
             let shift := and(index, 0xff)
             // Isolate the bit at `shift`.
@@ -46,27 +50,35 @@ library BitMaps {
             // Only the bit at `shift` will be flipped if they differ.
             // Every other bit will stay the same, as they are xor'ed with zeroes.
             value := xor(value, shl(shift, x))
+
+            sstore(mapKey, value)
         }
-        bitmap.map[index >> 8] = value;
     }
 
     /**
      * @dev Sets the bit at `index`.
      */
     function set(BitMap storage bitmap, uint256 index) internal {
-        bitmap.map[index >> 8] |= (1 << (index & 0xff));
+        assembly {
+            mstore(0, shr(8, index))
+            mstore(32, bitmap.slot)
+            let key := keccak256(0, 64)
+            let value := sload(key)
+            value := or(value, shl(and(index, 0xff), 1))
+            sstore(key, value)
+        }
     }
 
     function setBatch(
         BitMap storage bitmap_,
-        uint256[] memory values_
+        uint256[] calldata values_
     ) internal {
         assembly {
-            let length := mload(values_)
-            let i := add(values_, 0x20)
+            let length := values_.length
+            let i := add(calldataload(values_.offset), 0x20)
             mstore(0x20, bitmap_.slot)
             for {
-                let end := add(i, mul(length, 0x20))
+                let end := add(i, shl(5, length))
             } lt(i, end) {
                 i := add(i, 0x20)
             } {

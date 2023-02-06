@@ -18,7 +18,7 @@ contract BitMap256Test {
         assembly {
             uintX := x
         }
-        return _bitmap.unsafeGet(uintX);
+        return _bitmap.get({value_: uintX, shouldHash_: false});
     }
 
     //43863
@@ -27,7 +27,7 @@ contract BitMap256Test {
         assembly {
             uintX := x
         }
-        _bitmap.unsafeSet(uintX);
+        _bitmap.set({value_: uint256(uintX), shouldHash_: false});
     }
 
     // //135170
@@ -45,6 +45,6 @@ contract BitMap256Test {
         assembly {
             uintX := x
         }
-        _bitmap.unset(uintX);
+        _bitmap.unset({value_: uintX, shouldHash_: true});
     }
 }

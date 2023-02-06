@@ -6,9 +6,9 @@ import {
     ERC20Permit
 } from "../oz/token/ERC20/extensions/draft-ERC20Permit.sol";
 
-import "../internal/Transferable.sol";
+import {Transferable} from "../internal/Transferable.sol";
 
-import "./interfaces/IWNT.sol";
+import {IWNT} from "./interfaces/IWNT.sol";
 
 /// @notice Minimalist and modern Wrapped Ether implementation.
 /// @author Solmate (https://github.com/transmissions11/solmate/blob/main/src/tokens/WETH.sol)
@@ -32,7 +32,7 @@ contract WNT is IWNT, ERC20Permit, Transferable {
 
         emit Withdrawal(sender, amount);
 
-        _safeNativeTransfer(sender, amount);
+        _safeNativeTransfer(sender, amount, "");
     }
 
     receive() external payable virtual {

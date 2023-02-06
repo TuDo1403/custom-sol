@@ -1,10 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "../oz-upgradeable/utils/ContextUpgradeable.sol";
-import "../oz-upgradeable/proxy/utils/Initializable.sol";
+import {Initializable} from "../oz-upgradeable/proxy/utils/Initializable.sol";
+import {
+    ContextUpgradeable
+} from "../oz-upgradeable/utils/ContextUpgradeable.sol";
 
-import "./interfaces/IProtocolFeeUpgradeable.sol";
+import {
+    IERC20Upgradeable,
+    IProtocolFeeUpgradeable
+} from "./interfaces/IProtocolFeeUpgradeable.sol";
 
 /**
  * @title ProtocolFeeUpgradeable

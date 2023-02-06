@@ -64,24 +64,41 @@ abstract contract ERC20PermitUpgradeable is
     ) public virtual override {
         if (block.timestamp > deadline) revert ERC20Permit__Expired();
 
-        _verify(
-            owner,
-            keccak256(
-                abi.encode(
-                    _PERMIT_TYPEHASH,
-                    owner,
-                    spender,
-                    value,
-                    _useNonce(owner.fillLast12Bytes()),
-                    deadline
-                )
-            ),
-            v,
-            r,
-            s
-        );
+        bytes32 digest;
+        bytes32 allowanceKey;
+        uint256 nonce;
+        bytes32 nonceKey;
+        assembly {
+            mstore(0, owner)
+            mstore(32, _nonces.slot)
+            nonceKey := keccak256(0, 64)
+            nonce := sload(nonceKey)
 
-        _allowance[owner][spender] = value;
+            mstore(32, _allowance.slot)
+            allowanceKey := keccak256(0, 64)
+
+            let freeMemPtr := mload(0x40)
+
+            mstore(freeMemPtr, _PERMIT_TYPEHASH)
+            mstore(add(freeMemPtr, 32), owner)
+            mstore(add(freeMemPtr, 64), spender)
+            mstore(add(freeMemPtr, 96), value)
+            mstore(add(freeMemPtr, 128), nonce)
+            mstore(add(freeMemPtr, 160), deadline)
+            digest := keccak256(freeMemPtr, 192)
+        }
+
+        _verify(owner, digest, v, r, s);
+
+        assembly {
+            sstore(nonceKey, add(1, nonce))
+        }
+
+        assembly {
+            mstore(0, spender)
+            mstore(32, allowanceKey)
+            sstore(keccak256(0, 64), value)
+        }
     }
 
     /**

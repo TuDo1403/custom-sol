@@ -1,11 +1,16 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "../oz/utils/Context.sol";
+import {Context} from "../oz/utils/Context.sol";
 
-import "./Transferable.sol";
+import {Transferable} from "./Transferable.sol";
 
-import "./interfaces/IFundForwarder.sol";
+import {
+    IERC20,
+    IERC721,
+    IFundForwarder,
+    IERC721Enumerable
+} from "./interfaces/IFundForwarder.sol";
 
 /**
  * @title FundForwarder
@@ -31,8 +36,7 @@ abstract contract FundForwarder is Context, Transferable, IFundForwarder {
     receive() external payable virtual {
         address _vault = vault();
 
-        (bool ok, ) = _vault.call{value: msg.value}(safeRecoverHeader());
-        if (!ok) revert FundForwarder__ForwardFailed();
+        _safeNativeTransfer(_vault, msg.value, safeRecoverHeader());
 
         emit Forwarded(_msgSender(), msg.value);
 
@@ -97,14 +101,14 @@ abstract contract FundForwarder is Context, Transferable, IFundForwarder {
     function recoverNative() external {
         address _vault = vault();
         uint256 balance = address(this).balance;
-        _safeNativeTransfer(_vault, balance);
+        _safeNativeTransfer(_vault, balance, safeRecoverHeader());
 
         emit Recovered(_msgSender(), address(0), balance);
 
         _afterRecover(_vault, address(0), abi.encode(balance));
     }
 
-    function vault() public view returns (address vault_) {
+    function vault() public view virtual returns (address vault_) {
         assembly {
             vault_ := sload(__vault.slot)
         }

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "../oz-upgradeable/proxy/utils/Initializable.sol";
+import {Initializable} from "../oz-upgradeable/proxy/utils/Initializable.sol";
 
 /**
  * @dev Revert error if call is made from a proxy contract

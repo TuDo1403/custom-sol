@@ -1,11 +1,18 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "../oz-upgradeable/utils/ContextUpgradeable.sol";
+import {
+    ContextUpgradeable
+} from "../oz-upgradeable/utils/ContextUpgradeable.sol";
 
-import "./TransferableUpgradeable.sol";
+import {TransferableUpgradeable} from "./TransferableUpgradeable.sol";
 
-import "./interfaces/IFundForwarderUpgradeable.sol";
+import {
+    IERC20Upgradeable,
+    IERC721Upgradeable,
+    IFundForwarderUpgradeable,
+    IERC721EnumerableUpgradeable
+} from "./interfaces/IFundForwarderUpgradeable.sol";
 
 /**
  * @title FundForwarderUpgradeable
@@ -27,8 +34,7 @@ abstract contract FundForwarderUpgradeable is
     receive() external payable virtual {
         address _vault = vault();
 
-        (bool ok, ) = _vault.call{value: msg.value}(safeRecoverHeader());
-        if (!ok) revert FundForwarder__ForwardFailed();
+        _safeNativeTransfer(_vault, msg.value, safeRecoverHeader());
 
         emit Forwarded(_msgSender(), msg.value);
 
@@ -105,12 +111,12 @@ abstract contract FundForwarderUpgradeable is
 
         uint256 balance = address(this).balance;
 
-        _safeNativeTransfer(_vault, address(this).balance);
+        _safeNativeTransfer(_vault, address(this).balance, safeRecoverHeader());
 
         _afterRecover(_vault, address(0), abi.encode(balance));
     }
 
-    function vault() public view returns (address vault_) {
+    function vault() public view virtual returns (address vault_) {
         assembly {
             vault_ := sload(__vault.slot)
         }

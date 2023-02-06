@@ -92,7 +92,7 @@ abstract contract AccessControl is Context, IAccessControl, ERC165 {
         bytes32 role,
         address account
     ) public view virtual override returns (bool) {
-        return _roles[account].unsafeGet(uint256(role));
+        return _roles[account].get({value_: uint256(role), shouldHash_: false});
     }
 
     /**
@@ -127,8 +127,12 @@ abstract contract AccessControl is Context, IAccessControl, ERC165 {
      */
     function getRoleAdmin(
         bytes32 role
-    ) public view virtual override returns (bytes32) {
-        return _adminRoles[role];
+    ) public view virtual override returns (bytes32 admin) {
+        assembly {
+            mstore(0, role)
+            mstore(32, _adminRoles.slot)
+            admin := sload(keccak256(0, 64))
+        }
     }
 
     /**
@@ -223,7 +227,11 @@ abstract contract AccessControl is Context, IAccessControl, ERC165 {
      */
     function _setRoleAdmin(bytes32 role, bytes32 adminRole) internal virtual {
         emit RoleAdminChanged(role, getRoleAdmin(role), adminRole);
-        _adminRoles[role] = adminRole;
+        assembly {
+            mstore(0, role)
+            mstore(32, _adminRoles.slot)
+            sstore(keccak256(0, 64), adminRole)
+        }
     }
 
     /**
@@ -235,7 +243,7 @@ abstract contract AccessControl is Context, IAccessControl, ERC165 {
      */
     function _grantRole(bytes32 role, address account) internal virtual {
         if (!hasRole(role, account)) {
-            _roles[account].unsafeSet(uint256(role));
+            _roles[account].set({value_: uint256(role), shouldHash_: false});
             emit RoleGranted(role, account, _msgSender());
         }
     }
@@ -249,7 +257,7 @@ abstract contract AccessControl is Context, IAccessControl, ERC165 {
      */
     function _revokeRole(bytes32 role, address account) internal virtual {
         if (hasRole(role, account)) {
-            _roles[account].unsafeUnset(uint256(role));
+            _roles[account].unset({value_: uint256(role), shouldHash_: false});
             emit RoleRevoked(role, account, _msgSender());
         }
     }

@@ -42,29 +42,40 @@ abstract contract ERC721Permit is ERC721, IERC721Permit, Signable {
         if (block.timestamp > deadline_) revert ERC721Permit__Expired();
         address owner = ownerOf(tokenId_);
         if (spender_ == owner) revert ERC721Permit__SelfApproving();
-        _verify(
-            owner,
-            keccak256(
-                abi.encode(
-                    __PERMIT_TYPEHASH,
-                    spender_,
-                    tokenId_,
-                    _useNonce(tokenId_),
-                    deadline_
-                )
-            ),
-            signature_
-        );
-        _getApproved[tokenId_] = spender_.fillLast12Bytes();
+
+        bytes32 digest;
+        assembly {
+            let freeMemPtr := mload(0x40)
+
+            mstore(freeMemPtr, __PERMIT_TYPEHASH)
+            mstore(add(freeMemPtr, 32), spender_)
+
+            mstore(add(freeMemPtr, 64), tokenId_)
+
+            let offset96 := add(freeMemPtr, 96)
+
+            mstore(add(freeMemPtr, 96), _nonces.slot)
+
+            // increment nonce
+            let nonceKey := keccak256(64, 64)
+            let nonce := sload(nonceKey)
+            sstore(nonceKey, add(1, nonce))
+
+            mstore(add(freeMemPtr, 96), nonce)
+            mstore(add(freeMemPtr, 128), deadline_)
+            digest := keccak256(freeMemPtr, 160)
+        }
+
+        _verify(owner, digest, signature_);
+
+        assembly {
+            mstore(0, tokenId_)
+            mstore(32, _getApproved.slot)
+            sstore(keccak256(0, 64), spender_)
+        }
     }
 
     function nonces(uint256 tokenId_) external view override returns (uint256) {
         return _nonces[bytes32(tokenId_)];
-    }
-
-    function _useNonce(uint256 tokenId_) internal returns (uint256) {
-        unchecked {
-            return _nonces[bytes32(tokenId_)]++;
-        }
     }
 }

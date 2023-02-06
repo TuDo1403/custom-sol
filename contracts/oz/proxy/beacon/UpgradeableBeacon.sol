@@ -14,7 +14,7 @@ import "../../utils/Address.sol";
  * An owner is able to change the implementation the beacon points to, thus upgrading the proxies that use this beacon.
  */
 contract UpgradeableBeacon is IBeacon, Ownable {
-    address private _implementation;
+    bytes32 private __implementation;
 
     /**
      * @dev Emitted when the implementation returned by the beacon is changed.
@@ -32,8 +32,16 @@ contract UpgradeableBeacon is IBeacon, Ownable {
     /**
      * @dev Returns the current implementation address.
      */
-    function implementation() public view virtual override returns (address) {
-        return _implementation;
+    function implementation()
+        public
+        view
+        virtual
+        override
+        returns (address _implementation)
+    {
+        assembly {
+            _implementation := sload(__implementation.slot)
+        }
     }
 
     /**
@@ -62,6 +70,8 @@ contract UpgradeableBeacon is IBeacon, Ownable {
         if (!Address.isContract(newImplementation))
             revert UpgradeableBeacon__ImplementationIsNotAContract();
 
-        _implementation = newImplementation;
+        assembly {
+            sstore(__implementation.slot, newImplementation)
+        }
     }
 }

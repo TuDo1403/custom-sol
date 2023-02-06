@@ -6,6 +6,10 @@ pragma solidity ^0.8.0;
 import "../../interfaces/draft-IERC1822.sol";
 import "../ERC1967/ERC1967Upgrade.sol";
 
+error UUPSUpgradeable__OnlyCall();
+error UUPSUpgradeable__OnlyDelegateCall();
+error UUPSUpgradeable__OnlyActiveProxy();
+
 /**
  * @dev An upgradeability mechanism designed for UUPS proxies. The functions included here can perform an upgrade of an
  * {ERC1967Proxy}, when this contract is set as the implementation behind such a proxy.
@@ -30,14 +34,7 @@ abstract contract UUPSUpgradeable is IERC1822Proxiable, ERC1967Upgrade {
      * fail.
      */
     modifier onlyProxy() {
-        require(
-            address(this) != __self,
-            "Function must be called through delegatecall"
-        );
-        require(
-            _getImplementation() == __self,
-            "Function must be called through active proxy"
-        );
+        __checkProxy();
         _;
     }
 
@@ -46,10 +43,7 @@ abstract contract UUPSUpgradeable is IERC1822Proxiable, ERC1967Upgrade {
      * callable on the implementing contract but not through proxies.
      */
     modifier notDelegated() {
-        require(
-            address(this) == __self,
-            "UUPSUpgradeable: must not be called through delegatecall"
-        );
+        __checkDelegated();
         _;
     }
 
@@ -81,7 +75,7 @@ abstract contract UUPSUpgradeable is IERC1822Proxiable, ERC1967Upgrade {
      */
     function upgradeTo(address newImplementation) external virtual onlyProxy {
         _authorizeUpgrade(newImplementation);
-        _upgradeToAndCallUUPS(newImplementation, new bytes(0), false);
+        _upgradeToAndCallUUPS(newImplementation, "", false);
     }
 
     /**
@@ -111,4 +105,15 @@ abstract contract UUPSUpgradeable is IERC1822Proxiable, ERC1967Upgrade {
      * ```
      */
     function _authorizeUpgrade(address newImplementation) internal virtual;
+
+    function __checkProxy() private view {
+        address self = __self;
+        if (address(this) == self) revert UUPSUpgradeable__OnlyDelegateCall();
+        if (_getImplementation() != self)
+            revert UUPSUpgradeable__OnlyActiveProxy();
+    }
+
+    function __checkDelegated() private view {
+        if (address(this) != __self) revert UUPSUpgradeable__OnlyCall();
+    }
 }

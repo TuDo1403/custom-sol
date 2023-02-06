@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "../oz/utils/Context.sol";
+import {Context} from "../oz/utils/Context.sol";
 import {ECDSA, EIP712} from "../oz/utils/cryptography/draft-EIP712.sol";
 
-import "./interfaces/ISignable.sol";
+import {ISignable} from "./interfaces/ISignable.sol";
 
-import "../libraries/Bytes32Address.sol";
+import {Bytes32Address} from "../libraries/Bytes32Address.sol";
 
 /**
  * @title Signable

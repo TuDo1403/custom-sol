@@ -1,12 +1,18 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "../oz-upgradeable/utils/ContextUpgradeable.sol";
-import "../oz-upgradeable/utils/structs/BitMapsUpgradeable.sol";
+import {
+    ContextUpgradeable
+} from "../oz-upgradeable/utils/ContextUpgradeable.sol";
+import {
+    BitMapsUpgradeable
+} from "../oz-upgradeable/utils/structs/BitMapsUpgradeable.sol";
 
-import "../libraries/Bytes32Address.sol";
+import {Bytes32Address} from "../libraries/Bytes32Address.sol";
 
-import "./interfaces/IBlacklistableUpgradeable.sol";
+import {
+    IBlacklistableUpgradeable
+} from "./interfaces/IBlacklistableUpgradeable.sol";
 
 /**
  * @title BlacklistableUpgradeable

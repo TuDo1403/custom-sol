@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "../oz/utils/Create2.sol";
+import {Create2} from "../oz/utils/Create2.sol";
 
-import "../libraries/Create3.sol";
+import {Create3} from "../libraries/Create3.sol";
 
 abstract contract DeterministicDeployer {
     event Deployed(

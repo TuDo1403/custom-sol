@@ -40,10 +40,19 @@ abstract contract Manager is Context, IManager {
         address sender = _msgSender();
         emit RequestRoleCached(sender, role_);
 
-        (bool ok, ) = address(authority_).call(
+        (bool ok, bytes memory revertData) = address(authority_).call(
             abi.encodeCall(IAuthority.requestAccess, (role_))
         );
-        if (!ok) revert Manager__RequestFailed();
+        if (!ok)
+            assembly {
+                revert(
+                    // Start of revert data bytes. The 0x20 offset is always the same.
+                    add(revertData, 0x20),
+                    // Length of revert data.
+                    mload(revertData)
+                )
+            }
+
         __updateAuthority(authority_);
         emit AuthorityUpdated(sender, IAuthority(address(0)), authority_);
     }

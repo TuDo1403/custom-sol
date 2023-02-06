@@ -6,6 +6,8 @@ pragma solidity ^0.8.0;
 import "./TransparentUpgradeableProxy.sol";
 import "../../access/Ownable.sol";
 
+import {ErrorHandler} from "../../../libraries/ErrorHandler.sol";
+
 error ProxyAdmin__InvalidProxyAddress();
 
 /**
@@ -13,6 +15,8 @@ error ProxyAdmin__InvalidProxyAddress();
  * explanation of why you would want to use this see the documentation for {TransparentUpgradeableProxy}.
  */
 contract ProxyAdmin is Ownable {
+    using ErrorHandler for bool;
+
     /**
      * @dev Returns the current implementation of `proxy`.
      *
@@ -28,8 +32,9 @@ contract ProxyAdmin is Ownable {
         (bool success, bytes memory returndata) = address(proxy).staticcall(
             hex"5c60da1b"
         );
-        if (!success)
-            revert TransparentUpgradeableProxy__AdminCannotFallbackToProxyTarget();
+
+        success.handleRevertIfNotOk(returndata);
+
         return abi.decode(returndata, (address));
     }
 
@@ -48,8 +53,9 @@ contract ProxyAdmin is Ownable {
         (bool success, bytes memory returndata) = address(proxy).staticcall(
             hex"f851a440"
         );
-        if (!success)
-            revert TransparentUpgradeableProxy__AdminCannotFallbackToProxyTarget();
+
+        success.handleRevertIfNotOk(returndata);
+
         return abi.decode(returndata, (address));
     }
 

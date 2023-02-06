@@ -1,16 +1,20 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "../oz/security/Pausable.sol";
-import "../oz/access/AccessControlEnumerable.sol";
+import {Pausable} from "../oz/security/Pausable.sol";
+import {
+    AccessControl,
+    IAccessControl,
+    AccessControlEnumerable
+} from "../oz/access/AccessControlEnumerable.sol";
 
-import "../internal/ProxyChecker.sol";
-import "../internal/FundForwarder.sol";
-import "../internal/Blacklistable.sol";
+import {ProxyChecker} from "../internal/ProxyChecker.sol";
+import {FundForwarder} from "../internal/FundForwarder.sol";
+import {IBlacklistable, Blacklistable} from "../internal/Blacklistable.sol";
 
-import "./interfaces/IAuthority.sol";
+import {IAuthority} from "./interfaces/IAuthority.sol";
 
-import "../libraries/Roles.sol";
+import {Roles} from "../libraries/Roles.sol";
 
 abstract contract Authority is
     Pausable,

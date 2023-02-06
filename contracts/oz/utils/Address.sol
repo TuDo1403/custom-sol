@@ -3,10 +3,19 @@
 
 pragma solidity ^0.8.1;
 
+import {ErrorHandler} from "../../libraries/ErrorHandler.sol";
+
+error Address__CallToNonContract();
+error Address__InsufficientBalance();
+error Address__StaticcallToNonContract();
+error Address__DelegatecallToNonContract();
+
 /**
  * @dev Collection of functions related to the address type
  */
 library Address {
+    using ErrorHandler for bool;
+
     /**
      * @dev Returns true if `account` is a contract.
      *
@@ -38,7 +47,7 @@ library Address {
         // for contracts in construction, since the code is only stored at the end
         // of the constructor execution.
 
-        return account.code.length > 0;
+        return account.code.length != 0;
     }
 
     /**
@@ -58,16 +67,13 @@ library Address {
      * https://solidity.readthedocs.io/en/v0.5.11/security-considerations.html#use-the-checks-effects-interactions-pattern[checks-effects-interactions pattern].
      */
     function sendValue(address payable recipient, uint256 amount) internal {
-        require(
-            address(this).balance >= amount,
-            "Address: insufficient balance"
-        );
+        if (address(this).balance < amount)
+            revert Address__InsufficientBalance();
 
-        (bool success, ) = recipient.call{value: amount}("");
-        require(
-            success,
-            "Address: unable to send value, recipient may have reverted"
+        (bool success, bytes memory revertData) = recipient.call{value: amount}(
+            ""
         );
+        success.handleRevertIfNotOk(revertData);
     }
 
     /**
@@ -146,11 +152,10 @@ library Address {
         uint256 value,
         string memory errorMessage
     ) internal returns (bytes memory) {
-        require(
-            address(this).balance >= value,
-            "Address: insufficient balance for call"
-        );
-        require(isContract(target), "Address: call to non-contract");
+        if (address(this).balance < value)
+            revert Address__InsufficientBalance();
+
+        if (!isContract(target)) revert Address__CallToNonContract();
 
         (bool success, bytes memory returndata) = target.call{value: value}(
             data
@@ -187,7 +192,7 @@ library Address {
         bytes memory data,
         string memory errorMessage
     ) internal view returns (bytes memory) {
-        require(isContract(target), "Address: static call to non-contract");
+        if (!isContract(target)) revert Address__StaticcallToNonContract();
 
         (bool success, bytes memory returndata) = target.staticcall(data);
         return verifyCallResult(success, returndata, errorMessage);
@@ -222,7 +227,7 @@ library Address {
         bytes memory data,
         string memory errorMessage
     ) internal returns (bytes memory) {
-        require(isContract(target), "Address: delegate call to non-contract");
+        if (!isContract(target)) revert Address__DelegatecallToNonContract();
 
         (bool success, bytes memory returndata) = target.delegatecall(data);
         return verifyCallResult(success, returndata, errorMessage);

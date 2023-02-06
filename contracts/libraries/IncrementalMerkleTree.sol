@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "../oz/utils/structs/BitMaps.sol";
+import {BitMaps} from "../oz/utils/structs/BitMaps.sol";
 
 library PoseidonT3 {
     function poseidon(uint256[2] memory) public pure returns (uint256) {}

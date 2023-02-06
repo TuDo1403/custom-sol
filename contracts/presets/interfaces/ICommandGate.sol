@@ -16,21 +16,19 @@ interface ICommandGate {
     error CommandGate__InvalidArgument();
     error CommandGate__UnknownAddress(address);
 
-    event Whitelisted(address indexed addr);
+    event Whitelisted(address indexed operator, address indexed addr);
 
-    event VaultsWhitelisted(address[] vaults);
+    event VaultsWhitelisted(address indexed operator, address[] vaults);
 
     event Commanded(
         address indexed to,
         bytes4 indexed functionSelector,
         bytes params,
-        address indexed vault,
-        address from,
+        address vault,
+        address indexed from,
         address token,
         uint256 value
     );
-
-    function updateTreasury(ITreasury treasury_) external;
 
     function whitelistAddress(address addr_) external;
 

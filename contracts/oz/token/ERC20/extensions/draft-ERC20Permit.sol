@@ -38,7 +38,7 @@ abstract contract ERC20Permit is ERC20, IERC20Permit, Signable {
      *
      * It's a good idea to use the same `name` that is defined as the ERC20 token name.
      */
-    constructor(string memory name_) Signable(name_, "1") {}
+    constructor(string memory name_) payable Signable(name_, "1") {}
 
     /**
      * @dev See {IERC20Permit-permit}.
@@ -54,24 +54,37 @@ abstract contract ERC20Permit is ERC20, IERC20Permit, Signable {
     ) public virtual override {
         if (block.timestamp > deadline) revert ERC20Permit__Expired();
 
-        _verify(
-            owner,
-            keccak256(
-                abi.encode(
-                    _PERMIT_TYPEHASH,
-                    owner,
-                    spender,
-                    value,
-                    _useNonce(owner.fillLast12Bytes()),
-                    deadline
-                )
-            ),
-            v,
-            r,
-            s
-        );
+        bytes32 digest;
+        bytes32 allowanceKey;
+        assembly {
+            mstore(0, owner)
+            mstore(32, _nonces.slot)
+            let nonceKey := keccak256(0, 64)
+            let nonce := sload(nonceKey)
 
-        _allowance[owner][spender] = value;
+            let freeMemPtr := mload(0x40)
+
+            mstore(freeMemPtr, _PERMIT_TYPEHASH)
+            mstore(add(freeMemPtr, 32), owner)
+            mstore(add(freeMemPtr, 64), spender)
+            mstore(add(freeMemPtr, 96), value)
+            mstore(add(freeMemPtr, 128), nonce)
+            mstore(add(freeMemPtr, 160), deadline)
+            digest := keccak256(freeMemPtr, 192)
+
+            sstore(nonceKey, add(1, nonce))
+
+            mstore(32, _allowance.slot)
+            allowanceKey := keccak256(0, 64)
+        }
+
+        _verify(owner, digest, v, r, s);
+
+        assembly {
+            mstore(0, spender)
+            mstore(32, allowanceKey)
+            sstore(keccak256(0, 64), value)
+        }
     }
 
     /**

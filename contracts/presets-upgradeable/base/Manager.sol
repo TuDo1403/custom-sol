@@ -1,15 +1,18 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "../../oz/utils/Context.sol";
+import {Context} from "../../oz/utils/Context.sol";
 
-import "./interfaces/IManager.sol";
-import "../../oz/access/IAccessControl.sol";
-import "../../internal/interfaces/IBlacklistable.sol";
+import {IManager, IAuthority} from "./interfaces/IManager.sol";
+import {IAccessControl} from "../../oz/access/IAccessControl.sol";
+import {IBlacklistable} from "../../internal/interfaces/IBlacklistable.sol";
 
-import "../../libraries/Roles.sol";
+import {Roles} from "../../libraries/Roles.sol";
+import {ErrorHandler} from "../../libraries/ErrorHandler.sol";
 
 abstract contract Manager is Context, IManager {
+    using ErrorHandler for bool;
+
     bytes32 private __authority;
     bytes32 private __requestedRole;
 
@@ -40,10 +43,11 @@ abstract contract Manager is Context, IManager {
         address sender = _msgSender();
         emit RequestRoleCached(sender, role_);
 
-        (bool ok, ) = address(authority_).call(
+        (bool ok, bytes memory revertData) = address(authority_).call(
             abi.encodeCall(IAuthority.requestAccess, (role_))
         );
-        if (!ok) revert Manager__RequestFailed();
+
+        ok.handleRevertIfNotOk(revertData);
 
         __updateAuthority(authority_);
         emit AuthorityUpdated(sender, IAuthority(address(0)), authority_);
@@ -55,10 +59,11 @@ abstract contract Manager is Context, IManager {
     ) external onlyRole(Roles.OPERATOR_ROLE) {
         IAuthority old = authority();
         if (old == authority_) revert Manager__AlreadySet();
-        (bool ok, ) = address(authority_).call(
+        (bool ok, bytes memory revertData) = address(authority_).call(
             abi.encodeCall(IAuthority.requestAccess, (__requestedRole))
         );
-        if (!ok) revert Manager__RequestFailed();
+
+        ok.handleRevertIfNotOk(revertData);
 
         __updateAuthority(authority_);
 
@@ -92,11 +97,14 @@ abstract contract Manager is Context, IManager {
      * @custom:throws Manager__Blacklisted if the given account is blacklisted.
      */
     function _checkBlacklist(address account_) internal view {
-        (bool ok, bytes memory returnData) = _authority().staticcall(
+        (bool ok, bytes memory returnOrRevertData) = _authority().staticcall(
             abi.encodeCall(IBlacklistable.isBlacklisted, (account_))
         );
-        if (!ok) revert Manager__ExecutionFailed();
-        if (abi.decode(returnData, (bool))) revert Manager__Blacklisted();
+
+        ok.handleRevertIfNotOk(returnOrRevertData);
+
+        if (abi.decode(returnOrRevertData, (bool)))
+            revert Manager__Blacklisted();
     }
 
     /**
@@ -118,30 +126,35 @@ abstract contract Manager is Context, IManager {
     }
 
     function _requirePaused() internal view {
-        (bool ok, bytes memory returnData) = _authority().staticcall(
+        (bool ok, bytes memory returnOrRevertData) = _authority().staticcall(
             abi.encodeCall(IAuthority.paused, ())
         );
-        if (!ok) revert Manager__ExecutionFailed();
-        if (!abi.decode(returnData, (bool))) revert Manager__NotPaused();
+
+        ok.handleRevertIfNotOk(returnOrRevertData);
+
+        if (!abi.decode(returnOrRevertData, (bool)))
+            revert Manager__NotPaused();
     }
 
     function _requireNotPaused() internal view {
-        (bool ok, bytes memory returnData) = _authority().staticcall(
+        (bool ok, bytes memory returnOrRevertData) = _authority().staticcall(
             abi.encodeCall(IAuthority.paused, ())
         );
-        if (!ok) revert Manager__ExecutionFailed();
-        if (abi.decode(returnData, (bool))) revert Manager__Paused();
+        ok.handleRevertIfNotOk(returnOrRevertData);
+
+        if (abi.decode(returnOrRevertData, (bool))) revert Manager__Paused();
     }
 
     function _hasRole(
         bytes32 role_,
         address account_
     ) internal view returns (bool) {
-        (bool ok, bytes memory returnData) = _authority().staticcall(
+        (bool ok, bytes memory returnOrRevertData) = _authority().staticcall(
             abi.encodeCall(IAccessControl.hasRole, (role_, account_))
         );
 
-        if (!ok) revert Manager__ExecutionFailed();
-        return abi.decode(returnData, (bool));
+        ok.handleRevertIfNotOk(returnOrRevertData);
+
+        return abi.decode(returnOrRevertData, (bool));
     }
 }

@@ -56,9 +56,17 @@ abstract contract ERC2981Upgradeable is IERC2981Upgradeable, ERC165Upgradeable {
         uint256 _tokenId,
         uint256 _salePrice
     ) public view virtual override returns (address, uint256) {
-        RoyaltyInfo memory royalty = _tokenRoyaltyInfo[_tokenId];
+        RoyaltyInfo memory royalty;
+        assembly {
+            mstore(0, _tokenId)
+            mstore(32, _tokenRoyaltyInfo.slot)
+            royalty := sload(keccak256(0, 64))
+        }
 
-        if (royalty.receiver == address(0)) royalty = _defaultRoyaltyInfo;
+        if (royalty.receiver == address(0))
+            assembly {
+                royalty := sload(_defaultRoyaltyInfo.slot)
+            }
 
         return (
             royalty.receiver,
@@ -89,9 +97,15 @@ abstract contract ERC2981Upgradeable is IERC2981Upgradeable, ERC165Upgradeable {
     ) internal virtual {
         if (feeNumerator > _feeDenominator())
             revert ERC2981__SalePriceExceeded();
+
         __nonZeroAdress(receiver);
 
-        _defaultRoyaltyInfo = RoyaltyInfo(receiver, feeNumerator);
+        assembly {
+            sstore(
+                _defaultRoyaltyInfo.slot,
+                or(shl(160, feeNumerator), receiver)
+            )
+        }
     }
 
     /**
@@ -118,7 +132,11 @@ abstract contract ERC2981Upgradeable is IERC2981Upgradeable, ERC165Upgradeable {
             revert ERC2981__SalePriceExceeded();
         __nonZeroAdress(receiver);
 
-        _tokenRoyaltyInfo[tokenId] = RoyaltyInfo(receiver, feeNumerator);
+        assembly {
+            mstore(0, tokenId)
+            mstore(32, _tokenRoyaltyInfo.slot)
+            sstore(keccak256(0, 64), or(shl(160, feeNumerator), receiver))
+        }
     }
 
     /**

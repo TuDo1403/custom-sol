@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "./ProxyChecker.sol";
+import {ProxyChecker} from "./ProxyChecker.sol";
 
-import "./interfaces/IMultiLevelReferral.sol";
+import {IMultiLevelReferral} from "./interfaces/IMultiLevelReferral.sol";
 
-import "../libraries/FixedPointMathLib.sol";
+import {FixedPointMathLib} from "../libraries/FixedPointMathLib.sol";
 
 /**
  * @title MultiLevelReferral

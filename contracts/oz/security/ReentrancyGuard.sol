@@ -4,7 +4,7 @@ pragma solidity >=0.8.10;
 error ReentrancyGuard__Locked();
 
 abstract contract ReentrancyGuard {
-    uint256 private _locked = 1;
+    uint256 private __locked = 1;
 
     modifier nonReentrant() {
         __nonReentrantBefore();
@@ -13,12 +13,12 @@ abstract contract ReentrancyGuard {
     }
 
     function __nonReentrantBefore() private {
-        if (_locked != 1) revert ReentrancyGuard__Locked();
+        if (__locked != 1) revert ReentrancyGuard__Locked();
 
-        _locked = 2;
+        __locked = 2;
     }
 
     function __nonReentrantAfter() private {
-        _locked = 1;
+        __locked = 1;
     }
 }

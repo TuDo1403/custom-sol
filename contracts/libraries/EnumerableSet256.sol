@@ -3,8 +3,8 @@
 
 pragma solidity ^0.8.17;
 
-import "./Array.sol";
-import "./BitMap256.sol";
+import {Array} from "./Array.sol";
+import {BitMap256} from "./BitMap256.sol";
 
 library EnumerableSet256 {
     using BitMap256 for *;
@@ -21,7 +21,7 @@ library EnumerableSet256 {
 
     function _add(Set storage set, uint256 value) private returns (bool) {
         if (!_contains(set, value)) {
-            set._values[value.index()] = value;
+            set._values[value.index({shouldHash_: false})] = value;
             unchecked {
                 ++set.length;
             }
@@ -37,42 +37,14 @@ library EnumerableSet256 {
      */
     function _remove(Set storage set, uint256 value) private returns (bool) {
         // We read and store the value's index to prevent multiple reads from the same storage slot
-        uint256 valueIndex = set._values[value.index()] == value
-            ? value.index()
-            : 0;
+        uint256 idx = value.index({shouldHash_: false});
+        uint256 valueIndex = set._values[idx] == value ? idx : 0;
 
         if (valueIndex != 0) {
-            // Equivalent to contains(set, value)
-            // To delete an element from the _values array in O(1), we swap the element to delete with the last one in
-            // the array, and then remove the last element (sometimes called as 'swap and pop').
-            // This modifies the order of the array, as noted in {at}.
-
-            //uint256 toDeleteIndex;
-            // uint256 lastIndex;
-            // unchecked {
-            //     //toDeleteIndex = valueIndex - 1;
-            //     lastIndex = --set.length;
-            // }
-
-            set._values[valueIndex] = 0;
-
-            // if (valueIndex != lastIndex) {
-            //     uint256 lastValue = set._values[lastIndex];
-
-            //     // Move the last value to the index where the value to delete is
-            //     set._values[valueIndex] = lastValue;
-            //     // Update the index for the moved value
-            //     //set._indexes[lastValue] = valueIndex; // Replace lastValue's index to valueIndex
-            // }
-
-            // Delete the slot where the moved value was stored
-            //set._values.pop();
-
-            // Delete the index for the deleted slot
+            delete set._values[valueIndex];
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
     /**
@@ -82,8 +54,7 @@ library EnumerableSet256 {
         Set storage set,
         uint256 value
     ) private view returns (bool) {
-        //return set._indexes[value] != 0;
-        return set._values[value.index()] == value;
+        return set._values[value.index({shouldHash_: false})] == value;
     }
 
     /**
@@ -218,7 +189,6 @@ library EnumerableSet256 {
         Bytes32Set storage set
     ) internal view returns (bytes32[] memory res) {
         uint256[] memory val = _values(set._inner);
-        res = new bytes32[](val.length);
         assembly {
             res := val
         }

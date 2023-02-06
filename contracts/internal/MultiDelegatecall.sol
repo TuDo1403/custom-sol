@@ -1,20 +1,37 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-error MultiDelegatecall__OnlyDelegate();
-error MultiDelegatecall__ExecutionFailed();
+import {Context} from "../oz/utils/Context.sol";
+import {ReentrancyGuard} from "../oz/security/ReentrancyGuard.sol";
+
+import {ErrorHandler} from "../libraries/ErrorHandler.sol";
+
+error MultiDelegatecall__OnlyDelegatecall();
+error MultiDelegatecall__DelegatecallNotAllowed();
 
 /**
  * @title MultiDelegatecall
  * @dev Abstract contract for performing multiple delegatecalls in a single transaction.
  */
-abstract contract MultiDelegatecall {
+abstract contract MultiDelegatecall is Context, ReentrancyGuard {
+    using ErrorHandler for bool;
+
     /**
      * @dev Address of the original contract
      */
     address private immutable __original;
 
-    event BatchExecuted(
+    modifier onlyDelegatecalll() virtual {
+        __onlyDelegateCall();
+        _;
+    }
+
+    modifier nonDelegatecall() virtual {
+        __nonDelegatecall();
+        _;
+    }
+
+    event BatchExecutionDelegated(
         address indexed operator,
         bytes[] callData,
         bytes[] results
@@ -23,7 +40,7 @@ abstract contract MultiDelegatecall {
     /**
      * @dev Constructor that saves the address of the original contract
      */
-    constructor() payable {
+    constructor() payable ReentrancyGuard() {
         __original = address(this);
     }
 
@@ -34,21 +51,33 @@ abstract contract MultiDelegatecall {
      */
     function _multiDelegatecall(
         bytes[] calldata data_
-    ) internal returns (bytes[] memory results) {
-        if (address(this) != __original)
-            revert MultiDelegatecall__OnlyDelegate();
-
+    ) internal nonDelegatecall nonReentrant returns (bytes[] memory results) {
         uint256 length = data_.length;
         results = new bytes[](length);
         bool ok;
+        bytes memory result;
         for (uint256 i; i < length; ) {
-            (ok, results[i]) = address(this).delegatecall(data_[i]);
-            if (!ok) revert MultiDelegatecall__ExecutionFailed();
+            (ok, result) = address(this).delegatecall(data_[i]);
+
+            ok.handleRevertIfNotOk(result);
+
+            results[i] = result;
+
             unchecked {
                 ++i;
             }
         }
 
-        emit BatchExecuted(msg.sender, data_, results);
+        emit BatchExecutionDelegated(_msgSender(), data_, results);
+    }
+
+    function __onlyDelegateCall() private view {
+        if (address(this) != __original)
+            revert MultiDelegatecall__OnlyDelegatecall();
+    }
+
+    function __nonDelegatecall() private view {
+        if (address(this) == __original)
+            revert MultiDelegatecall__DelegatecallNotAllowed();
     }
 }

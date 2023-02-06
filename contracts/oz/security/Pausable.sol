@@ -28,13 +28,13 @@ abstract contract Pausable is Context {
      */
     event Unpaused(address account);
 
-    uint256 private _paused;
+    uint256 private __paused;
 
     /**
      * @dev Initializes the contract in unpaused state.
      */
     constructor() payable {
-        _paused = 1;
+        __paused = 1;
     }
 
     /**
@@ -66,7 +66,7 @@ abstract contract Pausable is Context {
      */
     function paused() public view virtual returns (bool isPaused) {
         assembly {
-            isPaused := eq(2, sload(_paused.slot))
+            isPaused := eq(2, sload(__paused.slot))
         }
     }
 
@@ -93,7 +93,7 @@ abstract contract Pausable is Context {
      */
     function _pause() internal virtual {
         _requireNotPaused();
-        _paused = 2;
+        __paused = 2;
         emit Paused(_msgSender());
     }
 
@@ -106,7 +106,7 @@ abstract contract Pausable is Context {
      */
     function _unpause() internal virtual {
         _requirePaused();
-        _paused = 1;
+        __paused = 1;
         emit Unpaused(_msgSender());
     }
 }

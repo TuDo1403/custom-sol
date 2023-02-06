@@ -1,14 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "../oz/utils/Context.sol";
-import "../oz/utils/structs/BitMaps.sol";
+import {Context} from "../oz/utils/Context.sol";
+import {BitMaps} from "../oz/utils/structs/BitMaps.sol";
 
-//import {ModuleIdentity} from "./Internal.sol";
+import {Bytes32Address} from "../libraries/Bytes32Address.sol";
 
-import "../libraries/Bytes32Address.sol";
-
-import "./interfaces/IBlacklistable.sol";
+import {IBlacklistable} from "./interfaces/IBlacklistable.sol";
 
 /**
  * @title Blacklistable

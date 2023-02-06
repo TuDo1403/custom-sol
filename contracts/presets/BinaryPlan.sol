@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "../oz/proxy/utils/Initializable.sol";
+import {Initializable} from "../oz/proxy/utils/Initializable.sol";
 
-import "./base/Manager.sol";
+import {Roles, Manager, IAuthority} from "./base/Manager.sol";
 
-import "./interfaces/IBinaryPlan.sol";
+import {IBinaryPlan} from "./interfaces/IBinaryPlan.sol";
 
 /**
  * @title BinaryPlan

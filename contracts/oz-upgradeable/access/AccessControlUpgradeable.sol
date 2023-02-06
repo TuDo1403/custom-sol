@@ -98,7 +98,7 @@ abstract contract AccessControlUpgradeable is
         bytes32 role,
         address account
     ) public view virtual override returns (bool) {
-        return _roles[account].unsafeGet(uint256(role));
+        return _roles[account].get({value_: uint256(role), shouldHash_: false});
     }
 
     /**
@@ -241,7 +241,7 @@ abstract contract AccessControlUpgradeable is
      */
     function _grantRole(bytes32 role, address account) internal virtual {
         if (!hasRole(role, account)) {
-            _roles[account].unsafeSet(uint256(role));
+            _roles[account].set({value_: uint256(role), shouldHash_: false});
             emit RoleGranted(role, account, _msgSender());
         }
     }
@@ -255,7 +255,7 @@ abstract contract AccessControlUpgradeable is
      */
     function _revokeRole(bytes32 role, address account) internal virtual {
         if (hasRole(role, account)) {
-            _roles[account].unsafeUnset(uint256(role));
+            _roles[account].unset({value_: uint256(role), shouldHash_: false});
             emit RoleRevoked(role, account, _msgSender());
         }
     }

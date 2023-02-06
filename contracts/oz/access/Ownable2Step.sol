@@ -20,6 +20,7 @@ error Ownable2Step__CallerIsNotTheNewOwner();
  */
 abstract contract Ownable2Step is Ownable {
     using Bytes32Address for *;
+
     bytes32 private __pendingOwner;
 
     event OwnershipTransferStarted(
@@ -30,8 +31,15 @@ abstract contract Ownable2Step is Ownable {
     /**
      * @dev Returns the address of the pending owner.
      */
-    function pendingOwner() public view virtual returns (address) {
-        return __pendingOwner.fromFirst20Bytes();
+    function pendingOwner()
+        public
+        view
+        virtual
+        returns (address _pendingOwner)
+    {
+        assembly {
+            _pendingOwner := sload(__pendingOwner.slot)
+        }
     }
 
     /**
@@ -41,7 +49,9 @@ abstract contract Ownable2Step is Ownable {
     function transferOwnership(
         address newOwner_
     ) public virtual override onlyOwner {
-        __pendingOwner = newOwner_.fillLast12Bytes();
+        assembly {
+            sstore(__pendingOwner.slot, newOwner_)
+        }
         emit OwnershipTransferStarted(owner(), newOwner_);
     }
 

@@ -25,8 +25,7 @@ abstract contract ERC20Pausable is ERC20, Pausable {
         address from,
         address to,
         uint256 amount
-    ) internal virtual override {
+    ) internal virtual override whenNotPaused {
         super._beforeTokenTransfer(from, to, amount);
-        _requireNotPaused();
     }
 }

@@ -3,17 +3,29 @@ pragma solidity ^0.8.17;
 
 import {ITreasury, Treasury} from "./Treasury.sol";
 
-import "../oz-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import "../oz-upgradeable/security/PausableUpgradeable.sol";
-import "../oz-upgradeable/access/AccessControlEnumerableUpgradeable.sol";
+import {
+    UUPSUpgradeable
+} from "../oz-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import {
+    PausableUpgradeable
+} from "../oz-upgradeable/security/PausableUpgradeable.sol";
+import {
+    AccessControlEnumerableUpgradeable
+} from "../oz-upgradeable/access/AccessControlEnumerableUpgradeable.sol";
 
-import "../internal-upgradeable/ProxyCheckerUpgradeable.sol";
-import "../internal-upgradeable/FundForwarderUpgradeable.sol";
-import "../internal-upgradeable/BlacklistableUpgradeable.sol";
+import {
+    ProxyCheckerUpgradeable
+} from "../internal-upgradeable/ProxyCheckerUpgradeable.sol";
+import {
+    FundForwarderUpgradeable
+} from "../internal-upgradeable/FundForwarderUpgradeable.sol";
+import {
+    BlacklistableUpgradeable
+} from "../internal-upgradeable/BlacklistableUpgradeable.sol";
 
-import "./interfaces/IAuthority.sol";
+import {IAuthority} from "./interfaces/IAuthority.sol";
 
-import "../libraries/Roles.sol";
+import {Roles} from "../libraries/Roles.sol";
 
 abstract contract AuthorityUpgradeable is
     IAuthority,

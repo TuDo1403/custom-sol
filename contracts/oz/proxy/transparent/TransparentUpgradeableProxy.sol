@@ -96,7 +96,7 @@ contract TransparentUpgradeableProxy is ERC1967Proxy {
      * NOTE: Only the admin can call this function. See {ProxyAdmin-upgrade}.
      */
     function upgradeTo(address newImplementation) external ifAdmin {
-        _upgradeToAndCall(newImplementation, bytes(""), false);
+        _upgradeToAndCall(newImplementation, "", false);
     }
 
     /**

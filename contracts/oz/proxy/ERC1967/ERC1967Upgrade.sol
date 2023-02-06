@@ -80,7 +80,7 @@ abstract contract ERC1967Upgrade {
         bool forceCall
     ) internal {
         _upgradeTo(newImplementation);
-        if (forceCall || data.length > 0)
+        if (forceCall || data.length != 0)
             Address.functionDelegateCall(newImplementation, data);
     }
 
@@ -194,7 +194,7 @@ abstract contract ERC1967Upgrade {
     ) internal {
         _setBeacon(newBeacon);
         emit BeaconUpgraded(newBeacon);
-        if (forceCall || data.length > 0) {
+        if (forceCall || data.length != 0) {
             Address.functionDelegateCall(
                 IBeacon(newBeacon).implementation(),
                 data

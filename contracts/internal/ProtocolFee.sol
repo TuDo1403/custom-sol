@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "../oz/utils/Context.sol";
-import "./interfaces/IProtocolFee.sol";
+import {Context} from "../oz/utils/Context.sol";
+import {IERC20, IProtocolFee} from "./interfaces/IProtocolFee.sol";
 
 /**
  * @title ProtocolFee

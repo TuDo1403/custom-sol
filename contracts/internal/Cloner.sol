@@ -1,22 +1,25 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "../oz/proxy/Clones.sol";
+import {Context} from "../oz/utils/Context.sol";
 
-import "./interfaces/ICloner.sol";
+import {Clones} from "../oz/proxy/Clones.sol";
 
-import "../libraries/Bytes32Address.sol";
+import {ICloner} from "./interfaces/ICloner.sol";
 
-abstract contract Cloner is ICloner {
+import {ErrorHandler} from "../libraries/ErrorHandler.sol";
+import {Bytes32Address} from "../libraries/Bytes32Address.sol";
+
+abstract contract Cloner is ICloner, Context {
     using Clones for address;
     using Bytes32Address for *;
+    using ErrorHandler for bool;
 
     bytes32 private __implement;
-    mapping(bytes32 => address[]) private __clones;
+    mapping(bytes32 => bytes32[]) private __clones;
 
     constructor(address implement_) payable {
         _setImplement(implement_);
-        emit ImplementChanged(address(0), implement_);
     }
 
     /// @inheritdoc ICloner
@@ -40,11 +43,20 @@ abstract contract Cloner is ICloner {
     function allClonesOf(
         address implement_
     ) external view returns (address[] memory clones) {
-        return __clones[implement_.fillLast12Bytes()];
+        bytes32[] memory _clones = __clones[implement_.fillLast12Bytes()];
+        assembly {
+            clones := _clones
+        }
     }
 
     function _setImplement(address implement_) internal {
-        __implement = implement_.fillLast12Bytes();
+        address currentImplement;
+        assembly {
+            currentImplement := sload(__implement.slot)
+            sstore(__implement.slot, implement_)
+        }
+
+        emit ImplementChanged(currentImplement, implement_);
     }
 
     /**
@@ -62,14 +74,14 @@ abstract contract Cloner is ICloner {
         address _implement = implement();
         clone = _implement.cloneDeterministic(salt_);
         if (initSelector_ != 0) {
-            (bool ok, ) = clone.call(
+            (bool ok, bytes memory revertData) = clone.call(
                 abi.encodePacked(initSelector_, initCode_)
             );
-            if (!ok) revert Cloner__InitCloneFailed();
+            ok.handleRevertIfNotOk(revertData);
         }
 
-        __clones[_implement.fillLast12Bytes()].push(clone);
+        __clones[_implement.fillLast12Bytes()].push(clone.fillLast12Bytes());
 
-        emit Cloned(_implement, clone, salt_, clone.codehash);
+        emit Cloned(_msgSender(), _implement, clone, salt_);
     }
 }

@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "../../oz-upgradeable/token/ERC20/IERC20Upgradeable.sol";
+import {
+    IERC20Upgradeable
+} from "../../oz-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 
 import {
     IERC721Upgradeable,
@@ -9,7 +11,6 @@ import {
 } from "../../oz-upgradeable/token/ERC721/extensions/IERC721EnumerableUpgradeable.sol";
 
 interface IFundForwarderUpgradeable {
-    error FundForwarder__ForwardFailed();
     error FundForwarder__InvalidArgument();
 
     /**

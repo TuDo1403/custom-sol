@@ -61,12 +61,12 @@ abstract contract Initializable {
      * @dev Indicates that the contract has been initialized.
      * @custom:oz-retyped-from bool
      */
-    uint256 private _initialized;
+    uint256 private __initialized;
 
     /**
      * @dev Indicates that the contract is in the process of being initialized.
      */
-    uint256 private _initializing;
+    uint256 private __initializing;
 
     /**
      * @dev Triggered when the contract has been initialized or reinitialized.
@@ -78,20 +78,9 @@ abstract contract Initializable {
      * `onlyInitializing` functions can be used to initialize parent contracts. Equivalent to `reinitializer(1)`.
      */
     modifier initializer() {
-        bool isTopLevelCall = _initializing != 2;
-        uint256 initialized = _initialized;
-        if (
-            !((isTopLevelCall && initialized == 0) ||
-                (initialized == 1 && address(this).code.length == 0))
-        ) revert Initializable__AlreadyInitialized();
-
-        _initialized = 1;
-        if (isTopLevelCall) _initializing = 2;
+        bool isTopLevelCall = __beforeInitialized();
         _;
-        if (isTopLevelCall) {
-            _initializing = 1;
-            emit Initialized(1);
-        }
+        __afterInitialized(isTopLevelCall);
     }
 
     /**
@@ -106,13 +95,10 @@ abstract contract Initializable {
      * Note that versions can jump in increments greater than 1; this implies that if multiple reinitializers coexist in
      * a contract, executing them in the right order is up to the developer or operator.
      */
-    modifier reinitializer(uint256 version) {
-        if (_initializing != 1 || _initialized >= version)
-            revert Initializable__AlreadyInitialized();
-        _initialized = version & ~uint8(0);
-        _initializing = 2;
+    modifier reinitializer(uint8 version) {
+        __beforeReinitialized(version);
         _;
-        _initializing = 1;
+        __afterReinitialized();
         emit Initialized(version);
     }
 
@@ -121,7 +107,7 @@ abstract contract Initializable {
      * {initializer} and {reinitializer} modifiers, directly or indirectly.
      */
     modifier onlyInitializing() {
-        if (_initializing != 2) revert Initializable__NotInitializing();
+        __checkInitializing();
         _;
     }
 
@@ -132,9 +118,9 @@ abstract contract Initializable {
      * through proxies.
      */
     function _disableInitializers() internal virtual {
-        if (_initializing != 1) revert Initializable__Initializing();
-        if (_initialized < 0xff) {
-            _initialized = 0xff;
+        if (__initializing != 1) revert Initializable__Initializing();
+        if (__initialized < 0xff) {
+            __initialized = 0xff;
             emit Initialized(0xff);
         }
     }
@@ -144,7 +130,7 @@ abstract contract Initializable {
      */
     function _getInitializedVersion() internal view returns (uint8 version) {
         assembly {
-            version := sload(_initialized.slot)
+            version := sload(__initialized.slot)
         }
     }
 
@@ -152,6 +138,41 @@ abstract contract Initializable {
      * @dev Internal function that returns the initialized version. Returns `_initializing`
      */
     function _isInitializing() internal view returns (bool) {
-        return _initializing == 2;
+        return __initializing == 2;
+    }
+
+    function __checkInitializing() private view {
+        if (__initializing != 2) revert Initializable__NotInitializing();
+    }
+
+    function __beforeInitialized() private returns (bool isTopLevelCall) {
+        isTopLevelCall = __initializing != 2;
+        uint256 initialized = __initialized;
+
+        if (
+            !((isTopLevelCall && initialized == 0) ||
+                (initialized == 1 && address(this).code.length == 0))
+        ) revert Initializable__AlreadyInitialized();
+
+        __initialized = 1;
+        if (isTopLevelCall) __initializing = 2;
+    }
+
+    function __afterInitialized(bool isTopLevelCall_) private {
+        if (isTopLevelCall_) {
+            __initializing = 1;
+            emit Initialized(1);
+        }
+    }
+
+    function __beforeReinitialized(uint8 version) private {
+        if (__initializing != 1 || __initialized >= version)
+            revert Initializable__AlreadyInitialized();
+        __initialized = version;
+        __initializing = 2;
+    }
+
+    function __afterReinitialized() private {
+        __initializing = 1;
     }
 }

@@ -11,7 +11,7 @@ interface IAccessControlBatchUpgradeable {
 
     event RolesGranted(
         bytes32 indexed role,
-        address[] indexed accounts,
+        address[] accounts,
         address indexed sender
     );
 

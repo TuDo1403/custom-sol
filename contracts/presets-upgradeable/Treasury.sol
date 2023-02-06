@@ -3,23 +3,22 @@ pragma solidity ^0.8.17;
 
 import {IAuthority, Manager} from "./base/Manager.sol";
 
-import "../internal/Signable.sol";
-import "../internal/ProxyChecker.sol";
-import "../internal/Withdrawable.sol";
+import {ProxyChecker} from "../internal/ProxyChecker.sol";
+import {IWithdrawable, Withdrawable} from "../internal/Withdrawable.sol";
+import {Signable, Bytes32Address} from "../internal/Signable.sol";
 
-import "./interfaces/ITreasury.sol";
-import "../oz/token/ERC20/IERC20.sol";
+import {ITreasury} from "./interfaces/ITreasury.sol";
+import {IERC20} from "../oz/token/ERC20/IERC20.sol";
 import {IERC721, ERC721TokenReceiver} from "../oz/token/ERC721/ERC721.sol";
 import {
     IERC1155,
     IERC1155Receiver
 } from "@openzeppelin/contracts/token/ERC1155/ERC1155.sol"; // TODO: update oz-custom
 
-import "../libraries/Roles.sol";
-import "../libraries/Bytes32Address.sol";
+import {Roles} from "../libraries/Roles.sol";
 
-import "../oz/utils/structs/BitMaps.sol";
-import "../oz/utils/introspection/ERC165Checker.sol";
+import {BitMaps} from "../oz/utils/structs/BitMaps.sol";
+import {ERC165Checker} from "../oz/utils/introspection/ERC165Checker.sol";
 
 contract Treasury is
     Manager,
@@ -39,7 +38,9 @@ contract Treasury is
         0x1d4e5c65da4048ea0e84458001171f3bf2f0666aa734d5dc971be326031829c5;
 
     uint256 public safeReceivedNativeBalance;
+
     mapping(address => uint256) public erc20Balances;
+
     mapping(address => BitMaps.BitMap) private __erc721Balances;
     mapping(address => mapping(uint256 => uint256)) public erc1155Balances;
 
@@ -283,7 +284,7 @@ contract Treasury is
             }
             safeReceivedNativeBalance = _balance;
 
-            _safeNativeTransfer(to_, value_);
+            _safeNativeTransfer(to_, value_, "SAFE_WITHDRAW");
         } else if (token_.supportsInterface(type(IERC721).interfaceId)) {
             if (!__erc721Balances[token_].get(value_))
                 revert Treasury__UnauthorizedWithdrawal();

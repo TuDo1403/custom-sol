@@ -1,20 +1,35 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "../oz/utils/structs/BitMaps.sol";
-import "../oz/utils/introspection/ERC165Checker.sol";
-import "../oz/token/ERC721/extensions/IERC721Enumerable.sol";
-import {IERC721, ERC721TokenReceiver} from "../oz/token/ERC721/ERC721.sol";
+import {BitMaps} from "../oz/utils/structs/BitMaps.sol";
+import {ERC165Checker} from "../oz/utils/introspection/ERC165Checker.sol";
 
-import "../internal/ProxyChecker.sol";
-import "../internal/FundForwarder.sol";
-import "../internal/MultiDelegatecall.sol";
+import {ERC721TokenReceiver} from "../oz/token/ERC721/ERC721.sol";
 
-import "./base/Manager.sol";
+import {ProxyChecker} from "../internal/ProxyChecker.sol";
+import {FundForwarder} from "../internal/FundForwarder.sol";
+import {
+    MultiDelegatecall,
+    ErrorHandler
+} from "../internal/MultiDelegatecall.sol";
 
-import "./interfaces/ICommandGate.sol";
+import {Roles, IAuthority, Manager} from "./base/Manager.sol";
 
-import "../libraries/Bytes32Address.sol";
+import {IWithdrawable} from "../internal/interfaces/IWithdrawable.sol";
+
+import {
+    IERC20,
+    ITreasury,
+    ICommandGate,
+    IERC20Permit
+} from "./interfaces/ICommandGate.sol";
+
+import {
+    IERC721,
+    IERC721Enumerable
+} from "../oz/token/ERC721/extensions/IERC721Enumerable.sol";
+
+import {Bytes32Address} from "../libraries/Bytes32Address.sol";
 
 contract CommandGate is
     Manager,
@@ -24,6 +39,7 @@ contract CommandGate is
     MultiDelegatecall,
     ERC721TokenReceiver
 {
+    using ErrorHandler for bool;
     using ERC165Checker for address;
     using Bytes32Address for address;
     using BitMaps for BitMaps.BitMap;
@@ -46,7 +62,7 @@ contract CommandGate is
 
     function changeVault(
         address vault_
-    ) external override onlyRole(Roles.OPERATOR_ROLE) {
+    ) external onlyRole(Roles.OPERATOR_ROLE) {
         _changeVault(vault_);
     }
 
@@ -56,12 +72,6 @@ contract CommandGate is
         __whitelistVaults(vaults_);
     }
 
-    function updateTreasury(
-        ITreasury treasury_
-    ) external onlyRole(Roles.OPERATOR_ROLE) {
-        _changeVault(address(treasury_));
-    }
-
     function whitelistAddress(
         address addr_
     ) external onlyRole(Roles.OPERATOR_ROLE) {
@@ -69,7 +79,7 @@ contract CommandGate is
             revert CommandGate__InvalidArgument();
         __isWhitelisted.set(addr_.fillLast96Bits());
 
-        emit Whitelisted(addr_);
+        emit Whitelisted(_msgSender(), addr_);
     }
 
     function depositNativeTokenWithCommand(
@@ -88,7 +98,7 @@ contract CommandGate is
             !__whitelistedVaults.get(vault_.fillLast96Bits())
         ) revert CommandGate__UnknownAddress(contract_);
 
-        _safeNativeTransfer(vault_, msg.value);
+        _safeNativeTransfer(vault_, msg.value, safeTransferHeader());
 
         __executeTx(
             contract_,
@@ -117,6 +127,7 @@ contract CommandGate is
     ) external whenNotPaused {
         address user = _msgSender();
         __checkUser(user);
+
         if (!__isWhitelisted.get(contract_.fillLast96Bits()))
             revert CommandGate__UnknownAddress(contract_);
         if (
@@ -125,6 +136,15 @@ contract CommandGate is
         ) revert CommandGate__UnknownAddress(vault_);
 
         _safeERC20TransferFrom(token_, user, vault_, value_);
+
+        if (
+            IWithdrawable(vault_).notifyERC20Transfer(
+                address(token_),
+                value_,
+                safeTransferHeader()
+            ) != IWithdrawable.notifyERC20Transfer.selector
+        ) revert CommandGate__ExecutionFailed();
+
         data_ = __concatDepositData(user, address(token_), value_, data_);
         __executeTx(contract_, fnSig_, data_);
 
@@ -243,13 +263,12 @@ contract CommandGate is
     }
 
     function __whitelistVaults(address[] memory vaults_) private {
-        uint256 length = vaults_.length;
         uint256[] memory uintVaults;
-
         assembly {
             uintVaults := vaults_
         }
 
+        uint256 length = vaults_.length;
         for (uint256 i; i < length; ) {
             if (uintVaults[i] == 0) revert CommandGate__InvalidArgument();
             __whitelistedVaults.set(uintVaults[i]);
@@ -258,7 +277,7 @@ contract CommandGate is
             }
         }
 
-        emit VaultsWhitelisted(vaults_);
+        emit VaultsWhitelisted(_msgSender(), vaults_);
     }
 
     function __executeTx(
@@ -266,8 +285,10 @@ contract CommandGate is
         bytes4 fnSignature_,
         bytes memory params_
     ) private {
-        (bool ok, ) = target_.call(abi.encodePacked(fnSignature_, params_));
-        if (!ok) revert CommandGate__ExecutionFailed();
+        (bool ok, bytes memory revertData) = target_.call(
+            abi.encodePacked(fnSignature_, params_)
+        );
+        ok.handleRevertIfNotOk(revertData);
     }
 
     function __checkUser(address user_) private view {
