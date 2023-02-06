@@ -36,19 +36,12 @@ abstract contract Create2Deployer is DeterministicDeployer {
     ) internal override returns (address instance) {
         instance = Create2.deploy(amount_, salt_, bytecode_);
 
-        emit Deployed(
-            instance,
-            salt_,
-            instance.codehash,
-            type(Create2Deployer).name
-        );
+        emit Deployed(instance, salt_, instance.codehash, type(Create2Deployer).name);
     }
 }
 
 abstract contract Create3Deployer is DeterministicDeployer {
-    function instanceOf(
-        bytes32 salt_
-    ) external view returns (address instance, bool isDeployed) {
+    function instanceOf(bytes32 salt_) external view returns (address instance, bool isDeployed) {
         instance = Create3.getDeployed(salt_);
         isDeployed = instance.code.length != 0;
     }
@@ -60,11 +53,6 @@ abstract contract Create3Deployer is DeterministicDeployer {
     ) internal override returns (address instance) {
         instance = Create3.deploy(salt_, bytecode_, amount_);
 
-        emit Deployed(
-            instance,
-            salt_,
-            instance.codehash,
-            type(Create3Deployer).name
-        );
+        emit Deployed(instance, salt_, instance.codehash, type(Create3Deployer).name);
     }
 }

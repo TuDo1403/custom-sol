@@ -67,12 +67,9 @@ library Address {
      * https://solidity.readthedocs.io/en/v0.5.11/security-considerations.html#use-the-checks-effects-interactions-pattern[checks-effects-interactions pattern].
      */
     function sendValue(address payable recipient, uint256 amount) internal {
-        if (address(this).balance < amount)
-            revert Address__InsufficientBalance();
+        if (address(this).balance < amount) revert Address__InsufficientBalance();
 
-        (bool success, bytes memory revertData) = recipient.call{value: amount}(
-            ""
-        );
+        (bool success, bytes memory revertData) = recipient.call{value: amount}("");
         success.handleRevertIfNotOk(revertData);
     }
 
@@ -94,10 +91,7 @@ library Address {
      *
      * _Available since v3.1._
      */
-    function functionCall(
-        address target,
-        bytes memory data
-    ) internal returns (bytes memory) {
+    function functionCall(address target, bytes memory data) internal returns (bytes memory) {
         return functionCall(target, data, "Address: low-level call failed");
     }
 
@@ -132,12 +126,7 @@ library Address {
         uint256 value
     ) internal returns (bytes memory) {
         return
-            functionCallWithValue(
-                target,
-                data,
-                value,
-                "Address: low-level call with value failed"
-            );
+            functionCallWithValue(target, data, value, "Address: low-level call with value failed");
     }
 
     /**
@@ -152,14 +141,11 @@ library Address {
         uint256 value,
         string memory errorMessage
     ) internal returns (bytes memory) {
-        if (address(this).balance < value)
-            revert Address__InsufficientBalance();
+        if (address(this).balance < value) revert Address__InsufficientBalance();
 
         if (!isContract(target)) revert Address__CallToNonContract();
 
-        (bool success, bytes memory returndata) = target.call{value: value}(
-            data
-        );
+        (bool success, bytes memory returndata) = target.call{value: value}(data);
         return verifyCallResult(success, returndata, errorMessage);
     }
 
@@ -173,12 +159,7 @@ library Address {
         address target,
         bytes memory data
     ) internal view returns (bytes memory) {
-        return
-            functionStaticCall(
-                target,
-                data,
-                "Address: low-level static call failed"
-            );
+        return functionStaticCall(target, data, "Address: low-level static call failed");
     }
 
     /**
@@ -208,12 +189,7 @@ library Address {
         address target,
         bytes memory data
     ) internal returns (bytes memory) {
-        return
-            functionDelegateCall(
-                target,
-                data,
-                "Address: low-level delegate call failed"
-            );
+        return functionDelegateCall(target, data, "Address: low-level delegate call failed");
     }
 
     /**

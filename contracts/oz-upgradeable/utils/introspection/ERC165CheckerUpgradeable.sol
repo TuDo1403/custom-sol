@@ -3,7 +3,7 @@
 
 pragma solidity ^0.8.0;
 
-import "./IERC165Upgradeable.sol";
+import {IERC165Upgradeable} from "./IERC165Upgradeable.sol";
 
 /**
  * @dev Library used to query support of an interface declared via {IERC165}.
@@ -14,7 +14,7 @@ import "./IERC165Upgradeable.sol";
  */
 library ERC165CheckerUpgradeable {
     // As per the EIP-165 spec, no interface should ever match 0xffffffff
-    bytes4 private constant _INTERFACE_ID_INVALID = 0xffffffff;
+    bytes4 private constant __INTERFACE_ID_INVALID = 0xffffffff;
 
     /**
      * @dev Returns true if `account` supports the {IERC165} interface,
@@ -23,11 +23,8 @@ library ERC165CheckerUpgradeable {
         // Any contract that implements ERC165 must explicitly indicate support of
         // InterfaceId_ERC165 and explicitly indicate non-support of InterfaceId_Invalid
         return
-            supportsERC165InterfaceUnchecked(
-                account,
-                type(IERC165Upgradeable).interfaceId
-            ) &&
-            !supportsERC165InterfaceUnchecked(account, _INTERFACE_ID_INVALID);
+            supportsERC165InterfaceUnchecked(account, type(IERC165Upgradeable).interfaceId) &&
+            !supportsERC165InterfaceUnchecked(account, __INTERFACE_ID_INVALID);
     }
 
     /**
@@ -36,14 +33,9 @@ library ERC165CheckerUpgradeable {
      *
      * See {IERC165-supportsInterface}.
      */
-    function supportsInterface(
-        address account,
-        bytes4 interfaceId
-    ) internal view returns (bool) {
+    function supportsInterface(address account, bytes4 interfaceId) internal view returns (bool) {
         // query support of both ERC165 as per the spec and support of _interfaceId
-        return
-            supportsERC165(account) &&
-            supportsERC165InterfaceUnchecked(account, interfaceId);
+        return supportsERC165(account) && supportsERC165InterfaceUnchecked(account, interfaceId);
     }
 
     /**
@@ -58,7 +50,7 @@ library ERC165CheckerUpgradeable {
      */
     function getSupportedInterfaces(
         address account,
-        bytes4[] memory interfaceIds
+        bytes4[] calldata interfaceIds
     ) internal view returns (bool[] memory interfaceIdsSupported) {
         uint256 length = interfaceIds.length;
 
@@ -91,7 +83,7 @@ library ERC165CheckerUpgradeable {
      */
     function supportsAllInterfaces(
         address account,
-        bytes4[] memory interfaceIds
+        bytes4[] calldata interfaceIds
     ) internal view returns (bool) {
         // query support of ERC165 itself
         if (!supportsERC165(account)) return false;
@@ -99,8 +91,7 @@ library ERC165CheckerUpgradeable {
         uint256 length = interfaceIds.length;
         // query support of each interface in _interfaceIds
         for (uint256 i; i < length; ) {
-            if (!supportsERC165InterfaceUnchecked(account, interfaceIds[i]))
-                return false;
+            if (!supportsERC165InterfaceUnchecked(account, interfaceIds[i])) return false;
 
             unchecked {
                 ++i;

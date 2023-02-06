@@ -3,9 +3,13 @@
 
 pragma solidity ^0.8.17;
 
-import "./draft-IERC20PermitUpgradeable.sol";
-import "../ERC20Upgradeable.sol";
-import "../../../../internal-upgradeable/SignableUpgradeable.sol";
+import {ERC20Upgradeable} from "../ERC20Upgradeable.sol";
+import {
+    Bytes32Address,
+    SignableUpgradeable
+} from "../../../../internal-upgradeable/SignableUpgradeable.sol";
+
+import {IERC20PermitUpgradeable} from "./draft-IERC20PermitUpgradeable.sol";
 
 /**
  * @dev Implementation of the ERC20 Permit extension allowing approvals to be made via signatures, as defined in
@@ -19,32 +23,22 @@ import "../../../../internal-upgradeable/SignableUpgradeable.sol";
  */
 abstract contract ERC20PermitUpgradeable is
     ERC20Upgradeable,
-    IERC20PermitUpgradeable,
-    SignableUpgradeable
+    SignableUpgradeable,
+    IERC20PermitUpgradeable
 {
     using Bytes32Address for address;
 
     // solhint-disable-next-line var-name-mixedcase
     //
-    bytes32 private constant _PERMIT_TYPEHASH =
+    bytes32 private constant __PERMIT_TYPEHASH =
         0x6e71edae12b1b97f4d1f60370fef10105fa2faae0126114a169c64845d6126c9;
-    /**
-     * @dev In previous versions `_PERMIT_TYPEHASH` was declared as `immutable`.
-     * However, to ensure consistency with the upgradeable transpiler, we will continue
-     * to reserve a slot.
-     * @custom:oz-renamed-from _PERMIT_TYPEHASH
-     */
-    // solhint-disable-next-line var-name-mixedcase
-    bytes32 private _PERMIT_TYPEHASH_DEPRECATED_SLOT;
 
     /**
      * @dev Initializes the {EIP712} domain separator using the `name` parameter, and setting `version` to `"1"`.
      *
      * It's a good idea to use the same `name` that is defined as the ERC20 token name.
      */
-    function __ERC20Permit_init(
-        string calldata name_
-    ) internal onlyInitializing {
+    function __ERC20Permit_init(string calldata name_) internal onlyInitializing {
         __EIP712_init_unchained(name_, "1");
     }
 
@@ -79,7 +73,7 @@ abstract contract ERC20PermitUpgradeable is
 
             let freeMemPtr := mload(0x40)
 
-            mstore(freeMemPtr, _PERMIT_TYPEHASH)
+            mstore(freeMemPtr, __PERMIT_TYPEHASH)
             mstore(add(freeMemPtr, 32), owner)
             mstore(add(freeMemPtr, 64), spender)
             mstore(add(freeMemPtr, 96), value)
@@ -122,5 +116,5 @@ abstract contract ERC20PermitUpgradeable is
         return _nonce(account_.fillLast12Bytes());
     }
 
-    uint256[49] private __gap;
+    uint256[50] private __gap;
 }

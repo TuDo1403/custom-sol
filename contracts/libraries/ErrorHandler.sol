@@ -2,10 +2,7 @@
 pragma solidity ^0.8.17;
 
 library ErrorHandler {
-    function handleRevertIfNotOk(
-        bool ok_,
-        bytes memory revertData_
-    ) internal pure {
+    function handleRevertIfNotOk(bool ok_, bytes memory revertData_) internal pure {
         if (!ok_)
             assembly {
                 revert(

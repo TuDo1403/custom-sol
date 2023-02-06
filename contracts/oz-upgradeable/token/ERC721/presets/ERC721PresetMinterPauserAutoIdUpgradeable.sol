@@ -3,11 +3,18 @@
 
 pragma solidity ^0.8.0;
 
-import "../ERC721Upgradeable.sol";
-import "../extensions/ERC721BurnableUpgradeable.sol";
-import "../extensions/ERC721PausableUpgradeable.sol";
-import "../extensions/ERC721EnumerableUpgradeable.sol";
-import "../../../access/AccessControlEnumerableUpgradeable.sol";
+import {
+    ERC721Upgradeable,
+    ERC721BurnableUpgradeable
+} from "../extensions/ERC721BurnableUpgradeable.sol";
+import {ERC721PausableUpgradeable} from "../extensions/ERC721PausableUpgradeable.sol";
+import {
+    IERC165Upgradeable,
+    ERC721EnumerableUpgradeable
+} from "../extensions/ERC721EnumerableUpgradeable.sol";
+import {
+    AccessControlEnumerableUpgradeable
+} from "../../../access/AccessControlEnumerableUpgradeable.sol";
 
 /**
  * @dev {ERC721} token, including:
@@ -27,10 +34,10 @@ import "../../../access/AccessControlEnumerableUpgradeable.sol";
  * _Deprecated in favor of https://wizard.openzeppelin.com/[Contracts Wizard]._
  */
 abstract contract ERC721PresetMinterPauserAutoIdUpgradeable is
-    AccessControlEnumerableUpgradeable,
     ERC721PausableUpgradeable,
     ERC721BurnableUpgradeable,
-    ERC721EnumerableUpgradeable
+    ERC721EnumerableUpgradeable,
+    AccessControlEnumerableUpgradeable
 {
     ///@dev value is equal to keccak256("MINTER_ROLE")
     bytes32 public constant MINTER_ROLE =
@@ -52,23 +59,17 @@ abstract contract ERC721PresetMinterPauserAutoIdUpgradeable is
      */
 
     function __ERC721PresetMinterPauserAutoId_init(
-        string memory name,
-        string memory symbol,
-        string memory baseTokenURI
+        string calldata name_,
+        string calldata symbol_,
+        string calldata baseTokenURI_
     ) internal onlyInitializing {
-        __ERC721_init_unchained(name, symbol);
+        __ERC721_init_unchained(name_, symbol_);
         __Pausable_init_unchained();
-        __ERC721PresetMinterPauserAutoId_init_unchained(
-            name,
-            symbol,
-            baseTokenURI
-        );
+        __ERC721PresetMinterPauserAutoId_init_unchained(baseTokenURI_);
     }
 
     function __ERC721PresetMinterPauserAutoId_init_unchained(
-        string memory,
-        string memory,
-        string memory baseTokenURI
+        string calldata baseTokenURI
     ) internal onlyInitializing {
         _baseTokenURI = baseTokenURI;
 
@@ -112,8 +113,7 @@ abstract contract ERC721PresetMinterPauserAutoIdUpgradeable is
      *
      * - the caller must have the `PAUSER_ROLE`.
      */
-    function pause() public virtual {
-        _checkRole(PAUSER_ROLE, _msgSender());
+    function pause() public virtual onlyRole(PAUSER_ROLE) {
         _pause();
     }
 
@@ -126,8 +126,7 @@ abstract contract ERC721PresetMinterPauserAutoIdUpgradeable is
      *
      * - the caller must have the `PAUSER_ROLE`.
      */
-    function unpause() public virtual {
-        _checkRole(PAUSER_ROLE, _msgSender());
+    function unpause() public virtual onlyRole(PAUSER_ROLE) {
         _unpause();
     }
 
@@ -138,11 +137,7 @@ abstract contract ERC721PresetMinterPauserAutoIdUpgradeable is
     )
         internal
         virtual
-        override(
-            ERC721Upgradeable,
-            ERC721EnumerableUpgradeable,
-            ERC721PausableUpgradeable
-        )
+        override(ERC721Upgradeable, ERC721PausableUpgradeable, ERC721EnumerableUpgradeable)
     {
         super._beforeTokenTransfer(from, to, tokenId);
     }
@@ -157,9 +152,10 @@ abstract contract ERC721PresetMinterPauserAutoIdUpgradeable is
         view
         virtual
         override(
-            AccessControlEnumerableUpgradeable,
             ERC721Upgradeable,
-            ERC721EnumerableUpgradeable
+            IERC165Upgradeable,
+            ERC721EnumerableUpgradeable,
+            AccessControlEnumerableUpgradeable
         )
         returns (bool)
     {

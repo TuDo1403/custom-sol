@@ -32,17 +32,13 @@ abstract contract Cloner is ICloner, Context {
      * @param salt_ The salt used to deterministically generate the clone's address
      * @return clone isCloned The cloned contract instance, and a boolean indicating whether the contract has already been cloned
      */
-    function _cloneOf(
-        bytes32 salt_
-    ) internal view returns (address clone, bool isCloned) {
+    function _cloneOf(bytes32 salt_) internal view returns (address clone, bool isCloned) {
         clone = implement().predictDeterministicAddress(salt_);
         isCloned = clone.code.length != 0;
     }
 
     /// @inheritdoc ICloner
-    function allClonesOf(
-        address implement_
-    ) external view returns (address[] memory clones) {
+    function allClonesOf(address implement_) external view returns (address[] memory clones) {
         bytes32[] memory _clones = __clones[implement_.fillLast12Bytes()];
         assembly {
             clones := _clones

@@ -73,13 +73,7 @@ abstract contract EIP712 {
     function _domainSeparatorV4() internal view returns (bytes32) {
         if (address(this) == _CACHED_THIS && block.chainid == _CACHED_CHAIN_ID)
             return _CACHED_DOMAIN_SEPARATOR;
-        else
-            return
-                _buildDomainSeparator(
-                    _TYPE_HASH,
-                    _HASHED_NAME,
-                    _HASHED_VERSION
-                );
+        else return _buildDomainSeparator(_TYPE_HASH, _HASHED_NAME, _HASHED_VERSION);
     }
 
     function _buildDomainSeparator(
@@ -112,9 +106,7 @@ abstract contract EIP712 {
      * address signer = ECDSA.recover(digest, signature);
      * ```
      */
-    function _hashTypedDataV4(
-        bytes32 structHash
-    ) internal view virtual returns (bytes32) {
+    function _hashTypedDataV4(bytes32 structHash) internal view virtual returns (bytes32) {
         return ECDSA.toTypedDataHash(_domainSeparatorV4(), structHash);
     }
 }

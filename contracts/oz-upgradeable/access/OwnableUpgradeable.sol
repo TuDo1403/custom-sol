@@ -3,9 +3,9 @@
 
 pragma solidity ^0.8.0;
 
-import "../utils/ContextUpgradeable.sol";
+import {ContextUpgradeable} from "../utils/ContextUpgradeable.sol";
 
-import "../../libraries/Bytes32Address.sol";
+import {Bytes32Address} from "../../libraries/Bytes32Address.sol";
 
 error Ownable__Unauthorized();
 error Ownable__NonZeroAddress();
@@ -27,10 +27,7 @@ abstract contract OwnableUpgradeable is ContextUpgradeable {
 
     bytes32 private _owner;
 
-    event OwnershipTransferred(
-        address indexed previousOwner,
-        address indexed newOwner
-    );
+    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
     /**
      * @dev Initializes the contract setting the deployer as the initial owner.

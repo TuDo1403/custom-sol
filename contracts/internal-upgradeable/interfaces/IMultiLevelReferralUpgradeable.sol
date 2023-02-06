@@ -32,7 +32,5 @@ interface IMultiLevelReferralUpgradeable {
      * @param account_ Account address to retrieve referrer information for
      * @return Referrer information of the account
      */
-    function referrerOf(
-        address account_
-    ) external view returns (Referrer memory);
+    function referrerOf(address account_) external view returns (Referrer memory);
 }

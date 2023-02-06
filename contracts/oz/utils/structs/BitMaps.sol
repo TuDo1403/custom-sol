@@ -14,10 +14,7 @@ library BitMaps {
     /**
      * @dev Returns whether the bit at `index` is set.
      */
-    function get(
-        BitMap storage bitmap,
-        uint256 index
-    ) internal view returns (bool isSet) {
+    function get(BitMap storage bitmap, uint256 index) internal view returns (bool isSet) {
         assembly {
             mstore(0, shr(8, index))
             mstore(32, bitmap.slot)
@@ -29,11 +26,7 @@ library BitMaps {
     /**
      * @dev Sets the bit at `index` to the boolean `value`.
      */
-    function setTo(
-        BitMap storage bitmap,
-        uint256 index,
-        bool shouldSet
-    ) internal {
+    function setTo(BitMap storage bitmap, uint256 index, bool shouldSet) internal {
         assembly {
             mstore(0, shr(8, index))
             mstore(32, bitmap.slot)
@@ -69,10 +62,7 @@ library BitMaps {
         }
     }
 
-    function setBatch(
-        BitMap storage bitmap_,
-        uint256[] calldata values_
-    ) internal {
+    function setBatch(BitMap storage bitmap_, uint256[] calldata values_) internal {
         assembly {
             let length := values_.length
             let i := add(calldataload(values_.offset), 0x20)

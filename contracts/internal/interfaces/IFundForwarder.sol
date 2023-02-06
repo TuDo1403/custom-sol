@@ -3,10 +3,7 @@ pragma solidity ^0.8.17;
 
 import {IERC20} from "../../oz/token/ERC20/IERC20.sol";
 
-import {
-    IERC721,
-    IERC721Enumerable
-} from "../../oz/token/ERC721/extensions/IERC721Enumerable.sol";
+import {IERC721, IERC721Enumerable} from "../../oz/token/ERC721/extensions/IERC721Enumerable.sol";
 
 interface IFundForwarder {
     error FundForwarder__InvalidArgument();
@@ -24,11 +21,7 @@ interface IFundForwarder {
      *@param token Address of the token contract
      *@param value Token ID of the recovered token
      */
-    event Recovered(
-        address indexed operator,
-        address indexed token,
-        uint256 indexed value
-    );
+    event Recovered(address indexed operator, address indexed token, uint256 indexed value);
 
     /**
      *@dev Emits when multiple ERC721 tokens are recovered
@@ -36,11 +29,7 @@ interface IFundForwarder {
      *@param token Address of the token contract
      *@param values Token IDs of the recovered tokens
      */
-    event RecoveredMulti(
-        address indexed operator,
-        address indexed token,
-        uint256[] values
-    );
+    event RecoveredMulti(address indexed operator, address indexed token, uint256[] values);
 
     /**
      * @dev Emits when funds are forwarded

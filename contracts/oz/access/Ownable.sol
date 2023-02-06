@@ -26,10 +26,7 @@ abstract contract Ownable is Context {
 
     bytes32 private __owner;
 
-    event OwnershipTransferred(
-        address indexed previousOwner,
-        address indexed newOwner
-    );
+    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
     /**
      * @dev Throws if called by any account other than the owner.
@@ -59,8 +56,7 @@ abstract contract Ownable is Context {
      * @dev Throws if the sender is not the owner.
      */
     function _checkOwner(address sender_) internal view virtual {
-        if (__owner != sender_.fillLast12Bytes())
-            revert Ownable__Unauthorized();
+        if (__owner != sender_.fillLast12Bytes()) revert Ownable__Unauthorized();
     }
 
     /**

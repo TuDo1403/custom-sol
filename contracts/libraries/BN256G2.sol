@@ -71,15 +71,7 @@ library BN256G2 {
             0
         );
 
-        return
-            _fromJacobian(
-                pt3[PTXX],
-                pt3[PTXY],
-                pt3[PTYX],
-                pt3[PTYY],
-                pt3[PTZX],
-                pt3[PTZY]
-            );
+        return _fromJacobian(pt3[PTXX], pt3[PTXY], pt3[PTYX], pt3[PTYY], pt3[PTZX], pt3[PTZY]);
     }
 
     /**
@@ -107,25 +99,9 @@ library BN256G2 {
             assert(_isOnCurve(pt1xx, pt1xy, pt1yx, pt1yy));
         }
 
-        uint256[6] memory pt2 = _ECTwistMulJacobian(
-            s,
-            pt1xx,
-            pt1xy,
-            pt1yx,
-            pt1yy,
-            pt1zx,
-            0
-        );
+        uint256[6] memory pt2 = _ECTwistMulJacobian(s, pt1xx, pt1xy, pt1yx, pt1yy, pt1zx, 0);
 
-        return
-            _fromJacobian(
-                pt2[PTXX],
-                pt2[PTXY],
-                pt2[PTYX],
-                pt2[PTYY],
-                pt2[PTZX],
-                pt2[PTZY]
-            );
+        return _fromJacobian(pt2[PTXX], pt2[PTXY], pt2[PTYX], pt2[PTYY], pt2[PTZX], pt2[PTZY]);
     }
 
     /**
@@ -136,11 +112,7 @@ library BN256G2 {
         return FIELD_MODULUS;
     }
 
-    function submod(
-        uint256 a,
-        uint256 b,
-        uint256 n
-    ) internal pure returns (uint256) {
+    function submod(uint256 a, uint256 b, uint256 n) internal pure returns (uint256) {
         return addmod(a, n - b, n);
     }
 
@@ -151,24 +123,12 @@ library BN256G2 {
         uint256 yy
     ) internal pure returns (uint256, uint256) {
         return (
-            submod(
-                mulmod(xx, yx, FIELD_MODULUS),
-                mulmod(xy, yy, FIELD_MODULUS),
-                FIELD_MODULUS
-            ),
-            addmod(
-                mulmod(xx, yy, FIELD_MODULUS),
-                mulmod(xy, yx, FIELD_MODULUS),
-                FIELD_MODULUS
-            )
+            submod(mulmod(xx, yx, FIELD_MODULUS), mulmod(xy, yy, FIELD_MODULUS), FIELD_MODULUS),
+            addmod(mulmod(xx, yy, FIELD_MODULUS), mulmod(xy, yx, FIELD_MODULUS), FIELD_MODULUS)
         );
     }
 
-    function _FQ2Muc(
-        uint256 xx,
-        uint256 xy,
-        uint256 c
-    ) internal pure returns (uint256, uint256) {
+    function _FQ2Muc(uint256 xx, uint256 xy, uint256 c) internal pure returns (uint256, uint256) {
         return (mulmod(xx, c, FIELD_MODULUS), mulmod(xy, c, FIELD_MODULUS));
     }
 
@@ -200,22 +160,12 @@ library BN256G2 {
         return _FQ2Mul(xx, xy, yx, yy);
     }
 
-    function _FQ2Inv(
-        uint256 x,
-        uint256 y
-    ) internal view returns (uint256, uint256) {
+    function _FQ2Inv(uint256 x, uint256 y) internal view returns (uint256, uint256) {
         uint256 inv = _modInv(
-            addmod(
-                mulmod(y, y, FIELD_MODULUS),
-                mulmod(x, x, FIELD_MODULUS),
-                FIELD_MODULUS
-            ),
+            addmod(mulmod(y, y, FIELD_MODULUS), mulmod(x, x, FIELD_MODULUS), FIELD_MODULUS),
             FIELD_MODULUS
         );
-        return (
-            mulmod(x, inv, FIELD_MODULUS),
-            FIELD_MODULUS - mulmod(y, inv, FIELD_MODULUS)
-        );
+        return (mulmod(x, inv, FIELD_MODULUS), FIELD_MODULUS - mulmod(y, inv, FIELD_MODULUS));
     }
 
     function isOnCurve(
@@ -245,10 +195,7 @@ library BN256G2 {
         return yyx == 0 && yyy == 0;
     }
 
-    function _modInv(
-        uint256 a,
-        uint256 n
-    ) internal view returns (uint256 result) {
+    function _modInv(uint256 a, uint256 n) internal view returns (uint256 result) {
         bool success;
         assembly {
             let freemem := mload(0x40)
@@ -258,14 +205,7 @@ library BN256G2 {
             mstore(add(freemem, 0x60), a)
             mstore(add(freemem, 0x80), sub(n, 2))
             mstore(add(freemem, 0xA0), n)
-            success := staticcall(
-                sub(gas(), 2000),
-                5,
-                freemem,
-                0xC0,
-                freemem,
-                0x20
-            )
+            success := staticcall(sub(gas(), 2000), 5, freemem, 0xC0, freemem, 0x20)
             result := mload(freemem)
         }
         require(success);
@@ -278,11 +218,7 @@ library BN256G2 {
         uint256 pt1yy,
         uint256 pt1zx,
         uint256 pt1zy
-    )
-        internal
-        view
-        returns (uint256 pt2xx, uint256 pt2xy, uint256 pt2yx, uint256 pt2yy)
-    {
+    ) internal view returns (uint256 pt2xx, uint256 pt2xy, uint256 pt2yx, uint256 pt2yy) {
         uint256 invzx;
         uint256 invzy;
         (invzx, invzy) = _FQ2Inv(pt1zx, pt1zy);
@@ -305,24 +241,24 @@ library BN256G2 {
         uint256 pt2zy
     ) public pure returns (uint256[6] memory pt3) {
         if (pt1zx == 0 && pt1zy == 0) {
-            (
-                pt3[PTXX],
-                pt3[PTXY],
-                pt3[PTYX],
-                pt3[PTYY],
-                pt3[PTZX],
-                pt3[PTZY]
-            ) = (pt2xx, pt2xy, pt2yx, pt2yy, pt2zx, pt2zy);
+            (pt3[PTXX], pt3[PTXY], pt3[PTYX], pt3[PTYY], pt3[PTZX], pt3[PTZY]) = (
+                pt2xx,
+                pt2xy,
+                pt2yx,
+                pt2yy,
+                pt2zx,
+                pt2zy
+            );
             return pt3;
         } else if (pt2zx == 0 && pt2zy == 0) {
-            (
-                pt3[PTXX],
-                pt3[PTXY],
-                pt3[PTYX],
-                pt3[PTYY],
-                pt3[PTZX],
-                pt3[PTZY]
-            ) = (pt1xx, pt1xy, pt1yx, pt1yy, pt1zx, pt1zy);
+            (pt3[PTXX], pt3[PTXY], pt3[PTYX], pt3[PTYY], pt3[PTZX], pt3[PTZY]) = (
+                pt1xx,
+                pt1xy,
+                pt1yx,
+                pt1yy,
+                pt1zx,
+                pt1zy
+            );
             return pt3;
         }
 
@@ -340,24 +276,10 @@ library BN256G2 {
                     pt3[PTYY],
                     pt3[PTZX],
                     pt3[PTZY]
-                ) = _ECTwistDoubleJacobian(
-                    pt1xx,
-                    pt1xy,
-                    pt1yx,
-                    pt1yy,
-                    pt1zx,
-                    pt1zy
-                );
+                ) = _ECTwistDoubleJacobian(pt1xx, pt1xy, pt1yx, pt1yy, pt1zx, pt1zy);
                 return pt3;
             }
-            (
-                pt3[PTXX],
-                pt3[PTXY],
-                pt3[PTYX],
-                pt3[PTYY],
-                pt3[PTZX],
-                pt3[PTZY]
-            ) = (1, 0, 1, 0, 0, 0);
+            (pt3[PTXX], pt3[PTXY], pt3[PTYX], pt3[PTYY], pt3[PTZX], pt3[PTZY]) = (1, 0, 1, 0, 0, 0);
             return pt3;
         }
 

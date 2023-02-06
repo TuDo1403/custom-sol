@@ -29,16 +29,7 @@ contract SigUtil {
         address spender,
         uint256 value,
         uint256 deadline
-    )
-        external
-        view
-        returns (
-            bytes32 hash,
-            bytes32 digest,
-            uint256 nonce,
-            bytes32 domainSeparator
-        )
-    {
+    ) external view returns (bytes32 hash, bytes32 digest, uint256 nonce, bytes32 domainSeparator) {
         hash = keccak256(
             abi.encode(
                 ERC20PERMIT_TYPE_HASH,
@@ -49,10 +40,7 @@ contract SigUtil {
                 deadline
             )
         );
-        digest = ECDSA.toTypedDataHash(
-            domainSeparator = paymentToken.DOMAIN_SEPARATOR(),
-            hash
-        );
+        digest = ECDSA.toTypedDataHash(domainSeparator = paymentToken.DOMAIN_SEPARATOR(), hash);
     }
 
     function splitSignature(
@@ -68,10 +56,7 @@ contract SigUtil {
         }
     }
 
-    function recover(
-        bytes32 digest,
-        bytes calldata sig
-    ) external view returns (address) {
+    function recover(bytes32 digest, bytes calldata sig) external view returns (address) {
         return ECDSA.recover(digest, sig);
     }
 

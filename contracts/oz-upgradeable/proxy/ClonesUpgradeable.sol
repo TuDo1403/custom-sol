@@ -3,6 +3,9 @@
 
 pragma solidity ^0.8.0;
 
+error Clones__CreateFailed();
+error Clones__Create2Failed();
+
 /**
  * @dev https://eips.ethereum.org/EIPS/eip-1167[EIP 1167] is a standard for
  * deploying minimal proxy contracts, also known as "clones".
@@ -26,10 +29,7 @@ library ClonesUpgradeable {
         /// @solidity memory-safe-assembly
         assembly {
             let ptr := mload(0x40)
-            mstore(
-                ptr,
-                0x3d602d80600a3d3981f3363d3d373d3d3d363d73000000000000000000000000
-            )
+            mstore(ptr, 0x3d602d80600a3d3981f3363d3d373d3d3d363d73000000000000000000000000)
             mstore(add(ptr, 0x14), shl(0x60, implementation))
             mstore(
                 add(ptr, 0x28),
@@ -37,7 +37,8 @@ library ClonesUpgradeable {
             )
             instance := create(0, ptr, 0x37)
         }
-        require(instance != address(0), "ERC1167: create failed");
+
+        if (instance == address(0)) revert Clones__CreateFailed();
     }
 
     /**
@@ -54,10 +55,7 @@ library ClonesUpgradeable {
         /// @solidity memory-safe-assembly
         assembly {
             let ptr := mload(0x40)
-            mstore(
-                ptr,
-                0x3d602d80600a3d3981f3363d3d373d3d3d363d73000000000000000000000000
-            )
+            mstore(ptr, 0x3d602d80600a3d3981f3363d3d373d3d3d363d73000000000000000000000000)
             mstore(add(ptr, 0x14), shl(0x60, implementation))
             mstore(
                 add(ptr, 0x28),
@@ -65,7 +63,8 @@ library ClonesUpgradeable {
             )
             instance := create2(0, ptr, 0x37, salt)
         }
-        require(instance != address(0), "ERC1167: create2 failed");
+
+        if (instance == address(0)) revert Clones__Create2Failed();
     }
 
     /**
@@ -79,10 +78,7 @@ library ClonesUpgradeable {
         /// @solidity memory-safe-assembly
         assembly {
             let ptr := mload(0x40)
-            mstore(
-                ptr,
-                0x3d602d80600a3d3981f3363d3d373d3d3d363d73000000000000000000000000
-            )
+            mstore(ptr, 0x3d602d80600a3d3981f3363d3d373d3d3d363d73000000000000000000000000)
             mstore(add(ptr, 0x14), shl(0x60, implementation))
             mstore(
                 add(ptr, 0x28),

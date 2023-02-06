@@ -39,9 +39,7 @@ library FixedPointMathLib {
     ) internal pure returns (uint256 z) {
         assembly {
             // Equivalent to require(denominator != 0 && (y == 0 || x <= type(uint256).max / y))
-            if iszero(
-                mul(denominator, iszero(mul(y, gt(x, div(MAX_UINT256, y)))))
-            ) {
+            if iszero(mul(denominator, iszero(mul(y, gt(x, div(MAX_UINT256, y)))))) {
                 revert(0, 0)
             }
 
@@ -49,32 +47,19 @@ library FixedPointMathLib {
         }
     }
 
-    function mulDivUp(
-        uint256 x,
-        uint256 y,
-        uint256 denominator
-    ) internal pure returns (uint256 z) {
+    function mulDivUp(uint256 x, uint256 y, uint256 denominator) internal pure returns (uint256 z) {
         assembly {
             // Equivalent to require(denominator != 0 && (y == 0 || x <= type(uint256).max / y))
-            if iszero(
-                mul(denominator, iszero(mul(y, gt(x, div(MAX_UINT256, y)))))
-            ) {
+            if iszero(mul(denominator, iszero(mul(y, gt(x, div(MAX_UINT256, y)))))) {
                 revert(0, 0)
             }
 
             // Add 1 to the result if x * y mod denominator != 0.
-            z := add(
-                gt(mod(mul(x, y), denominator), 0),
-                div(mul(x, y), denominator)
-            )
+            z := add(gt(mod(mul(x, y), denominator), 0), div(mul(x, y), denominator))
         }
     }
 
-    function rpow(
-        uint256 x,
-        uint256 n,
-        uint256 scalar
-    ) internal pure returns (uint256 z) {
+    function rpow(uint256 x, uint256 n, uint256 scalar) internal pure returns (uint256 z) {
         assembly {
             switch x
             case 0 {

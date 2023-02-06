@@ -22,12 +22,7 @@ abstract contract Withdrawable is Context, Transferable, IWithdrawable {
      * @dev Fallback function to receive funds when msg.data is not empty and emit the Received event
      */
     fallback() external payable virtual {
-        emit Received(
-            _msgSender(),
-            address(0),
-            abi.encode(msg.value),
-            msg.data
-        );
+        emit Received(_msgSender(), address(0), abi.encode(msg.value), msg.data);
     }
 
     function notifyERC20Transfer(

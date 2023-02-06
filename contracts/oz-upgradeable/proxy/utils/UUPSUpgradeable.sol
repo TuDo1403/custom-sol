@@ -3,9 +3,9 @@
 
 pragma solidity ^0.8.0;
 
-import "../../interfaces/draft-IERC1822Upgradeable.sol";
-import "../ERC1967/ERC1967UpgradeUpgradeable.sol";
-import "./Initializable.sol";
+import {Initializable} from "./Initializable.sol";
+import {ERC1967UpgradeUpgradeable} from "../ERC1967/ERC1967UpgradeUpgradeable.sol";
+import {IERC1822ProxiableUpgradeable} from "../../interfaces/draft-IERC1822Upgradeable.sol";
 
 error UUPSUpgradeable__OnlyCall();
 error UUPSUpgradeable__OnlyDelegateCall();
@@ -25,8 +25,8 @@ error UUPSUpgradeable__OnlyActiveProxy();
  */
 abstract contract UUPSUpgradeable is
     Initializable,
-    IERC1822ProxiableUpgradeable,
-    ERC1967UpgradeUpgradeable
+    ERC1967UpgradeUpgradeable,
+    IERC1822ProxiableUpgradeable
 {
     function __UUPSUpgradeable_init() internal onlyInitializing {}
 
@@ -64,14 +64,7 @@ abstract contract UUPSUpgradeable is
      * bricking a proxy that upgrades to it, by delegating to itself until out of gas. Thus it is critical that this
      * function revert if invoked through a proxy. This is guaranteed by the `notDelegated` modifier.
      */
-    function proxiableUUID()
-        external
-        view
-        virtual
-        override
-        notDelegated
-        returns (bytes32)
-    {
+    function proxiableUUID() external view virtual override notDelegated returns (bytes32) {
         return _IMPLEMENTATION_SLOT;
     }
 
@@ -118,8 +111,7 @@ abstract contract UUPSUpgradeable is
     function __checkProxy() private view {
         address self = __self;
         if (address(this) == self) revert UUPSUpgradeable__OnlyDelegateCall();
-        if (_getImplementation() != self)
-            revert UUPSUpgradeable__OnlyActiveProxy();
+        if (_getImplementation() != self) revert UUPSUpgradeable__OnlyActiveProxy();
     }
 
     function __checkDelegated() private view {

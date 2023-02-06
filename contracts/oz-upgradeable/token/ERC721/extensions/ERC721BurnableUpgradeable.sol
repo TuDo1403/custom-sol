@@ -3,16 +3,20 @@
 
 pragma solidity ^0.8.10;
 
-import "../ERC721Upgradeable.sol";
+import {ERC721Upgradeable, IERC721Upgradeable} from "../ERC721Upgradeable.sol";
 
-error ERC721Burnable__OnlyOwnerOrApproved();
+interface IERC721BurnableUpgradeable is IERC721Upgradeable {
+    error ERC721Burnable__OnlyOwnerOrApproved();
+
+    function burn(uint256 tokenId) external;
+}
 
 /**
  * @title ERC721 Burnable Token
  * @dev ERC721 Token that can be burned (destroyed).
  */
 
-abstract contract ERC721BurnableUpgradeable is ERC721Upgradeable {
+abstract contract ERC721BurnableUpgradeable is ERC721Upgradeable, IERC721BurnableUpgradeable {
     function __ERC721Burnable_init() internal onlyInitializing {}
 
     function __ERC721Burnable_init_unchained() internal onlyInitializing {}

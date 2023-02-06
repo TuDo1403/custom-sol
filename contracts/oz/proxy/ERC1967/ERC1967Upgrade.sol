@@ -54,9 +54,7 @@ abstract contract ERC1967Upgrade {
     function _setImplementation(address newImplementation) private {
         if (!Address.isContract(newImplementation))
             revert ERC1967__NewImplementationIsNotAContract();
-        StorageSlot
-            .getAddressSlot(_IMPLEMENTATION_SLOT)
-            .value = newImplementation;
+        StorageSlot.getAddressSlot(_IMPLEMENTATION_SLOT).value = newImplementation;
     }
 
     /**
@@ -80,8 +78,7 @@ abstract contract ERC1967Upgrade {
         bool forceCall
     ) internal {
         _upgradeTo(newImplementation);
-        if (forceCall || data.length != 0)
-            Address.functionDelegateCall(newImplementation, data);
+        if (forceCall || data.length != 0) Address.functionDelegateCall(newImplementation, data);
     }
 
     /**
@@ -100,11 +97,8 @@ abstract contract ERC1967Upgrade {
         if (StorageSlot.getBooleanSlot(_ROLLBACK_SLOT).value) {
             _setImplementation(newImplementation);
         } else {
-            try IERC1822Proxiable(newImplementation).proxiableUUID() returns (
-                bytes32 slot
-            ) {
-                if (slot != _IMPLEMENTATION_SLOT)
-                    revert ERC1967__UnsupportedProxiableUUID();
+            try IERC1822Proxiable(newImplementation).proxiableUUID() returns (bytes32 slot) {
+                if (slot != _IMPLEMENTATION_SLOT) revert ERC1967__UnsupportedProxiableUUID();
             } catch {
                 revert ERC1967__NewImplementationIsNotUUPS();
             }
@@ -173,8 +167,7 @@ abstract contract ERC1967Upgrade {
      * @dev Stores a new beacon in the EIP1967 beacon slot.
      */
     function _setBeacon(address newBeacon) private {
-        if (!Address.isContract(newBeacon))
-            revert ERC1967__NewBeaconIsNotAContract();
+        if (!Address.isContract(newBeacon)) revert ERC1967__NewBeaconIsNotAContract();
         if (!Address.isContract(IBeacon(newBeacon).implementation()))
             revert ERC1967__BeaconImplementationIsNotAContract();
 
@@ -195,10 +188,7 @@ abstract contract ERC1967Upgrade {
         _setBeacon(newBeacon);
         emit BeaconUpgraded(newBeacon);
         if (forceCall || data.length != 0) {
-            Address.functionDelegateCall(
-                IBeacon(newBeacon).implementation(),
-                data
-            );
+            Address.functionDelegateCall(IBeacon(newBeacon).implementation(), data);
         }
     }
 }

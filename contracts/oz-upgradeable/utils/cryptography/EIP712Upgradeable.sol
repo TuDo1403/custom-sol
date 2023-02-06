@@ -3,8 +3,8 @@
 
 pragma solidity ^0.8.0;
 
-import "./ECDSAUpgradeable.sol";
-import "../../proxy/utils/Initializable.sol";
+import {ECDSAUpgradeable} from "./ECDSAUpgradeable.sol";
+import {Initializable} from "../../proxy/utils/Initializable.sol";
 
 /**
  * @dev https://eips.ethereum.org/EIPS/eip-712[EIP 712] is a standard for hashing and signing of typed structured data.
@@ -68,12 +68,7 @@ abstract contract EIP712Upgradeable is Initializable {
      * @dev Returns the domain separator for the current chain.
      */
     function _domainSeparatorV4() internal view returns (bytes32) {
-        return
-            _buildDomainSeparator(
-                _TYPE_HASH,
-                _EIP712NameHash(),
-                _EIP712VersionHash()
-            );
+        return _buildDomainSeparator(_TYPE_HASH, _EIP712NameHash(), _EIP712VersionHash());
     }
 
     function _buildDomainSeparator(
@@ -106,11 +101,8 @@ abstract contract EIP712Upgradeable is Initializable {
      * address signer = ECDSA.recover(digest, signature);
      * ```
      */
-    function _hashTypedDataV4(
-        bytes32 structHash
-    ) internal view virtual returns (bytes32) {
-        return
-            ECDSAUpgradeable.toTypedDataHash(_domainSeparatorV4(), structHash);
+    function _hashTypedDataV4(bytes32 structHash) internal view virtual returns (bytes32) {
+        return ECDSAUpgradeable.toTypedDataHash(_domainSeparatorV4(), structHash);
     }
 
     /**

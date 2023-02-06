@@ -5,11 +5,7 @@ interface IFactoryUpgradeable {
     error Factory__CloneFailed();
     error Factory__NonExistImplement();
 
-    event Cloned(
-        address indexed implement,
-        bytes32 indexed salt,
-        address indexed clone
-    );
+    event Cloned(address indexed implement, bytes32 indexed salt, address indexed clone);
 
     event Deployed(
         address indexed deployed,
@@ -32,7 +28,5 @@ interface IFactoryUpgradeable {
         bytes32 salt_
     ) external view returns (address instance, bool isDeployed);
 
-    function instanceOf(
-        bytes32 salt_
-    ) external view returns (address instance, bool isDeployed);
+    function instanceOf(bytes32 salt_) external view returns (address instance, bool isDeployed);
 }

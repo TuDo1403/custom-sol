@@ -71,10 +71,7 @@ abstract contract ProxyChecker {
      * @param txOrigin_ Origin of the transaction
      * @return True if the call was made by a proxy contract, false otherwise
      */
-    function _isProxyCall(
-        address msgSender_,
-        address txOrigin_
-    ) internal pure returns (bool) {
+    function _isProxyCall(address msgSender_, address txOrigin_) internal pure returns (bool) {
         return msgSender_ != txOrigin_;
     }
 

@@ -69,18 +69,12 @@ abstract contract Transferable {
         bytes memory data_
     ) internal virtual {
         __checkValidTransfer(to_, amount_);
-        if (!_nativeTransfer(to_, amount_, data_))
-            revert Transferable__TransferFailed();
+        if (!_nativeTransfer(to_, amount_, data_)) revert Transferable__TransferFailed();
     }
 
-    function _safeERC20Transfer(
-        IERC20 token_,
-        address to_,
-        uint256 amount_
-    ) internal virtual {
+    function _safeERC20Transfer(IERC20 token_, address to_, uint256 amount_) internal virtual {
         __checkValidTransfer(to_, amount_);
-        if (!_ERC20Transfer(token_, to_, amount_))
-            revert Transferable__TransferFailed();
+        if (!_ERC20Transfer(token_, to_, amount_)) revert Transferable__TransferFailed();
     }
 
     function _safeERC20TransferFrom(
@@ -91,8 +85,7 @@ abstract contract Transferable {
     ) internal virtual {
         __checkValidTransfer(to_, amount_);
 
-        if (!_ERC20TransferFrom(token_, from_, to_, amount_))
-            revert Transferable__TransferFailed();
+        if (!_ERC20TransferFrom(token_, from_, to_, amount_)) revert Transferable__TransferFailed();
     }
 
     function _nativeTransfer(
@@ -121,10 +114,7 @@ abstract contract Transferable {
             mstore(add(freeMemoryPointer, 36), value_) // Append the "amount" argument.
 
             success := and(
-                or(
-                    and(eq(mload(0), 1), gt(returndatasize(), 31)),
-                    iszero(returndatasize())
-                ),
+                or(and(eq(mload(0), 1), gt(returndatasize(), 31)), iszero(returndatasize())),
                 call(gas(), token_, 0, freeMemoryPointer, 68, 0, 32)
             )
         }
@@ -148,17 +138,13 @@ abstract contract Transferable {
             mstore(add(freeMemoryPointer, 68), value_)
 
             success := and(
-                or(
-                    and(eq(mload(0), 1), gt(returndatasize(), 31)),
-                    iszero(returndatasize())
-                ),
+                or(and(eq(mload(0), 1), gt(returndatasize(), 31)), iszero(returndatasize())),
                 call(gas(), token_, 0, freeMemoryPointer, 100, 0, 32)
             )
         }
     }
 
     function __checkValidTransfer(address to_, uint256 value_) private pure {
-        if (value_ == 0 || to_ == address(0))
-            revert Transferable__InvalidArguments();
+        if (value_ == 0 || to_ == address(0)) revert Transferable__InvalidArguments();
     }
 }

@@ -3,10 +3,12 @@
 
 pragma solidity ^0.8.17;
 
-import "../ERC20Upgradeable.sol";
-import "../extensions/ERC20BurnableUpgradeable.sol";
-import "../extensions/ERC20PausableUpgradeable.sol";
-import "../../../access/AccessControlEnumerableUpgradeable.sol";
+import {ERC20Upgradeable} from "../ERC20Upgradeable.sol";
+import {ERC20BurnableUpgradeable} from "../extensions/ERC20BurnableUpgradeable.sol";
+import {ERC20PausableUpgradeable} from "../extensions/ERC20PausableUpgradeable.sol";
+import {
+    AccessControlEnumerableUpgradeable
+} from "../../../access/AccessControlEnumerableUpgradeable.sol";
 
 /**
  * @dev {ERC20} token, including:
@@ -25,9 +27,9 @@ import "../../../access/AccessControlEnumerableUpgradeable.sol";
  * _Deprecated in favor of https://wizard.openzeppelin.com/[Contracts Wizard]._
  */
 abstract contract ERC20PresetMinterPauserUpgradeable is
-    AccessControlEnumerableUpgradeable,
     ERC20BurnableUpgradeable,
-    ERC20PausableUpgradeable
+    ERC20PausableUpgradeable,
+    AccessControlEnumerableUpgradeable
 {
     ///@dev value is equal to keccak256("MINTER_ROLE")
     bytes32 public constant MINTER_ROLE =
@@ -52,10 +54,7 @@ abstract contract ERC20PresetMinterPauserUpgradeable is
         __ERC20PresetMinterPauser_init_unchained();
     }
 
-    function __ERC20PresetMinterPauser_init_unchained()
-        internal
-        onlyInitializing
-    {
+    function __ERC20PresetMinterPauser_init_unchained() internal onlyInitializing {
         address sender = _msgSender();
 
         _grantRole(MINTER_ROLE, sender);

@@ -35,9 +35,7 @@ abstract contract ERC2981 is IERC2981, ERC165 {
     function supportsInterface(
         bytes4 interfaceId
     ) public view virtual override(IERC165, ERC165) returns (bool) {
-        return
-            interfaceId == type(IERC2981).interfaceId ||
-            super.supportsInterface(interfaceId);
+        return interfaceId == type(IERC2981).interfaceId || super.supportsInterface(interfaceId);
     }
 
     /**
@@ -82,20 +80,13 @@ abstract contract ERC2981 is IERC2981, ERC165 {
      * - `receiver` cannot be the zero address.
      * - `feeNumerator` cannot be greater than the fee denominator.
      */
-    function _setDefaultRoyalty(
-        address receiver,
-        uint96 feeNumerator
-    ) internal virtual {
-        if (feeNumerator > _feeDenominator())
-            revert ERC2981__SalePriceExceeded();
+    function _setDefaultRoyalty(address receiver, uint96 feeNumerator) internal virtual {
+        if (feeNumerator > _feeDenominator()) revert ERC2981__SalePriceExceeded();
 
         __nonZeroAdress(receiver);
 
         assembly {
-            sstore(
-                _defaultRoyaltyInfo.slot,
-                or(shl(160, feeNumerator), receiver)
-            )
+            sstore(_defaultRoyaltyInfo.slot, or(shl(160, feeNumerator), receiver))
         }
     }
 
@@ -119,8 +110,7 @@ abstract contract ERC2981 is IERC2981, ERC165 {
         address receiver,
         uint96 feeNumerator
     ) internal virtual {
-        if (feeNumerator > _feeDenominator())
-            revert ERC2981__SalePriceExceeded();
+        if (feeNumerator > _feeDenominator()) revert ERC2981__SalePriceExceeded();
         __nonZeroAdress(receiver);
 
         assembly {

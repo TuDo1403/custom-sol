@@ -54,9 +54,7 @@ abstract contract Manager is Context, IManager {
     }
 
     /// @inheritdoc IManager
-    function updateAuthority(
-        IAuthority authority_
-    ) external onlyRole(Roles.OPERATOR_ROLE) {
+    function updateAuthority(IAuthority authority_) external onlyRole(Roles.OPERATOR_ROLE) {
         IAuthority old = authority();
         if (old == authority_) revert Manager__AlreadySet();
         (bool ok, bytes memory revertData) = address(authority_).call(
@@ -103,8 +101,7 @@ abstract contract Manager is Context, IManager {
 
         ok.handleRevertIfNotOk(returnOrRevertData);
 
-        if (abi.decode(returnOrRevertData, (bool)))
-            revert Manager__Blacklisted();
+        if (abi.decode(returnOrRevertData, (bool))) revert Manager__Blacklisted();
     }
 
     /**
@@ -132,8 +129,7 @@ abstract contract Manager is Context, IManager {
 
         ok.handleRevertIfNotOk(returnOrRevertData);
 
-        if (!abi.decode(returnOrRevertData, (bool)))
-            revert Manager__NotPaused();
+        if (!abi.decode(returnOrRevertData, (bool))) revert Manager__NotPaused();
     }
 
     function _requireNotPaused() internal view {
@@ -145,10 +141,7 @@ abstract contract Manager is Context, IManager {
         if (abi.decode(returnOrRevertData, (bool))) revert Manager__Paused();
     }
 
-    function _hasRole(
-        bytes32 role_,
-        address account_
-    ) internal view returns (bool) {
+    function _hasRole(bytes32 role_, address account_) internal view returns (bool) {
         (bool ok, bytes memory returnOrRevertData) = _authority().staticcall(
             abi.encodeCall(IAccessControl.hasRole, (role_, account_))
         );

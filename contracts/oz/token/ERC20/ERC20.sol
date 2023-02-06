@@ -35,13 +35,8 @@ abstract contract ERC20 is Context, IERC20 {
                                CONSTRUCTOR
     //////////////////////////////////////////////////////////////*/
 
-    constructor(
-        string memory name_,
-        string memory symbol_,
-        uint8 decimals_
-    ) payable {
-        if (bytes(symbol_).length > 32 || bytes(name_).length > 32)
-            revert ERC20__StringTooLong();
+    constructor(string memory name_, string memory symbol_, uint8 decimals_) payable {
+        if (bytes(symbol_).length > 32 || bytes(name_).length > 32) revert ERC20__StringTooLong();
 
         name = name_;
         symbol = symbol_;
@@ -53,10 +48,7 @@ abstract contract ERC20 is Context, IERC20 {
                                ERC20 LOGIC
     //////////////////////////////////////////////////////////////*/
 
-    function approve(
-        address spender,
-        uint256 amount
-    ) public virtual returns (bool) {
+    function approve(address spender, uint256 amount) public virtual returns (bool) {
         address sender = _msgSender();
         _allowance[sender][spender] = amount;
 
@@ -65,10 +57,7 @@ abstract contract ERC20 is Context, IERC20 {
         return true;
     }
 
-    function transfer(
-        address to,
-        uint256 amount
-    ) public virtual returns (bool) {
+    function transfer(address to, uint256 amount) public virtual returns (bool) {
         address sender = _msgSender();
         _beforeTokenTransfer(sender, to, amount);
         _balanceOf[sender] -= amount;
@@ -86,11 +75,7 @@ abstract contract ERC20 is Context, IERC20 {
         return true;
     }
 
-    function transferFrom(
-        address from,
-        address to,
-        uint256 amount
-    ) public virtual returns (bool) {
+    function transferFrom(address from, address to, uint256 amount) public virtual returns (bool) {
         _beforeTokenTransfer(from, to, amount);
 
         _spendAllowance(from, _msgSender(), amount);
@@ -109,27 +94,18 @@ abstract contract ERC20 is Context, IERC20 {
         return true;
     }
 
-    function balanceOf(
-        address account
-    ) external view override returns (uint256) {
+    function balanceOf(address account) external view override returns (uint256) {
         return _balanceOf[account];
     }
 
-    function allowance(
-        address owner,
-        address spender
-    ) external view override returns (uint256) {
+    function allowance(address owner, address spender) external view override returns (uint256) {
         return _allowance[owner][spender];
     }
 
     /*//////////////////////////////////////////////////////////////
                         INTERNAL MINT/BURN LOGIC
     //////////////////////////////////////////////////////////////*/
-    function _spendAllowance(
-        address owner_,
-        address spender_,
-        uint256 amount_
-    ) internal virtual {
+    function _spendAllowance(address owner_, address spender_, uint256 amount_) internal virtual {
         bytes32 allowanceKey;
         uint256 allowed;
         assembly {
@@ -149,17 +125,9 @@ abstract contract ERC20 is Context, IERC20 {
         }
     }
 
-    function _beforeTokenTransfer(
-        address from,
-        address to,
-        uint256 amount
-    ) internal virtual {}
+    function _beforeTokenTransfer(address from, address to, uint256 amount) internal virtual {}
 
-    function _afterTokenTransfer(
-        address from,
-        address to,
-        uint256 amount
-    ) internal virtual {}
+    function _afterTokenTransfer(address from, address to, uint256 amount) internal virtual {}
 
     function _mint(address to, uint256 amount) internal virtual {
         _beforeTokenTransfer(address(0), to, amount);

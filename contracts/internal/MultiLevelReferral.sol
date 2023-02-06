@@ -47,10 +47,7 @@ abstract contract MultiLevelReferral is ProxyChecker, IMultiLevelReferral {
      * @param ratePerTier_ Percentage of amount spent by referree that is rewarded to referrer for each level
      * @dev The sum of the ratePerTier values must equal to 10,000
      */
-    constructor(
-        uint64 activeTimestampThreshold_,
-        uint16[] memory ratePerTier_
-    ) payable {
+    constructor(uint64 activeTimestampThreshold_, uint16[] memory ratePerTier_) payable {
         // Check that the sum of the ratePerTier values is equal to 10,000
         uint256 length = ratePerTier_.length;
         uint256 sum;
@@ -60,17 +57,14 @@ abstract contract MultiLevelReferral is ProxyChecker, IMultiLevelReferral {
                 ++i;
             }
         }
-        if (sum != PERCENTAGE_FRACTION)
-            revert MultiLevelReferral__InvalidArguments();
+        if (sum != PERCENTAGE_FRACTION) revert MultiLevelReferral__InvalidArguments();
 
         ratePerTier = ratePerTier_;
         activeTimestampThreshold = activeTimestampThreshold_;
     }
 
     /// @inheritdoc IMultiLevelReferral
-    function referrerOf(
-        address account_
-    ) external view returns (Referrer memory) {
+    function referrerOf(address account_) external view returns (Referrer memory) {
         return __referrals[account_];
     }
 
@@ -85,16 +79,14 @@ abstract contract MultiLevelReferral is ProxyChecker, IMultiLevelReferral {
      */
     function _addReferrer(address referrer_, address referree_) internal {
         if (_isProxy(referree_)) revert MultiLevelReferral__ProxyNotAllowed();
-        if (__referrals[referree_].addr != address(0))
-            revert MultiLevelReferral__ReferralExisted();
+        if (__referrals[referree_].addr != address(0)) revert MultiLevelReferral__ReferralExisted();
 
         __referrals[referree_].addr = referrer_;
 
         uint256 maxLevel = ratePerTier.length;
         uint256 level;
         for (uint256 i; i < maxLevel; ) {
-            if (referrer_ == referree_)
-                revert MultiLevelReferral__CircularRefUnallowed();
+            if (referrer_ == referree_) revert MultiLevelReferral__CircularRefUnallowed();
 
             unchecked {
                 level = ++__referrals[referrer_].level;
@@ -113,10 +105,7 @@ abstract contract MultiLevelReferral is ProxyChecker, IMultiLevelReferral {
      * @param referree_ Address of the referree
      * @param amount_ Amount of reward that the referree received
      */
-    function _updateReferrerBonuses(
-        address referree_,
-        uint256 amount_
-    ) internal {
+    function _updateReferrerBonuses(address referree_, uint256 amount_) internal {
         uint16[] memory rates = ratePerTier;
         uint256 length = rates.length;
 
@@ -139,12 +128,8 @@ abstract contract MultiLevelReferral is ProxyChecker, IMultiLevelReferral {
      * @param account_ Account to check for recent activity
      * @return True if the given account has been active recently, false otherwise
      */
-    function _isAccountActiveLately(
-        address account_
-    ) internal view virtual returns (bool) {
-        return
-            block.timestamp - lastActiveTimestamp[account_] <=
-            activeTimestampThreshold;
+    function _isAccountActiveLately(address account_) internal view virtual returns (bool) {
+        return block.timestamp - lastActiveTimestamp[account_] <= activeTimestampThreshold;
     }
 
     /**

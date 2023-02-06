@@ -6,11 +6,7 @@ import {ReentrancyGuard} from "../oz/security/ReentrancyGuard.sol";
 
 import {IMultichainDeployer} from "./interfaces/IMultichainDeployer.sol";
 
-contract MultichainDeployer is
-    Create2Deployer,
-    ReentrancyGuard,
-    IMultichainDeployer
-{
+contract MultichainDeployer is Create2Deployer, ReentrancyGuard, IMultichainDeployer {
     using Create2 for bytes32;
 
     /// @dev value is equal to keccak256("MultichainDeployer_v1")

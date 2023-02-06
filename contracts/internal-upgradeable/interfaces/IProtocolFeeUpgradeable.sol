@@ -24,8 +24,5 @@ interface IProtocolFeeUpgradeable {
      * @dev Returns the fee information
      * @return  token feeAmt Token address of the fee and the fee amount
      */
-    function feeInfo()
-        external
-        view
-        returns (IERC20Upgradeable token, uint256 feeAmt);
+    function feeInfo() external view returns (IERC20Upgradeable token, uint256 feeAmt);
 }

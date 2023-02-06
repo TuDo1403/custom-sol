@@ -29,9 +29,7 @@ abstract contract ERC721URIStorage is ERC721 {
     /**
      * @dev See {IERC721Metadata-tokenURI}.
      */
-    function tokenURI(
-        uint256 tokenId
-    ) public view virtual override returns (string memory) {
+    function tokenURI(uint256 tokenId) public view virtual override returns (string memory) {
         ownerOf(tokenId);
 
         string memory _tokenURI = _tokenURIs[tokenId];
@@ -40,8 +38,7 @@ abstract contract ERC721URIStorage is ERC721 {
         if (bytes(_baseTokenURI).length == 0) return _tokenURI;
 
         // If both are set, concatenate the baseURI and tokenURI (via abi.encodePacked).
-        if (bytes(_tokenURI).length != 0)
-            return string(abi.encodePacked(_baseTokenURI, _tokenURI));
+        if (bytes(_tokenURI).length != 0) return string(abi.encodePacked(_baseTokenURI, _tokenURI));
 
         return tokenURI(tokenId);
     }
@@ -53,10 +50,7 @@ abstract contract ERC721URIStorage is ERC721 {
      *
      * - `tokenId` must exist.
      */
-    function _setTokenURI(
-        uint256 tokenId,
-        string memory _tokenURI
-    ) internal virtual {
+    function _setTokenURI(uint256 tokenId, string memory _tokenURI) internal virtual {
         ownerOf(tokenId);
         _tokenURIs[tokenId] = _tokenURI;
     }

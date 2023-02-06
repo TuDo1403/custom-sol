@@ -1,6 +1,8 @@
 {
   "extends": "solhint:recommended",
   "rules": {
+    "no-complex-fallback": "off",
+    "no-empty-blocks": "off",
     "func-name-mixedcase" : "off",
     "avoid-tx-origin": "off",
     "no-inline-assembly": "off",

@@ -7,9 +7,7 @@ import "../../oz/token/ERC20/IERC20.sol";
 
 import "../../oz/token/ERC721/IERC721.sol";
 
-import {
-    IERC20Permit
-} from "../../oz/token/ERC20/extensions/draft-IERC20Permit.sol";
+import {IERC20Permit} from "../../oz/token/ERC20/extensions/draft-IERC20Permit.sol";
 
 interface ICommandGate {
     error CommandGate__ExecutionFailed();

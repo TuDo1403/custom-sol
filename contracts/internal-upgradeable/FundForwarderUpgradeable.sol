@@ -1,9 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import {
-    ContextUpgradeable
-} from "../oz-upgradeable/utils/ContextUpgradeable.sol";
+import {ContextUpgradeable} from "../oz-upgradeable/utils/ContextUpgradeable.sol";
 
 import {TransferableUpgradeable} from "./TransferableUpgradeable.sol";
 
@@ -45,9 +43,7 @@ abstract contract FundForwarderUpgradeable is
         __FundForwarder_init_unchained(vault_);
     }
 
-    function __FundForwarder_init_unchained(
-        address vault_
-    ) internal onlyInitializing {
+    function __FundForwarder_init_unchained(address vault_) internal onlyInitializing {
         _changeVault(vault_);
     }
 
@@ -68,12 +64,7 @@ abstract contract FundForwarderUpgradeable is
         __checkValidAddress(address(token_));
         address _vault = vault();
 
-        token_.safeTransferFrom(
-            address(this),
-            _vault,
-            tokenId_,
-            safeRecoverHeader()
-        );
+        token_.safeTransferFrom(address(this), _vault, tokenId_, safeRecoverHeader());
 
         emit Recovered(_msgSender(), address(token_), tokenId_);
 
@@ -146,11 +137,7 @@ abstract contract FundForwarderUpgradeable is
 
     function safeTransferHeader() public pure virtual returns (bytes memory);
 
-    function _afterRecover(
-        address vault_,
-        address token_,
-        bytes memory value_
-    ) internal virtual {}
+    function _afterRecover(address vault_, address token_, bytes memory value_) internal virtual {}
 
     /**
      *@dev Asserts that the given address is not the zero address
@@ -158,8 +145,7 @@ abstract contract FundForwarderUpgradeable is
      *@custom:throws FundForwarder__InvalidArgument if the address is the zero address
      */
     function __checkValidAddress(address addr_) private view {
-        if (addr_ == address(0) || addr_ == address(this))
-            revert FundForwarder__InvalidArgument();
+        if (addr_ == address(0) || addr_ == address(this)) revert FundForwarder__InvalidArgument();
     }
 
     uint256[49] private __gap;

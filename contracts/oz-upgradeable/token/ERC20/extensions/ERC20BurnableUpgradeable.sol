@@ -3,14 +3,20 @@
 
 pragma solidity ^0.8.17;
 
-import "../ERC20Upgradeable.sol";
+import {IERC20Upgradeable, ERC20Upgradeable} from "../ERC20Upgradeable.sol";
+
+interface IERC721BurnableUpgradeable is IERC20Upgradeable {
+    function burn(uint256 amount) external;
+
+    function burnFrom(address account, uint256 amount) external;
+}
 
 /**
  * @dev Extension of {ERC20} that allows token holders to destroy both their own
  * tokens and those that they have an allowance for, in a way that can be
  * recognized off-chain (via event analysis).
  */
-abstract contract ERC20BurnableUpgradeable is ERC20Upgradeable {
+abstract contract ERC20BurnableUpgradeable is ERC20Upgradeable, IERC721BurnableUpgradeable {
     function __ERC20Burnable_init() internal onlyInitializing {}
 
     function __ERC20Burnable_init_unchained() internal onlyInitializing {}

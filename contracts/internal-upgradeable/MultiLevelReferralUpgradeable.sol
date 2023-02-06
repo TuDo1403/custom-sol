@@ -70,17 +70,14 @@ abstract contract MultiLevelReferralUpgradeable is
                 ++i;
             }
         }
-        if (sum != PERCENTAGE_FRACTION)
-            revert MultiLevelReferral__InvalidArguments();
+        if (sum != PERCENTAGE_FRACTION) revert MultiLevelReferral__InvalidArguments();
 
         ratePerTier = ratePerTier_;
         activeTimestampThreshold = activeTimestampThreshold_;
     }
 
     /// @inheritdoc IMultiLevelReferralUpgradeable
-    function referrerOf(
-        address account_
-    ) external view returns (Referrer memory) {
+    function referrerOf(address account_) external view returns (Referrer memory) {
         return __referrals[account_];
     }
 
@@ -95,16 +92,14 @@ abstract contract MultiLevelReferralUpgradeable is
      */
     function _addReferrer(address referrer_, address referree_) internal {
         if (_isProxy(referree_)) revert MultiLevelReferral__ProxyNotAllowed();
-        if (__referrals[referree_].addr != address(0))
-            revert MultiLevelReferral__ReferralExisted();
+        if (__referrals[referree_].addr != address(0)) revert MultiLevelReferral__ReferralExisted();
 
         __referrals[referree_].addr = referrer_;
 
         uint256 maxLevel = ratePerTier.length;
         uint256 level;
         for (uint256 i; i < maxLevel; ) {
-            if (referrer_ == referree_)
-                revert MultiLevelReferral__CircularRefUnallowed();
+            if (referrer_ == referree_) revert MultiLevelReferral__CircularRefUnallowed();
 
             unchecked {
                 level = ++__referrals[referrer_].level;
@@ -123,10 +118,7 @@ abstract contract MultiLevelReferralUpgradeable is
      * @param referree_ Address of the referree
      * @param amount_ Amount of reward that the referree received
      */
-    function _updateReferrerBonuses(
-        address referree_,
-        uint256 amount_
-    ) internal {
+    function _updateReferrerBonuses(address referree_, uint256 amount_) internal {
         uint16[] memory rates = ratePerTier;
         uint256 length = rates.length;
 
@@ -149,12 +141,8 @@ abstract contract MultiLevelReferralUpgradeable is
      * @param account_ Account to check for recent activity
      * @return True if the given account has been active recently, false otherwise
      */
-    function _isAccountActiveLately(
-        address account_
-    ) internal view virtual returns (bool) {
-        return
-            block.timestamp - lastActiveTimestamp[account_] <=
-            activeTimestampThreshold;
+    function _isAccountActiveLately(address account_) internal view virtual returns (bool) {
+        return block.timestamp - lastActiveTimestamp[account_] <= activeTimestampThreshold;
     }
 
     /**

@@ -32,13 +32,7 @@ contract UpgradeableBeacon is IBeacon, Ownable {
     /**
      * @dev Returns the current implementation address.
      */
-    function implementation()
-        public
-        view
-        virtual
-        override
-        returns (address _implementation)
-    {
+    function implementation() public view virtual override returns (address _implementation) {
         assembly {
             _implementation := sload(__implementation.slot)
         }

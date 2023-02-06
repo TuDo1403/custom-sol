@@ -41,15 +41,9 @@ library IncrementalMerkleTree {
     /// @param self: Tree data.
     /// @param depth: Depth of the tree.
     /// @param zero: Zero value to be used.
-    function init(
-        IncrementalTreeData storage self,
-        uint256 depth,
-        uint256 zero
-    ) internal {
-        if (zero >= SNARK_SCALAR_FIELD)
-            revert IncrementalMerkleTree__OutOfField();
-        if (depth == 0 || depth > MAX_DEPTH)
-            revert IncrementalMerkleTree__OutOfDepth();
+    function init(IncrementalTreeData storage self, uint256 depth, uint256 zero) internal {
+        if (zero >= SNARK_SCALAR_FIELD) revert IncrementalMerkleTree__OutOfField();
+        if (depth == 0 || depth > MAX_DEPTH) revert IncrementalMerkleTree__OutOfDepth();
 
         self.depth = depth;
 
@@ -70,13 +64,11 @@ library IncrementalMerkleTree {
     /// @param self: Tree data.
     /// @param leaf: Leaf to be inserted.
     function insert(IncrementalTreeData storage self, uint256 leaf) internal {
-        if (leaf >= SNARK_SCALAR_FIELD)
-            revert IncrementalMerkleTree__OutOfField();
+        if (leaf >= SNARK_SCALAR_FIELD) revert IncrementalMerkleTree__OutOfField();
 
         uint256 depth = self.depth;
         uint256 numberOfLeaves = self.numberOfLeaves;
-        if (numberOfLeaves >= 1 << depth)
-            revert IncrementalMerkleTree__AllocationExceeded();
+        if (numberOfLeaves >= 1 << depth) revert IncrementalMerkleTree__AllocationExceeded();
 
         uint256 index = numberOfLeaves;
         uint256 hash = leaf;
@@ -133,13 +125,11 @@ library IncrementalMerkleTree {
             updateIndex |= (proofPathIndice & 1) << i;
 
             if (proofPathIndice == 0) {
-                if (proofPathIndice == self.lastSubtrees[i][1])
-                    self.lastSubtrees[i][0] = hash;
+                if (proofPathIndice == self.lastSubtrees[i][1]) self.lastSubtrees[i][0] = hash;
 
                 hash = PoseidonT3.poseidon([hash, proofPathIndice]);
             } else {
-                if (proofPathIndice == self.lastSubtrees[i][0])
-                    self.lastSubtrees[i][1] = hash;
+                if (proofPathIndice == self.lastSubtrees[i][0]) self.lastSubtrees[i][1] = hash;
 
                 hash = PoseidonT3.poseidon([proofPathIndice, hash]);
             }
@@ -149,8 +139,7 @@ library IncrementalMerkleTree {
             }
         }
 
-        if (updateIndex >= self.numberOfLeaves)
-            revert IncrementalMerkleTree__OutOfRange();
+        if (updateIndex >= self.numberOfLeaves) revert IncrementalMerkleTree__OutOfRange();
 
         self.root = hash;
         self.knownRoots.set(hash);
@@ -194,8 +183,7 @@ library IncrementalMerkleTree {
         uint256 proofSibling;
         for (uint256 i; i < depth; ) {
             proofSibling = proofSiblings[i];
-            if (proofSibling >= scalarField)
-                revert IncrementalMerkleTree__OutOfField();
+            if (proofSibling >= scalarField) revert IncrementalMerkleTree__OutOfField();
 
             hash = proofSibling == 0
                 ? PoseidonT3.poseidon([hash, proofSibling])

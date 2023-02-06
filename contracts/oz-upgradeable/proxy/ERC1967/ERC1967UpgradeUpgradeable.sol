@@ -3,10 +3,12 @@
 
 pragma solidity ^0.8.2;
 
-import "../beacon/IBeaconUpgradeable.sol";
-import "../../interfaces/draft-IERC1822Upgradeable.sol";
-import "../../utils/StorageSlotUpgradeable.sol";
-import "../utils/Initializable.sol";
+import {Initializable} from "../utils/Initializable.sol";
+
+import {IBeaconUpgradeable} from "../beacon/IBeaconUpgradeable.sol";
+import {IERC1822ProxiableUpgradeable} from "../../interfaces/draft-IERC1822Upgradeable.sol";
+
+import {StorageSlotUpgradeable} from "../../utils/StorageSlotUpgradeable.sol";
 
 error ERC1967UpgradeUpgradeable__NonZeroAddress();
 error ERC1967UpgradeUpgradeable__ExecutionFailed();
@@ -50,8 +52,7 @@ abstract contract ERC1967UpgradeUpgradeable is Initializable {
      * @dev Returns the current implementation address.
      */
     function _getImplementation() internal view returns (address) {
-        return
-            StorageSlotUpgradeable.getAddressSlot(_IMPLEMENTATION_SLOT).value;
+        return StorageSlotUpgradeable.getAddressSlot(_IMPLEMENTATION_SLOT).value;
     }
 
     /**
@@ -60,9 +61,7 @@ abstract contract ERC1967UpgradeUpgradeable is Initializable {
     function _setImplementation(address newImplementation) private {
         if (!_isContract(newImplementation))
             revert ERC1967UpgradeUpgradeable__ImplementationIsNotContract();
-        StorageSlotUpgradeable
-            .getAddressSlot(_IMPLEMENTATION_SLOT)
-            .value = newImplementation;
+        StorageSlotUpgradeable.getAddressSlot(_IMPLEMENTATION_SLOT).value = newImplementation;
     }
 
     /**
@@ -107,9 +106,9 @@ abstract contract ERC1967UpgradeUpgradeable is Initializable {
         if (StorageSlotUpgradeable.getBooleanSlot(_ROLLBACK_SLOT).value) {
             _setImplementation(newImplementation);
         } else {
-            try
-                IERC1822ProxiableUpgradeable(newImplementation).proxiableUUID()
-            returns (bytes32 slot) {
+            try IERC1822ProxiableUpgradeable(newImplementation).proxiableUUID() returns (
+                bytes32 slot
+            ) {
                 if (slot != _IMPLEMENTATION_SLOT)
                     revert ERC1967UpgradeUpgradeable__UnsupportedProxiableUUID();
             } catch {
@@ -144,8 +143,7 @@ abstract contract ERC1967UpgradeUpgradeable is Initializable {
      * @dev Stores a new address in the EIP1967 admin slot.
      */
     function _setAdmin(address newAdmin) private {
-        if (newAdmin == address(0))
-            revert ERC1967UpgradeUpgradeable__NonZeroAddress();
+        if (newAdmin == address(0)) revert ERC1967UpgradeUpgradeable__NonZeroAddress();
         StorageSlotUpgradeable.getAddressSlot(_ADMIN_SLOT).value = newAdmin;
     }
 
@@ -182,8 +180,7 @@ abstract contract ERC1967UpgradeUpgradeable is Initializable {
      * @dev Stores a new beacon in the EIP1967 beacon slot.
      */
     function _setBeacon(address newBeacon) private {
-        if (!_isContract(newBeacon))
-            revert ERC1967UpgradeUpgradeable__TargetIsNotContract();
+        if (!_isContract(newBeacon)) revert ERC1967UpgradeUpgradeable__TargetIsNotContract();
         if (!_isContract(IBeaconUpgradeable(newBeacon).implementation()))
             revert ERC1967UpgradeUpgradeable__ImplementationIsNotContract();
         StorageSlotUpgradeable.getAddressSlot(_BEACON_SLOT).value = newBeacon;
@@ -197,16 +194,13 @@ abstract contract ERC1967UpgradeUpgradeable is Initializable {
      */
     function _upgradeBeaconToAndCall(
         address newBeacon,
-        bytes memory data,
+        bytes calldata data,
         bool forceCall
     ) internal {
         _setBeacon(newBeacon);
         emit BeaconUpgraded(newBeacon);
         if (forceCall || data.length > 0) {
-            _functionDelegateCall(
-                IBeaconUpgradeable(newBeacon).implementation(),
-                data
-            );
+            _functionDelegateCall(IBeaconUpgradeable(newBeacon).implementation(), data);
         }
     }
 
@@ -220,8 +214,7 @@ abstract contract ERC1967UpgradeUpgradeable is Initializable {
         address target,
         bytes memory data
     ) private returns (bytes memory) {
-        if (!_isContract(target))
-            revert ERC1967UpgradeUpgradeable__DelegateCallToNonContract();
+        if (!_isContract(target)) revert ERC1967UpgradeUpgradeable__DelegateCallToNonContract();
 
         // solhint-disable-next-line avoid-low-level-calls
         (bool success, bytes memory returndata) = target.delegatecall(data);

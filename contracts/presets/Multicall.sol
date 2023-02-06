@@ -37,21 +37,13 @@ contract Multicall is Context, IMulticall, ReentrancyGuard {
     function _multicall(
         CallData[] calldata calldata_,
         bytes calldata
-    )
-        internal
-        virtual
-        nonDelegatecall
-        nonReentrant
-        returns (bytes[] memory results)
-    {
+    ) internal virtual nonDelegatecall nonReentrant returns (bytes[] memory results) {
         uint256 length = calldata_.length;
         results = new bytes[](length);
         bool ok;
         bytes memory result;
         for (uint256 i; i < length; ) {
-            (ok, result) = calldata_[i].target.call{value: calldata_[i].value}(
-                calldata_[i].data
-            );
+            (ok, result) = calldata_[i].target.call{value: calldata_[i].value}(calldata_[i].data);
 
             ok.handleRevertIfNotOk(result);
 
@@ -66,7 +58,6 @@ contract Multicall is Context, IMulticall, ReentrancyGuard {
     }
 
     function __nonDelegatecall() private view {
-        if (address(this) == __original)
-            revert Multicall__DelegatecallNotAllowed();
+        if (address(this) == __original) revert Multicall__DelegatecallNotAllowed();
     }
 }

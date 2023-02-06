@@ -47,19 +47,13 @@ library ProxyCreator {
         assembly {
             // Deploy a new contract with our pre-made bytecode via CREATE2.
             // We start 32 bytes into the code to avoid copying the byte length.
-            proxy := create2(
-                0,
-                add(proxyChildBytecode, 32),
-                mload(proxyChildBytecode),
-                salt
-            )
+            proxy := create2(0, add(proxyChildBytecode, 32), mload(proxyChildBytecode), salt)
         }
         if (proxy == address(0)) revert ProxyCreator__DeploymentFailed();
 
         deployed = getDeployed(salt);
         (bool success, ) = proxy.call{value: value}(creationCode);
-        if (!success || deployed.code.length == 0)
-            revert ProxyCreator__InitializationFailed();
+        if (!success || deployed.code.length == 0) revert ProxyCreator__InitializationFailed();
     }
 
     function getDeployed(bytes32 salt) internal view returns (address) {

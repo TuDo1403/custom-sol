@@ -21,10 +21,7 @@ interface IAccessControlEnumerable is IAccessControl {
      * https://forum.openzeppelin.com/t/iterating-over-elements-on-enumerableset-in-openzeppelin-contracts/2296[forum post]
      * for more information.
      */
-    function getRoleMember(
-        bytes32 role,
-        uint256 index
-    ) external view returns (address);
+    function getRoleMember(bytes32 role, uint256 index) external view returns (address);
 
     /**
      * @dev Returns the number of accounts that have `role`. Can be used
@@ -32,7 +29,5 @@ interface IAccessControlEnumerable is IAccessControl {
      */
     function getRoleMemberCount(bytes32 role) external view returns (uint256);
 
-    function getAllRoleMembers(
-        bytes32 role_
-    ) external view returns (address[] memory);
+    function getAllRoleMembers(bytes32 role_) external view returns (address[] memory);
 }

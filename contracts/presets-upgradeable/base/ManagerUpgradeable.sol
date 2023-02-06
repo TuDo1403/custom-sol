@@ -1,18 +1,12 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import {
-    ContextUpgradeable
-} from "../../oz-upgradeable/utils/ContextUpgradeable.sol";
-import {
-    UUPSUpgradeable
-} from "../../oz-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import {ContextUpgradeable} from "../../oz-upgradeable/utils/ContextUpgradeable.sol";
+import {UUPSUpgradeable} from "../../oz-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
 import {IManager, IAuthority} from "./interfaces/IManager.sol";
 
-import {
-    IAccessControlUpgradeable
-} from "../../oz-upgradeable/access/IAccessControlUpgradeable.sol";
+import {IAccessControlUpgradeable} from "../../oz-upgradeable/access/IAccessControlUpgradeable.sol";
 import {
     IBlacklistableUpgradeable
 } from "../../internal-upgradeable/interfaces/IBlacklistableUpgradeable.sol";
@@ -20,11 +14,7 @@ import {
 import {Roles} from "../../libraries/Roles.sol";
 import {ErrorHandler} from "../../libraries/ErrorHandler.sol";
 
-abstract contract ManagerUpgradeable is
-    IManager,
-    UUPSUpgradeable,
-    ContextUpgradeable
-{
+abstract contract ManagerUpgradeable is IManager, UUPSUpgradeable, ContextUpgradeable {
     using ErrorHandler for bool;
 
     bytes32 private __authority;
@@ -50,10 +40,7 @@ abstract contract ManagerUpgradeable is
         _;
     }
 
-    function __Manager_init(
-        IAuthority authority_,
-        bytes32 role_
-    ) internal onlyInitializing {
+    function __Manager_init(IAuthority authority_, bytes32 role_) internal onlyInitializing {
         __Manager_init_unchained(authority_, role_);
     }
 
@@ -78,9 +65,7 @@ abstract contract ManagerUpgradeable is
     }
 
     /// @inheritdoc IManager
-    function updateAuthority(
-        IAuthority authority_
-    ) external onlyRole(Roles.OPERATOR_ROLE) {
+    function updateAuthority(IAuthority authority_) external onlyRole(Roles.OPERATOR_ROLE) {
         IAuthority old = authority();
         if (old == authority_) revert Manager__AlreadySet();
 
@@ -128,8 +113,7 @@ abstract contract ManagerUpgradeable is
 
         ok.handleRevertIfNotOk(returnOrRevertData);
 
-        if (abi.decode(returnOrRevertData, (bool)))
-            revert Manager__Blacklisted();
+        if (abi.decode(returnOrRevertData, (bool))) revert Manager__Blacklisted();
     }
 
     /**
@@ -157,8 +141,7 @@ abstract contract ManagerUpgradeable is
 
         ok.handleRevertIfNotOk(returnOrRevertData);
 
-        if (!abi.decode(returnOrRevertData, (bool)))
-            revert Manager__NotPaused();
+        if (!abi.decode(returnOrRevertData, (bool))) revert Manager__NotPaused();
     }
 
     function _requireNotPaused() internal view {
@@ -170,10 +153,7 @@ abstract contract ManagerUpgradeable is
         if (abi.decode(returnOrRevertData, (bool))) revert Manager__Paused();
     }
 
-    function _hasRole(
-        bytes32 role_,
-        address account_
-    ) internal view returns (bool) {
+    function _hasRole(bytes32 role_, address account_) internal view returns (bool) {
         (bool ok, bytes memory returnOrRevertData) = _authority().staticcall(
             abi.encodeCall(IAccessControlUpgradeable.hasRole, (role_, account_))
         );

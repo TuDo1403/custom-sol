@@ -5,12 +5,7 @@ import {Context} from "../oz/utils/Context.sol";
 
 import {Transferable} from "./Transferable.sol";
 
-import {
-    IERC20,
-    IERC721,
-    IFundForwarder,
-    IERC721Enumerable
-} from "./interfaces/IFundForwarder.sol";
+import {IERC20, IERC721, IFundForwarder, IERC721Enumerable} from "./interfaces/IFundForwarder.sol";
 
 /**
  * @title FundForwarder
@@ -60,12 +55,7 @@ abstract contract FundForwarder is Context, Transferable, IFundForwarder {
         __checkValidAddress(address(token_));
         address _vault = vault();
 
-        token_.safeTransferFrom(
-            address(this),
-            _vault,
-            tokenId_,
-            safeRecoverHeader()
-        );
+        token_.safeTransferFrom(address(this), _vault, tokenId_, safeRecoverHeader());
 
         emit Recovered(_msgSender(), address(token_), tokenId_);
 
@@ -138,11 +128,7 @@ abstract contract FundForwarder is Context, Transferable, IFundForwarder {
         }
     }
 
-    function _afterRecover(
-        address vault_,
-        address token_,
-        bytes memory value_
-    ) internal virtual {}
+    function _afterRecover(address vault_, address token_, bytes memory value_) internal virtual {}
 
     /**
      *@dev Asserts that the given address is not the zero address
@@ -150,7 +136,6 @@ abstract contract FundForwarder is Context, Transferable, IFundForwarder {
      *@custom:throws FundForwarder__InvalidArgument if the address is the zero address
      */
     function __checkValidAddress(address addr_) private view {
-        if (addr_ == address(0) || addr_ == address(this))
-            revert FundForwarder__InvalidArgument();
+        if (addr_ == address(0) || addr_ == address(this)) revert FundForwarder__InvalidArgument();
     }
 }

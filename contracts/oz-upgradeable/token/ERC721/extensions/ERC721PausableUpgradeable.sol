@@ -3,8 +3,8 @@
 
 pragma solidity ^0.8.0;
 
-import "../ERC721Upgradeable.sol";
-import "../../../security/PausableUpgradeable.sol";
+import {ERC721Upgradeable} from "../ERC721Upgradeable.sol";
+import {PausableUpgradeable} from "../../../security/PausableUpgradeable.sol";
 
 /**
  * @dev ERC721 token with pausable token transfers, minting and burning.
@@ -13,10 +13,7 @@ import "../../../security/PausableUpgradeable.sol";
  * period, or having an emergency switch for freezing all token transfers in the
  * event of a large bug.
  */
-abstract contract ERC721PausableUpgradeable is
-    ERC721Upgradeable,
-    PausableUpgradeable
-{
+abstract contract ERC721PausableUpgradeable is ERC721Upgradeable, PausableUpgradeable {
     function __ERC721Pausable_init() internal onlyInitializing {
         __Pausable_init_unchained();
     }
@@ -34,9 +31,8 @@ abstract contract ERC721PausableUpgradeable is
         address from,
         address to,
         uint256 tokenId
-    ) internal virtual override {
+    ) internal virtual override whenNotPaused {
         super._beforeTokenTransfer(from, to, tokenId);
-        _requireNotPaused();
     }
 
     /**

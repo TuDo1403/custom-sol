@@ -90,16 +90,7 @@ library FactoryProofs {
         // '\xff' + deployer address + salt + keccak256(type(DEPLOYED_CONTRACT).creationCode)
         address expected = address(
             uint160(
-                uint256(
-                    keccak256(
-                        abi.encodePacked(
-                            hex"ff",
-                            deployer,
-                            deploySalt,
-                            initCodeHash
-                        )
-                    )
-                )
+                uint256(keccak256(abi.encodePacked(hex"ff", deployer, deploySalt, initCodeHash)))
             )
         );
         return expected == deployed;

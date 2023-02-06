@@ -1,17 +1,20 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 pragma solidity ^0.8.10;
 
-import "../ERC721Upgradeable.sol";
-import "./IERC721PermitUpgradeable.sol";
+import {ERC721Upgradeable} from "../ERC721Upgradeable.sol";
+import {
+    Bytes32Address,
+    SignableUpgradeable
+} from "../../../../internal-upgradeable/SignableUpgradeable.sol";
 
-import "../../../../internal-upgradeable/SignableUpgradeable.sol";
+import {IERC721PermitUpgradeable} from "./IERC721PermitUpgradeable.sol";
 
 /// @title ERC721 with permit
 /// @notice Nonfungible tokens that support an approve via signature, i.e. permit
 abstract contract ERC721PermitUpgradeable is
     ERC721Upgradeable,
-    IERC721PermitUpgradeable,
-    SignableUpgradeable
+    SignableUpgradeable,
+    IERC721PermitUpgradeable
 {
     using Bytes32Address for address;
 
@@ -49,32 +52,42 @@ abstract contract ERC721PermitUpgradeable is
         bytes calldata signature_
     ) external override {
         if (block.timestamp > deadline_) revert ERC721Permit__Expired();
+
         address owner = ownerOf(tokenId_);
         if (spender_ == owner) revert ERC721Permit__SelfApproving();
-        _verify(
-            owner,
-            keccak256(
-                abi.encode(
-                    __PERMIT_TYPEHASH,
-                    spender_,
-                    tokenId_,
-                    _useNonce(tokenId_),
-                    deadline_
-                )
-            ),
-            signature_
-        );
-        _getApproved[tokenId_] = spender_.fillLast12Bytes();
+
+        bytes32 digest;
+        assembly {
+            let freeMemPtr := mload(0x40)
+
+            mstore(freeMemPtr, __PERMIT_TYPEHASH)
+            mstore(add(freeMemPtr, 32), spender_)
+
+            mstore(add(freeMemPtr, 64), tokenId_)
+
+            mstore(add(freeMemPtr, 96), _nonces.slot)
+
+            // increment nonce
+            let nonceKey := keccak256(64, 64)
+            let nonce := sload(nonceKey)
+            sstore(nonceKey, add(1, nonce))
+
+            mstore(add(freeMemPtr, 96), nonce)
+            mstore(add(freeMemPtr, 128), deadline_)
+            digest := keccak256(freeMemPtr, 160)
+        }
+
+        _verify(owner, digest, signature_);
+
+        assembly {
+            mstore(0, tokenId_)
+            mstore(32, _getApproved.slot)
+            sstore(keccak256(0, 64), spender_)
+        }
     }
 
     function nonces(uint256 tokenId_) external view override returns (uint256) {
         return _nonces[bytes32(tokenId_)];
-    }
-
-    function _useNonce(uint256 tokenId_) internal returns (uint256) {
-        unchecked {
-            return _nonces[bytes32(tokenId_)]++;
-        }
     }
 
     /**

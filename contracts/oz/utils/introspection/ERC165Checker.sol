@@ -23,10 +23,7 @@ library ERC165Checker {
         // Any contract that implements ERC165 must explicitly indicate support of
         // InterfaceId_ERC165 and explicitly indicate non-support of InterfaceId_Invalid
         return
-            supportsERC165InterfaceUnchecked(
-                account,
-                type(IERC165).interfaceId
-            ) &&
+            supportsERC165InterfaceUnchecked(account, type(IERC165).interfaceId) &&
             !supportsERC165InterfaceUnchecked(account, _INTERFACE_ID_INVALID);
     }
 
@@ -36,14 +33,9 @@ library ERC165Checker {
      *
      * See {IERC165-supportsInterface}.
      */
-    function supportsInterface(
-        address account,
-        bytes4 interfaceId
-    ) internal view returns (bool) {
+    function supportsInterface(address account, bytes4 interfaceId) internal view returns (bool) {
         // query support of both ERC165 as per the spec and support of _interfaceId
-        return
-            supportsERC165(account) &&
-            supportsERC165InterfaceUnchecked(account, interfaceId);
+        return supportsERC165(account) && supportsERC165InterfaceUnchecked(account, interfaceId);
     }
 
     /**
@@ -99,8 +91,7 @@ library ERC165Checker {
         uint256 length = interfaceIds.length;
         // query support of each interface in _interfaceIds
         for (uint256 i; i < length; ) {
-            if (!supportsERC165InterfaceUnchecked(account, interfaceIds[i]))
-                return false;
+            if (!supportsERC165InterfaceUnchecked(account, interfaceIds[i])) return false;
 
             unchecked {
                 ++i;
