@@ -119,11 +119,7 @@ abstract contract FundForwarderUpgradeable is
 
         uint256 balance = address(this).balance;
 
-        _safeNativeTransfer(
-            _vault,
-            address(this).balance,
-            safeRecoverHeader()
-        );
+        _safeNativeTransfer(_vault, balance, safeRecoverHeader());
 
         _afterRecover(_vault, address(0), abi.encode(balance));
     }

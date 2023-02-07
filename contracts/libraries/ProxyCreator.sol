@@ -34,7 +34,9 @@ library ProxyCreator {
     bytes internal constant PROXY_BYTECODE =
         hex"63_00_00_00_09_80_60_0E_60_00_39_60_00_F3_36_3d_80_37_36_3d_34_f0_ff";
 
-    bytes32 internal constant PROXY_BYTECODE_HASH = keccak256(PROXY_BYTECODE);
+    /// @dev value is equal to keccak256(PROXY_BYTECODE)
+    bytes32 internal constant PROXY_BYTECODE_HASH =
+        0x68afe50fe78ae96feb6ec11f21f31fdd467c9fcc7add426282cfa3913daf04e9;
 
     function deploy(
         bytes32 salt,
