@@ -10,7 +10,10 @@ import {Signable, Bytes32Address} from "../internal/Signable.sol";
 import {ITreasury} from "./interfaces/ITreasury.sol";
 import {IERC20} from "../oz/token/ERC20/IERC20.sol";
 import {IERC721, ERC721TokenReceiver} from "../oz/token/ERC721/ERC721.sol";
-import {IERC1155, IERC1155Receiver} from "@openzeppelin/contracts/token/ERC1155/ERC1155.sol"; // TODO: update oz-custom
+import {
+    IERC1155,
+    IERC1155Receiver
+} from "@openzeppelin/contracts/token/ERC1155/ERC1155.sol"; // TODO: update oz-custom
 
 import {Roles} from "../libraries/Roles.sol";
 
@@ -49,7 +52,9 @@ contract Treasury is
         onlyProxy
         Signable(name_, "1")
         Manager(
-            address(authority_) == address(0) ? IAuthority(_msgSender()) : authority_,
+            address(authority_) == address(0)
+                ? IAuthority(_msgSender())
+                : authority_,
             Roles.TREASURER_ROLE
         )
     {
@@ -81,9 +86,11 @@ contract Treasury is
         uint256 value_,
         bytes calldata data_
     ) external returns (bytes4) {
-        if (value_ == 0 || data_.length == 0) revert Treasury__InvalidArgument();
+        if (value_ == 0 || data_.length == 0)
+            revert Treasury__InvalidArgument();
 
-        if (_checkMesage(data_)) return IERC1155Receiver.onERC1155Received.selector;
+        if (_checkMesage(data_))
+            return IERC1155Receiver.onERC1155Received.selector;
 
         address token = _msgSender();
         _onlyProxy(token);
@@ -106,7 +113,8 @@ contract Treasury is
     ) external returns (bytes4) {
         uint256 length = ids_.length;
         if (length != values_.length) revert Treasury__LengthMismatch();
-        if (_checkMesage(data_)) return IERC1155Receiver.onERC1155BatchReceived.selector;
+        if (_checkMesage(data_))
+            return IERC1155Receiver.onERC1155BatchReceived.selector;
 
         address token = _msgSender();
         _onlyProxy(token);
@@ -124,7 +132,10 @@ contract Treasury is
                 let idx := shl(5, i)
                 mstore(0, calldataload(add(ids_.offset, idx)))
                 let key := keccak256(0, 64)
-                sstore(key, add(calldataload(add(values_.offset, idx)), sload(key)))
+                sstore(
+                    key,
+                    add(calldataload(add(values_.offset, idx)), sload(key))
+                )
                 i := add(1, i)
             }
         }
@@ -140,7 +151,8 @@ contract Treasury is
         uint256 tokenId_,
         bytes calldata data_
     ) external override returns (bytes4) {
-        if (_checkMesage(data_)) return ERC721TokenReceiver.onERC721Received.selector;
+        if (_checkMesage(data_))
+            return ERC721TokenReceiver.onERC721Received.selector;
 
         address token = _msgSender();
         _onlyProxy(token);
@@ -159,7 +171,8 @@ contract Treasury is
         uint256 value_,
         bytes calldata data_
     ) external virtual override onlyRole(Roles.PROXY_ROLE) returns (bytes4) {
-        if (_checkMesage(data_)) return IWithdrawable.notifyERC20Transfer.selector;
+        if (_checkMesage(data_))
+            return IWithdrawable.notifyERC20Transfer.selector;
 
         if (value_ == 0) revert Treasury__InvalidArgument();
         if (
@@ -171,7 +184,12 @@ contract Treasury is
 
         erc20Balances[token_] += value_;
 
-        emit Received(abi.decode(data_, (address)), token_, abi.encode(value_), data_);
+        emit Received(
+            abi.decode(data_, (address)),
+            token_,
+            abi.encode(value_),
+            data_
+        );
 
         return IWithdrawable.notifyERC20Transfer.selector;
     }
@@ -226,19 +244,26 @@ contract Treasury is
 
     function safeRecoverHeader() public pure returns (bytes32) {
         /// @dev value is equal keccak256("SAFE_RECOVER_HEADER")
-        return 0x556d79614195ebefcc31ab1ee514b9953934b87d25857902370689cbd29b49de;
+        return
+            0x556d79614195ebefcc31ab1ee514b9953934b87d25857902370689cbd29b49de;
     }
 
     function safeTransferHeader() public pure returns (bytes32) {
         /// @dev value is equal keccak256("SAFE_TRANSFER")
-        return 0xc9627ddb76e5ee80829319617b557cc79498bbbc5553d8c632749a7511825f5d;
+        return
+            0xc9627ddb76e5ee80829319617b557cc79498bbbc5553d8c632749a7511825f5d;
     }
 
-    function ownerOf(address token_, uint256 tokenId_) external view returns (bool) {
+    function ownerOf(
+        address token_,
+        uint256 tokenId_
+    ) external view returns (bool) {
         return __erc721Balances[token_].get(tokenId_);
     }
 
-    function supportsInterface(bytes4 interfaceId) external pure virtual override returns (bool) {
+    function supportsInterface(
+        bytes4 interfaceId
+    ) external pure virtual override returns (bool) {
         return
             interfaceId == type(ITreasury).interfaceId ||
             interfaceId == type(IWithdrawable).interfaceId ||
@@ -261,11 +286,17 @@ contract Treasury is
 
             _safeNativeTransfer(to_, value_, "SAFE_WITHDRAW");
         } else if (token_.supportsInterface(type(IERC721).interfaceId)) {
-            if (!__erc721Balances[token_].get(value_)) revert Treasury__UnauthorizedWithdrawal();
+            if (!__erc721Balances[token_].get(value_))
+                revert Treasury__UnauthorizedWithdrawal();
 
             __erc721Balances[token_].unset(value_);
 
-            IERC721(token_).safeTransferFrom(address(this), to_, value_, "SAFE_WITHDRAW");
+            IERC721(token_).safeTransferFrom(
+                address(this),
+                to_,
+                value_,
+                "SAFE_WITHDRAW"
+            );
         } else if (token_.supportsInterface(type(IERC1155).interfaceId)) {
             uint256 amount = abi.decode(data_, (uint256));
             bytes32 key;
@@ -286,7 +317,13 @@ contract Treasury is
                 sstore(key, sub(_balance, amount))
             }
 
-            IERC1155(token_).safeTransferFrom(address(this), to_, value_, amount, "SAFE_WITHDRAW");
+            IERC1155(token_).safeTransferFrom(
+                address(this),
+                to_,
+                value_,
+                amount,
+                "SAFE_WITHDRAW"
+            );
         } else {
             bytes32 key;
             uint256 _balance;
@@ -310,16 +347,23 @@ contract Treasury is
         emit Withdrawn(token_, to_, value_);
     }
 
-    function _checkMesage(bytes memory data_) internal view virtual returns (bool) {
+    function _checkMesage(
+        bytes memory data_
+    ) internal view virtual returns (bool) {
         bytes32 header = abi.decode(data_, (bytes32));
 
         if (header == safeRecoverHeader()) return true;
-        if (header != safeTransferHeader()) revert Treasury__MistakenTransfer();
+        if (header != safeTransferHeader())
+            revert Treasury__MistakenTransfer();
 
         return false;
     }
 
-    function __checkInterface(address token_, bytes4 interfaceId_) private view {
-        if (!token_.supportsInterface(interfaceId_)) revert Treasury__InvalidFunctionCall();
+    function __checkInterface(
+        address token_,
+        bytes4 interfaceId_
+    ) private view {
+        if (!token_.supportsInterface(interfaceId_))
+            revert Treasury__InvalidFunctionCall();
     }
 }

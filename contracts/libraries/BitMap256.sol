@@ -7,7 +7,10 @@ library BitMap256 {
         uint256 data;
     }
 
-    function index(uint256 value_, bool shouldHash_) internal pure returns (uint256 idx) {
+    function index(
+        uint256 value_,
+        bool shouldHash_
+    ) internal pure returns (uint256 idx) {
         if (shouldHash_) {
             assembly {
                 mstore(0x00, value_)
@@ -25,7 +28,10 @@ library BitMap256 {
         if (shouldHash_) {
             assembly {
                 mstore(0x00, value_)
-                isSet := and(sload(bitmap_.slot), shl(and(keccak256(0x00, 32), 0xff), 1))
+                isSet := and(
+                    sload(bitmap_.slot),
+                    shl(and(keccak256(0x00, 32), 0xff), 1)
+                )
             }
         }
         assembly {
@@ -65,19 +71,29 @@ library BitMap256 {
         else unset(bitmap_, value_, shouldHash_);
     }
 
-    function set(BitMap storage bitmap_, uint256 value_, bool shouldHash_) internal {
+    function set(
+        BitMap storage bitmap_,
+        uint256 value_,
+        bool shouldHash_
+    ) internal {
         if (shouldHash_) {
             assembly {
                 mstore(0x00, value_)
                 sstore(
                     bitmap_.slot,
-                    or(sload(bitmap_.slot), shl(and(keccak256(0x00, 32), 0xff), 1))
+                    or(
+                        sload(bitmap_.slot),
+                        shl(and(keccak256(0x00, 32), 0xff), 1)
+                    )
                 )
             }
         }
 
         assembly {
-            sstore(bitmap_.slot, or(sload(bitmap_.slot), shl(and(value_, 0xff), 1)))
+            sstore(
+                bitmap_.slot,
+                or(sload(bitmap_.slot), shl(and(value_, 0xff), 1))
+            )
         }
     }
 
@@ -97,18 +113,28 @@ library BitMap256 {
         }
     }
 
-    function unset(BitMap storage bitmap_, uint256 value_, bool shouldHash_) internal {
+    function unset(
+        BitMap storage bitmap_,
+        uint256 value_,
+        bool shouldHash_
+    ) internal {
         if (shouldHash_) {
             assembly {
                 mstore(0x00, value_)
                 sstore(
                     bitmap_.slot,
-                    and(sload(bitmap_.slot), not(shl(and(keccak256(0x00, 32), 0xff), 1)))
+                    and(
+                        sload(bitmap_.slot),
+                        not(shl(and(keccak256(0x00, 32), 0xff), 1))
+                    )
                 )
             }
         }
         assembly {
-            sstore(bitmap_.slot, and(sload(bitmap_.slot), not(shl(and(value_, 0xff), 1))))
+            sstore(
+                bitmap_.slot,
+                and(sload(bitmap_.slot), not(shl(and(value_, 0xff), 1)))
+            )
         }
     }
 
@@ -120,7 +146,10 @@ library BitMap256 {
         if (shouldHash_) {
             assembly {
                 mstore(0x00, value_)
-                bitmap := and(bitmap_, not(shl(and(keccak256(0x00, 32), 0xff), 1)))
+                bitmap := and(
+                    bitmap_,
+                    not(shl(and(keccak256(0x00, 32), 0xff), 1))
+                )
             }
         }
         assembly {

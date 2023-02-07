@@ -5,9 +5,14 @@ import {ERC721Upgradeable} from "../ERC721Upgradeable.sol";
 
 import {IERC721RentableUpgradeable} from "./IERC721RentableUpgradeable.sol";
 
-import {SafeCastUpgradeable} from "../../../utils/math/SafeCastUpgradeable.sol";
+import {
+    SafeCastUpgradeable
+} from "../../../utils/math/SafeCastUpgradeable.sol";
 
-abstract contract ERC721RentableUpgradeable is ERC721Upgradeable, IERC721RentableUpgradeable {
+abstract contract ERC721RentableUpgradeable is
+    ERC721Upgradeable,
+    IERC721RentableUpgradeable
+{
     using SafeCastUpgradeable for uint256;
 
     mapping(uint256 => UserInfo) internal _users;
@@ -16,8 +21,13 @@ abstract contract ERC721RentableUpgradeable is ERC721Upgradeable, IERC721Rentabl
 
     function __ERC721Rentable_init_unchained() internal onlyInitializing {}
 
-    function setUser(uint256 tokenId, address user, uint64 expires) external virtual override {
-        if (!_isApprovedOrOwner(_msgSender(), tokenId)) revert Rentable__OnlyOwnerOrApproved();
+    function setUser(
+        uint256 tokenId,
+        address user,
+        uint64 expires
+    ) external virtual override {
+        if (!_isApprovedOrOwner(_msgSender(), tokenId))
+            revert Rentable__OnlyOwnerOrApproved();
 
         bytes32 infoKey;
         UserInfo memory info;
@@ -39,16 +49,22 @@ abstract contract ERC721RentableUpgradeable is ERC721Upgradeable, IERC721Rentabl
         emit UserUpdated(tokenId, user, expires);
     }
 
-    function userOf(uint256 tokenId) external view virtual override returns (address user) {
+    function userOf(
+        uint256 tokenId
+    ) external view virtual override returns (address user) {
         UserInfo memory info = _users[tokenId];
         user = info.expires > block.timestamp ? info.user : address(0);
     }
 
-    function userExpires(uint256 tokenId) public view virtual override returns (uint256) {
+    function userExpires(
+        uint256 tokenId
+    ) public view virtual override returns (uint256) {
         return _users[tokenId].expires;
     }
 
-    function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
+    function supportsInterface(
+        bytes4 interfaceId
+    ) public view virtual override returns (bool) {
         return
             interfaceId == type(IERC721RentableUpgradeable).interfaceId ||
             super.supportsInterface(interfaceId);
@@ -70,7 +86,8 @@ abstract contract ERC721RentableUpgradeable is ERC721Upgradeable, IERC721Rentabl
             info := sload(infoKey)
         }
 
-        if (block.timestamp < info.expires) revert Rentable__NotValidTransfer();
+        if (block.timestamp < info.expires)
+            revert Rentable__NotValidTransfer();
         if (from != to && info.user != address(0)) {
             assembly {
                 sstore(infoKey, 0)

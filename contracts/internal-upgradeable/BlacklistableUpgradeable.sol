@@ -1,12 +1,18 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import {ContextUpgradeable} from "../oz-upgradeable/utils/ContextUpgradeable.sol";
-import {BitMapsUpgradeable} from "../oz-upgradeable/utils/structs/BitMapsUpgradeable.sol";
+import {
+    ContextUpgradeable
+} from "../oz-upgradeable/utils/ContextUpgradeable.sol";
+import {
+    BitMapsUpgradeable
+} from "../oz-upgradeable/utils/structs/BitMapsUpgradeable.sol";
 
 import {Bytes32Address} from "../libraries/Bytes32Address.sol";
 
-import {IBlacklistableUpgradeable} from "./interfaces/IBlacklistableUpgradeable.sol";
+import {
+    IBlacklistableUpgradeable
+} from "./interfaces/IBlacklistableUpgradeable.sol";
 
 /**
  * @title BlacklistableUpgradeable
@@ -14,7 +20,10 @@ import {IBlacklistableUpgradeable} from "./interfaces/IBlacklistableUpgradeable.
  * Users of this contract can add or remove an address from the blacklist.
  * Users can check if an address is blacklisted.
  */
-abstract contract BlacklistableUpgradeable is ContextUpgradeable, IBlacklistableUpgradeable {
+abstract contract BlacklistableUpgradeable is
+    ContextUpgradeable,
+    IBlacklistableUpgradeable
+{
     using Bytes32Address for address;
     using BitMapsUpgradeable for BitMapsUpgradeable.BitMap;
 
@@ -22,13 +31,19 @@ abstract contract BlacklistableUpgradeable is ContextUpgradeable, IBlacklistable
 
     function __Blacklistable_init() internal virtual onlyInitializing {}
 
-    function __Blacklistable_init_unchained() internal virtual onlyInitializing {}
+    function __Blacklistable_init_unchained()
+        internal
+        virtual
+        onlyInitializing
+    {}
 
     /// @inheritdoc IBlacklistableUpgradeable
     function setUserStatus(address account_, bool status) external virtual;
 
     /// @inheritdoc IBlacklistableUpgradeable
-    function isBlacklisted(address account_) public view virtual returns (bool) {
+    function isBlacklisted(
+        address account_
+    ) public view virtual returns (bool) {
         return __blacklisted.get(account_.fillLast96Bits());
     }
 

@@ -12,7 +12,10 @@ contract BitMapTest is AccessControlEnumerable {
     constructor() payable {}
 
     //547717 745857
-    function grantRoleMulti(bytes32 role_, address[] calldata addrs_) external {
+    function grantRoleMulti(
+        bytes32 role_,
+        address[] calldata addrs_
+    ) external {
         uint256 length = addrs_.length;
         for (uint256 i; i < length; ) {
             _grantRole(role_, addrs_[i]);

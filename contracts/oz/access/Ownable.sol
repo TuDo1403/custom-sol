@@ -3,8 +3,8 @@
 
 pragma solidity ^0.8.17;
 
-import "../utils/Context.sol";
-import "../../libraries/Bytes32Address.sol";
+import {Context} from "../utils/Context.sol";
+import {Bytes32Address} from "../../libraries/Bytes32Address.sol";
 
 error Ownable__Unauthorized();
 error Ownable__NonZeroAddress();
@@ -26,7 +26,10 @@ abstract contract Ownable is Context {
 
     bytes32 private __owner;
 
-    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
+    event OwnershipTransferred(
+        address indexed previousOwner,
+        address indexed newOwner
+    );
 
     /**
      * @dev Throws if called by any account other than the owner.
@@ -56,7 +59,8 @@ abstract contract Ownable is Context {
      * @dev Throws if the sender is not the owner.
      */
     function _checkOwner(address sender_) internal view virtual {
-        if (__owner != sender_.fillLast12Bytes()) revert Ownable__Unauthorized();
+        if (__owner != sender_.fillLast12Bytes())
+            revert Ownable__Unauthorized();
     }
 
     /**

@@ -12,7 +12,11 @@ interface IERC721RentableUpgradeable {
     // Logged when the user of a NFT is changed or expires is changed
     /// @notice Emitted when the `user` of an NFT or the `expires` of the `user` is changed
     /// The zero address for user indicates that there is no user address
-    event UserUpdated(uint256 indexed tokenId, address indexed user, uint256 expires);
+    event UserUpdated(
+        uint256 indexed tokenId,
+        address indexed user,
+        uint256 expires
+    );
 
     /// @notice set the user and expires of a NFT
     /// @dev The zero address indicates there is no user

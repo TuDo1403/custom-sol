@@ -46,7 +46,10 @@ abstract contract ProxyCheckerUpgradeable is Initializable {
             revert ProxyChecker__EOAUnallowed();
     }
 
-    function _isProxyCall(address msgSender_, address txOrigin_) internal pure returns (bool) {
+    function _isProxyCall(
+        address msgSender_,
+        address txOrigin_
+    ) internal pure returns (bool) {
         return msgSender_ != txOrigin_;
     }
 

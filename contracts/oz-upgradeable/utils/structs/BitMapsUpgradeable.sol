@@ -14,7 +14,10 @@ library BitMapsUpgradeable {
     /**
      * @dev Returns whether the bit at `index` is set.
      */
-    function get(BitMap storage bitmap, uint256 index) internal view returns (bool isSet) {
+    function get(
+        BitMap storage bitmap,
+        uint256 index
+    ) internal view returns (bool isSet) {
         uint256 value = bitmap._data[index >> 8] & (1 << (index & 0xff));
 
         assembly {
@@ -25,7 +28,11 @@ library BitMapsUpgradeable {
     /**
      * @dev Sets the bit at `index` to the boolean `value`.
      */
-    function setTo(BitMap storage bitmap, uint256 index, bool shouldSet) internal {
+    function setTo(
+        BitMap storage bitmap,
+        uint256 index,
+        bool shouldSet
+    ) internal {
         uint256 value = bitmap._data[index >> 8];
 
         assembly {

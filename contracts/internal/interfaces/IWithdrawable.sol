@@ -2,12 +2,21 @@
 pragma solidity ^0.8.17;
 
 interface IWithdrawable {
-    event Withdrawn(address indexed token, address indexed to, uint256 indexed value);
+    event Withdrawn(
+        address indexed token,
+        address indexed to,
+        uint256 indexed value
+    );
 
     /**
      * @dev Event emitted when funds are received by the contract
      */
-    event Received(address indexed sender, address indexed token, bytes value, bytes data);
+    event Received(
+        address indexed sender,
+        address indexed token,
+        bytes value,
+        bytes data
+    );
 
     function notifyERC20Transfer(
         address token_,
@@ -21,5 +30,10 @@ interface IWithdrawable {
      * @param to_ Address to send the tokens or Ether to
      * @param amount_ Amount of tokens or Ether to withdraw
      */
-    function withdraw(address token_, address to_, uint256 amount_, bytes calldata data_) external;
+    function withdraw(
+        address token_,
+        address to_,
+        uint256 amount_,
+        bytes calldata data_
+    ) external;
 }

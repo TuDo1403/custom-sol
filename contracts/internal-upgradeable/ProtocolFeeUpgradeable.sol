@@ -2,9 +2,14 @@
 pragma solidity ^0.8.17;
 
 import {Initializable} from "../oz-upgradeable/proxy/utils/Initializable.sol";
-import {ContextUpgradeable} from "../oz-upgradeable/utils/ContextUpgradeable.sol";
+import {
+    ContextUpgradeable
+} from "../oz-upgradeable/utils/ContextUpgradeable.sol";
 
-import {IERC20Upgradeable, IProtocolFeeUpgradeable} from "./interfaces/IProtocolFeeUpgradeable.sol";
+import {
+    IERC20Upgradeable,
+    IProtocolFeeUpgradeable
+} from "./interfaces/IProtocolFeeUpgradeable.sol";
 
 /**
  * @title ProtocolFeeUpgradeable
@@ -34,7 +39,11 @@ abstract contract ProtocolFeeUpgradeable is
     }
 
     /// @inheritdoc IProtocolFeeUpgradeable
-    function feeInfo() public view returns (IERC20Upgradeable token, uint256 feeAmt) {
+    function feeInfo()
+        public
+        view
+        returns (IERC20Upgradeable token, uint256 feeAmt)
+    {
         assembly {
             let data := sload(__feeInfo.slot)
             token := data
@@ -47,7 +56,10 @@ abstract contract ProtocolFeeUpgradeable is
      * @param token_ Token address of the fee
      * @param amount_ Fee amount
      */
-    function _setRoyalty(IERC20Upgradeable token_, uint96 amount_) internal virtual {
+    function _setRoyalty(
+        IERC20Upgradeable token_,
+        uint96 amount_
+    ) internal virtual {
         assembly {
             sstore(__feeInfo.slot, or(shl(160, amount_), token_))
         }

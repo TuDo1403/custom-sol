@@ -6,7 +6,9 @@ contract TestDupp {
     using Array for uint256[];
 
     //47273
-    function getSet(uint256[] calldata arr) external pure returns (uint256[] memory) {
+    function getSet(
+        uint256[] calldata arr
+    ) external pure returns (uint256[] memory) {
         return arr.buildSet();
     }
 }

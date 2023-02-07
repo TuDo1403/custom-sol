@@ -62,7 +62,9 @@ library SSTORE2 {
         }
     }
 
-    function writeToAddr(bytes memory data) internal returns (address pointer) {
+    function writeToAddr(
+        bytes memory data
+    ) internal returns (address pointer) {
         // Note: The assembly block below does not expand the memory.
         assembly {
             let originalDataLength := mload(data)
@@ -113,7 +115,12 @@ library SSTORE2 {
         assembly {
             pointer := ptr
         }
-        return readBytecode(pointer, DATA_OFFSET, pointer.code.length - DATA_OFFSET);
+        return
+            readBytecode(
+                pointer,
+                DATA_OFFSET,
+                pointer.code.length - DATA_OFFSET
+            );
     }
 
     function read(bytes32 ptr) internal view returns (bytes memory) {
@@ -121,10 +128,18 @@ library SSTORE2 {
         assembly {
             pointer := ptr
         }
-        return readBytecode(pointer, DATA_OFFSET, pointer.code.length - DATA_OFFSET);
+        return
+            readBytecode(
+                pointer,
+                DATA_OFFSET,
+                pointer.code.length - DATA_OFFSET
+            );
     }
 
-    function read(address pointer, uint256 start) internal view returns (bytes memory) {
+    function read(
+        address pointer,
+        uint256 start
+    ) internal view returns (bytes memory) {
         start += DATA_OFFSET;
         return readBytecode(pointer, start, pointer.code.length - start);
     }

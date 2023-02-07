@@ -25,7 +25,10 @@ import {FixedPointMathLib} from "../../../libraries/FixedPointMathLib.sol";
  *
  * _Available since v4.5._
  */
-abstract contract ERC2981Upgradeable is IERC2981Upgradeable, ERC165Upgradeable {
+abstract contract ERC2981Upgradeable is
+    IERC2981Upgradeable,
+    ERC165Upgradeable
+{
     using FixedPointMathLib for uint256;
 
     RoyaltyInfo internal _defaultRoyaltyInfo;
@@ -40,7 +43,13 @@ abstract contract ERC2981Upgradeable is IERC2981Upgradeable, ERC165Upgradeable {
      */
     function supportsInterface(
         bytes4 interfaceId
-    ) public view virtual override(IERC165Upgradeable, ERC165Upgradeable) returns (bool) {
+    )
+        public
+        view
+        virtual
+        override(IERC165Upgradeable, ERC165Upgradeable)
+        returns (bool)
+    {
         return
             interfaceId == type(IERC2981Upgradeable).interfaceId ||
             super.supportsInterface(interfaceId);
@@ -88,13 +97,20 @@ abstract contract ERC2981Upgradeable is IERC2981Upgradeable, ERC165Upgradeable {
      * - `receiver` cannot be the zero address.
      * - `feeNumerator` cannot be greater than the fee denominator.
      */
-    function _setDefaultRoyalty(address receiver, uint96 feeNumerator) internal virtual {
-        if (feeNumerator > _feeDenominator()) revert ERC2981__SalePriceExceeded();
+    function _setDefaultRoyalty(
+        address receiver,
+        uint96 feeNumerator
+    ) internal virtual {
+        if (feeNumerator > _feeDenominator())
+            revert ERC2981__SalePriceExceeded();
 
         __nonZeroAdress(receiver);
 
         assembly {
-            sstore(_defaultRoyaltyInfo.slot, or(shl(160, feeNumerator), receiver))
+            sstore(
+                _defaultRoyaltyInfo.slot,
+                or(shl(160, feeNumerator), receiver)
+            )
         }
     }
 
@@ -118,7 +134,8 @@ abstract contract ERC2981Upgradeable is IERC2981Upgradeable, ERC165Upgradeable {
         address receiver,
         uint96 feeNumerator
     ) internal virtual {
-        if (feeNumerator > _feeDenominator()) revert ERC2981__SalePriceExceeded();
+        if (feeNumerator > _feeDenominator())
+            revert ERC2981__SalePriceExceeded();
         __nonZeroAdress(receiver);
 
         assembly {

@@ -4,7 +4,6 @@ pragma solidity ^0.8.17;
 import {Pausable} from "../oz/security/Pausable.sol";
 import {
     AccessControl,
-    IAccessControl,
     AccessControlEnumerable
 } from "../oz/access/AccessControlEnumerable.sol";
 
@@ -13,6 +12,7 @@ import {FundForwarder} from "../internal/FundForwarder.sol";
 import {IBlacklistable, Blacklistable} from "../internal/Blacklistable.sol";
 
 import {IAuthority} from "./interfaces/IAuthority.sol";
+import {IAccessControl} from "../oz/access/IAccessControl.sol";
 
 import {Roles} from "../libraries/Roles.sol";
 
@@ -51,7 +51,9 @@ abstract contract Authority is
         }
     }
 
-    function changeVault(address vault_) external override onlyRole(DEFAULT_ADMIN_ROLE) {
+    function changeVault(
+        address vault_
+    ) external override onlyRole(DEFAULT_ADMIN_ROLE) {
         _changeVault(vault_);
     }
 
@@ -64,7 +66,11 @@ abstract contract Authority is
     function grantRole(
         bytes32 role_,
         address account_
-    ) public override(AccessControl, IAccessControl) onlyRole(getRoleAdmin(role_)) {
+    )
+        public
+        override(AccessControl, IAccessControl)
+        onlyRole(getRoleAdmin(role_))
+    {
         AccessControl.grantRole(role_, account_);
     }
 
@@ -92,7 +98,12 @@ abstract contract Authority is
     }
 
     /// @inheritdoc IAuthority
-    function paused() public view override(IAuthority, Pausable) returns (bool isPaused) {
+    function paused()
+        public
+        view
+        override(IAuthority, Pausable)
+        returns (bool isPaused)
+    {
         return Pausable.paused();
     }
 

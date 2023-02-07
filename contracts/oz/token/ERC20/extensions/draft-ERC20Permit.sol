@@ -3,9 +3,11 @@
 
 pragma solidity ^0.8.17;
 
-import "./draft-IERC20Permit.sol";
-import "../ERC20.sol";
-import "../../../../internal/Signable.sol";
+import {ERC20} from "../ERC20.sol";
+
+import {Signable, Bytes32Address} from "../../../../internal/Signable.sol";
+
+import {IERC20Permit} from "./draft-IERC20Permit.sol";
 
 /**
  * @dev Implementation of the ERC20 Permit extension allowing approvals to be made via signatures, as defined in
@@ -22,16 +24,8 @@ abstract contract ERC20Permit is ERC20, IERC20Permit, Signable {
 
     // solhint-disable-next-line var-name-mixedcase
     /// @dev value is equal to keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)")
-    bytes32 private constant _PERMIT_TYPEHASH =
+    bytes32 private constant __PERMIT_TYPEHASH =
         0x6e71edae12b1b97f4d1f60370fef10105fa2faae0126114a169c64845d6126c9;
-    /**
-     * @dev In previous versions `_PERMIT_TYPEHASH` was declared as `immutable`.
-     * However, to ensure consistency with the upgradeable transpiler, we will continue
-     * to reserve a slot.
-     * @custom:oz-renamed-from _PERMIT_TYPEHASH
-     */
-    // solhint-disable-next-line var-name-mixedcase
-    bytes32 private _PERMIT_TYPEHASH_DEPRECATED_SLOT;
 
     /**
      * @dev Initializes the {EIP712} domain separator using the `name` parameter, and setting `version` to `"1"`.
@@ -64,7 +58,7 @@ abstract contract ERC20Permit is ERC20, IERC20Permit, Signable {
 
             let freeMemPtr := mload(0x40)
 
-            mstore(freeMemPtr, _PERMIT_TYPEHASH)
+            mstore(freeMemPtr, __PERMIT_TYPEHASH)
             mstore(add(freeMemPtr, 32), owner)
             mstore(add(freeMemPtr, 64), spender)
             mstore(add(freeMemPtr, 96), value)
@@ -95,7 +89,12 @@ abstract contract ERC20Permit is ERC20, IERC20Permit, Signable {
      * @dev See {IERC20Permit-DOMAIN_SEPARATOR}.
      */
     // solhint-disable-next-line func-name-mixedcase
-    function DOMAIN_SEPARATOR() external view override(IERC20Permit, Signable) returns (bytes32) {
+    function DOMAIN_SEPARATOR()
+        external
+        view
+        override(IERC20Permit, Signable)
+        returns (bytes32)
+    {
         return _domainSeparatorV4();
     }
 

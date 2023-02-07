@@ -130,11 +130,15 @@ library BLS {
         return out[0] != 0;
     }
 
-    function hashToPoint(bytes memory data) internal view returns (uint256[2] memory p) {
+    function hashToPoint(
+        bytes memory data
+    ) internal view returns (uint256[2] memory p) {
         return mapToPoint(keccak256(data));
     }
 
-    function mapToPoint(bytes32 _x) internal view returns (uint256[2] memory p) {
+    function mapToPoint(
+        bytes32 _x
+    ) internal view returns (uint256[2] memory p) {
         uint256 x = uint256(_x) % N;
         uint256 y;
         bool found = false;
@@ -152,9 +156,13 @@ library BLS {
         }
     }
 
-    function isValidPublicKey(uint256[4] memory publicKey) internal pure returns (bool) {
+    function isValidPublicKey(
+        uint256[4] memory publicKey
+    ) internal pure returns (bool) {
         if (
-            (publicKey[0] >= N) || (publicKey[1] >= N) || (publicKey[2] >= N || (publicKey[3] >= N))
+            (publicKey[0] >= N) ||
+            (publicKey[1] >= N) ||
+            (publicKey[2] >= N || (publicKey[3] >= N))
         ) {
             return false;
         } else {
@@ -162,7 +170,9 @@ library BLS {
         }
     }
 
-    function isValidSignature(uint256[2] memory signature) internal pure returns (bool) {
+    function isValidSignature(
+        uint256[2] memory signature
+    ) internal pure returns (bool) {
         if ((signature[0] >= N) || (signature[1] >= N)) {
             return false;
         } else {
@@ -175,7 +185,8 @@ library BLS {
         uint256[2] memory y
     ) internal pure returns (uint256[4] memory uncompressed) {
         uint256 desicion = compressed[0] & SIGN_MASK;
-        if (y[0] & 1 == 1 && desicion != ODD_NUM) revert BLS__BadYCoordinateForUncompressingKey();
+        if (y[0] & 1 == 1 && desicion != ODD_NUM)
+            revert BLS__BadYCoordinateForUncompressingKey();
 
         uncompressed[0] = compressed[0] & FIELD_MASK;
         uncompressed[1] = compressed[1];
@@ -188,11 +199,14 @@ library BLS {
         uint256 y
     ) internal pure returns (uint256[2] memory uncompressed) {
         uint256 desicion = compressed & SIGN_MASK;
-        if (y & 1 == 1 && desicion != ODD_NUM) revert BLS__BadYCoordinateForUncompressingKey();
+        if (y & 1 == 1 && desicion != ODD_NUM)
+            revert BLS__BadYCoordinateForUncompressingKey();
         return [compressed & FIELD_MASK, y];
     }
 
-    function isValidCompressedPublicKey(uint256[2] memory publicKey) internal view returns (bool) {
+    function isValidCompressedPublicKey(
+        uint256[2] memory publicKey
+    ) internal view returns (bool) {
         uint256 x0 = publicKey[0] & FIELD_MASK;
         uint256 x1 = publicKey[1];
         if ((x0 >= N) || (x1 >= N)) {
@@ -204,7 +218,9 @@ library BLS {
         }
     }
 
-    function isValidCompressedSignature(uint256 signature) internal view returns (bool) {
+    function isValidCompressedSignature(
+        uint256 signature
+    ) internal view returns (bool) {
         uint256 x = signature & FIELD_MASK;
         if (x >= N) {
             return false;
@@ -214,7 +230,9 @@ library BLS {
         return isOnCurveG1(x);
     }
 
-    function isOnCurveG1(uint256[2] memory point) internal pure returns (bool _isOnCurve) {
+    function isOnCurveG1(
+        uint256[2] memory point
+    ) internal pure returns (bool _isOnCurve) {
         // solium-disable-next-line security/no-inline-assembly
         assembly {
             let t0 := mload(point)
@@ -251,12 +269,21 @@ library BLS {
                 add(freemem, 0xA0),
                 0x30644e72e131a029b85045b68181585d97816a916871ca8d3c208c16d87cfd47
             )
-            callSuccess := staticcall(sub(gas(), 2000), 5, freemem, 0xC0, freemem, 0x20)
+            callSuccess := staticcall(
+                sub(gas(), 2000),
+                5,
+                freemem,
+                0xC0,
+                freemem,
+                0x20
+            )
             _isOnCurve := eq(1, mload(freemem))
         }
     }
 
-    function isOnCurveG2(uint256[4] memory point) internal pure returns (bool _isOnCurve) {
+    function isOnCurveG2(
+        uint256[4] memory point
+    ) internal pure returns (bool _isOnCurve) {
         // solium-disable-next-line security/no-inline-assembly
         assembly {
             // x0, x1
@@ -276,8 +303,16 @@ library BLS {
             t3 := mulmod(add(t4, sub(N, t3)), t1, N)
 
             // x ^ 3 + b
-            t0 := addmod(t2, 0x2b149d40ceb8aaae81be18991be06ac3b5b4c5e559dbefa33267e6dc24a138e5, N)
-            t1 := addmod(t3, 0x009713b03af0fed4cd2cafadeed8fdf4a74fa084e52d1852e4a2bd0685c315d2, N)
+            t0 := addmod(
+                t2,
+                0x2b149d40ceb8aaae81be18991be06ac3b5b4c5e559dbefa33267e6dc24a138e5,
+                N
+            )
+            t1 := addmod(
+                t3,
+                0x009713b03af0fed4cd2cafadeed8fdf4a74fa084e52d1852e4a2bd0685c315d2,
+                N
+            )
 
             // y0, y1
             t2 := mload(add(point, 64))
@@ -291,7 +326,9 @@ library BLS {
         }
     }
 
-    function isOnCurveG2(uint256[2] memory x) internal view returns (bool _isOnCurve) {
+    function isOnCurveG2(
+        uint256[2] memory x
+    ) internal view returns (bool _isOnCurve) {
         bool callSuccess;
         // solium-disable-next-line security/no-inline-assembly
         assembly {
@@ -311,8 +348,14 @@ library BLS {
             // x1 * (3 * x0 ^ 2 - x1 ^ 2)
             t3 := mulmod(add(t4, sub(N, t3)), t1, N)
             // x ^ 3 + b
-            t0 := add(t2, 0x2b149d40ceb8aaae81be18991be06ac3b5b4c5e559dbefa33267e6dc24a138e5)
-            t1 := add(t3, 0x009713b03af0fed4cd2cafadeed8fdf4a74fa084e52d1852e4a2bd0685c315d2)
+            t0 := add(
+                t2,
+                0x2b149d40ceb8aaae81be18991be06ac3b5b4c5e559dbefa33267e6dc24a138e5
+            )
+            t1 := add(
+                t3,
+                0x009713b03af0fed4cd2cafadeed8fdf4a74fa084e52d1852e4a2bd0685c315d2
+            )
 
             // is non residue ?
             t0 := addmod(mulmod(t0, t0, N), mulmod(t1, t1, N), N)
@@ -331,12 +374,21 @@ library BLS {
                 add(freemem, 0xA0),
                 0x30644e72e131a029b85045b68181585d97816a916871ca8d3c208c16d87cfd47
             )
-            callSuccess := staticcall(sub(gas(), 2000), 5, freemem, 0xC0, freemem, 0x20)
+            callSuccess := staticcall(
+                sub(gas(), 2000),
+                5,
+                freemem,
+                0xC0,
+                freemem,
+                0x20
+            )
             _isOnCurve := eq(1, mload(freemem))
         }
     }
 
-    function isOnSubgroupG2Naive(uint256[4] memory point) internal view returns (bool) {
+    function isOnSubgroupG2Naive(
+        uint256[4] memory point
+    ) internal view returns (bool) {
         uint256 t0;
         uint256 t1;
         uint256 t2;
@@ -358,7 +410,9 @@ library BLS {
         return xx == 0 && xy == 0 && yx == 0 && yy == 0;
     }
 
-    function isNonResidueFP(uint256 e) internal view returns (bool isNonResidue) {
+    function isNonResidueFP(
+        uint256 e
+    ) internal view returns (bool isNonResidue) {
         bool callSuccess;
         // solium-disable-next-line security/no-inline-assembly
         assembly {
@@ -377,14 +431,23 @@ library BLS {
                 add(freemem, 0xA0),
                 0x30644e72e131a029b85045b68181585d97816a916871ca8d3c208c16d87cfd47
             )
-            callSuccess := staticcall(sub(gas(), 2000), 5, freemem, 0xC0, freemem, 0x20)
+            callSuccess := staticcall(
+                sub(gas(), 2000),
+                5,
+                freemem,
+                0xC0,
+                freemem,
+                0x20
+            )
             isNonResidue := eq(1, mload(freemem))
         }
         if (!callSuccess) revert BLS__IsNonResidueFP2ModExpCallFailed();
         return !isNonResidue;
     }
 
-    function isNonResidueFP2(uint256[2] memory e) internal view returns (bool isNonResidue) {
+    function isNonResidueFP2(
+        uint256[2] memory e
+    ) internal view returns (bool isNonResidue) {
         uint256 a = addmod(mulmod(e[0], e[0], N), mulmod(e[1], e[1], N), N);
         bool callSuccess;
         // solium-disable-next-line security/no-inline-assembly
@@ -404,7 +467,14 @@ library BLS {
                 add(freemem, 0xA0),
                 0x30644e72e131a029b85045b68181585d97816a916871ca8d3c208c16d87cfd47
             )
-            callSuccess := staticcall(sub(gas(), 2000), 5, freemem, 0xC0, freemem, 0x20)
+            callSuccess := staticcall(
+                sub(gas(), 2000),
+                5,
+                freemem,
+                0xC0,
+                freemem,
+                0x20
+            )
             isNonResidue := eq(1, mload(freemem))
         }
         if (!callSuccess) revert BLS__IsNonResidueFP2ModExpCallFailed();
@@ -430,7 +500,14 @@ library BLS {
                 add(freemem, 0xA0),
                 0x30644e72e131a029b85045b68181585d97816a916871ca8d3c208c16d87cfd47
             )
-            callSuccess := staticcall(sub(gas(), 2000), 5, freemem, 0xC0, freemem, 0x20)
+            callSuccess := staticcall(
+                sub(gas(), 2000),
+                5,
+                freemem,
+                0xC0,
+                freemem,
+                0x20
+            )
             x := mload(freemem)
             hasRoot := eq(xx, mulmod(x, x, N))
         }
@@ -445,16 +522,28 @@ library BLS {
     ) internal pure returns (uint256, uint256, uint256, uint256) {
         // x coordinate endomorphism
         // (xx, N - xy) is the conjugate of (xx, xy)
-        (uint256 xxe, uint256 xye) = BN256G2._FQ2Mul(EPS_EXP_0X0, EPS_EXP_0X1, xx, N - xy);
+        (uint256 xxe, uint256 xye) = BN256G2._FQ2Mul(
+            EPS_EXP_0X0,
+            EPS_EXP_0X1,
+            xx,
+            N - xy
+        );
         // y coordinate endomorphism
         // (yx, N - yy) is the conjugate of (yx, yy)
-        (uint256 yxe, uint256 yye) = BN256G2._FQ2Mul(EPS_EXP_1X0, EPS_EXP_1X1, yx, N - yy);
+        (uint256 yxe, uint256 yye) = BN256G2._FQ2Mul(
+            EPS_EXP_1X0,
+            EPS_EXP_1X1,
+            yx,
+            N - yy
+        );
 
         return (xxe, xye, yxe, yye);
     }
 
     /// Using https://eprint.iacr.org/2022/348.pdf
-    function isOnSubgroupG2DLZZ(uint256[4] memory point) internal view returns (bool) {
+    function isOnSubgroupG2DLZZ(
+        uint256[4] memory point
+    ) internal view returns (bool) {
         uint256 t0;
         uint256 t1;
         uint256 t2;
@@ -480,14 +569,28 @@ library BLS {
         uint256 yx0;
         uint256 yy0;
         //(s+1)P
-        (xx0, xy0, yx0, yy0) = BN256G2.ECTwistAdd(t0, t1, t2, t3, xx, xy, yx, yy);
+        (xx0, xy0, yx0, yy0) = BN256G2.ECTwistAdd(
+            t0,
+            t1,
+            t2,
+            t3,
+            xx,
+            xy,
+            yx,
+            yy
+        );
 
         uint256[4] memory end0;
         //phi(sP)
         (end0[0], end0[1], end0[2], end0[3]) = endomorphism(xx, xy, yx, yy);
         uint256[4] memory end1;
         //phi^2(sP)
-        (end1[0], end1[1], end1[2], end1[3]) = endomorphism(end0[0], end0[1], end0[2], end0[3]);
+        (end1[0], end1[1], end1[2], end1[3]) = endomorphism(
+            end0[0],
+            end0[1],
+            end0[2],
+            end0[3]
+        );
         //(s+1)P + phi(sP)
         (xx0, xy0, yx0, yy0) = BN256G2.ECTwistAdd(
             xx0,
@@ -514,9 +617,23 @@ library BLS {
         (xx, xy, yx, yy) = BN256G2.ECTwistAdd(xx, xy, yx, yy, xx, xy, yx, yy);
         //phi^3(2sP)
         (end0[0], end0[1], end0[2], end0[3]) = endomorphism(xx, xy, yx, yy);
-        (end0[0], end0[1], end0[2], end0[3]) = endomorphism(end0[0], end0[1], end0[2], end0[3]);
-        (end0[0], end0[1], end0[2], end0[3]) = endomorphism(end0[0], end0[1], end0[2], end0[3]);
+        (end0[0], end0[1], end0[2], end0[3]) = endomorphism(
+            end0[0],
+            end0[1],
+            end0[2],
+            end0[3]
+        );
+        (end0[0], end0[1], end0[2], end0[3]) = endomorphism(
+            end0[0],
+            end0[1],
+            end0[2],
+            end0[3]
+        );
 
-        return xx0 == end0[0] && xy0 == end0[1] && yx0 == end0[2] && yy0 == end0[3];
+        return
+            xx0 == end0[0] &&
+            xy0 == end0[1] &&
+            yx0 == end0[2] &&
+            yy0 == end0[3];
     }
 }

@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import {ContextUpgradeable} from "../oz-upgradeable/utils/ContextUpgradeable.sol";
+import {
+    ContextUpgradeable
+} from "../oz-upgradeable/utils/ContextUpgradeable.sol";
 import {
     ReentrancyGuardUpgradeable
 } from "../oz-upgradeable/security/ReentrancyGuardUpgradeable.sol";
@@ -40,7 +42,11 @@ abstract contract MultiDelegatecallUpgradeable is
         _;
     }
 
-    event BatchExecutionDelegated(address indexed operator, bytes[] callData, bytes[] results);
+    event BatchExecutionDelegated(
+        address indexed operator,
+        bytes[] callData,
+        bytes[] results
+    );
 
     function __MultiDelegatecall_init() internal onlyInitializing {
         __ReentrancyGuard_init_unchained();

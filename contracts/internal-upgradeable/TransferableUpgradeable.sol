@@ -2,7 +2,9 @@
 pragma solidity ^0.8.17;
 
 import {Initializable} from "../oz-upgradeable/proxy/utils/Initializable.sol";
-import {IERC20Upgradeable} from "../oz-upgradeable/token/ERC20/IERC20Upgradeable.sol";
+import {
+    IERC20Upgradeable
+} from "../oz-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 
 error Transferable__TransferFailed();
 error Transferable__InvalidArguments();
@@ -34,7 +36,12 @@ abstract contract TransferableUpgradeable is Initializable {
         if (
             token_ == address(0)
                 ? _nativeTransfer(to_, value_, data_)
-                : _ERC20TransferFrom(IERC20Upgradeable(token_), from_, to_, value_)
+                : _ERC20TransferFrom(
+                    IERC20Upgradeable(token_),
+                    from_,
+                    to_,
+                    value_
+                )
         ) return;
 
         revert Transferable__TransferFailed();
@@ -74,7 +81,8 @@ abstract contract TransferableUpgradeable is Initializable {
         bytes memory data_
     ) internal virtual {
         __checkValidTransfer(to_, amount_);
-        if (!_nativeTransfer(to_, amount_, data_)) revert Transferable__TransferFailed();
+        if (!_nativeTransfer(to_, amount_, data_))
+            revert Transferable__TransferFailed();
     }
 
     function _safeERC20Transfer(
@@ -83,7 +91,8 @@ abstract contract TransferableUpgradeable is Initializable {
         uint256 amount_
     ) internal virtual {
         __checkValidTransfer(to_, amount_);
-        if (!_ERC20Transfer(token_, to_, amount_)) revert Transferable__TransferFailed();
+        if (!_ERC20Transfer(token_, to_, amount_))
+            revert Transferable__TransferFailed();
     }
 
     function _safeERC20TransferFrom(
@@ -94,7 +103,8 @@ abstract contract TransferableUpgradeable is Initializable {
     ) internal virtual {
         __checkValidTransfer(to_, amount_);
 
-        if (!_ERC20TransferFrom(token_, from_, to_, amount_)) revert Transferable__TransferFailed();
+        if (!_ERC20TransferFrom(token_, from_, to_, amount_))
+            revert Transferable__TransferFailed();
     }
 
     function _nativeTransfer(
@@ -123,7 +133,10 @@ abstract contract TransferableUpgradeable is Initializable {
             mstore(add(freeMemoryPointer, 36), value_) // Append the "amount" argument.
 
             success := and(
-                or(and(eq(mload(0), 1), gt(returndatasize(), 31)), iszero(returndatasize())),
+                or(
+                    and(eq(mload(0), 1), gt(returndatasize(), 31)),
+                    iszero(returndatasize())
+                ),
                 call(gas(), token_, 0, freeMemoryPointer, 68, 0, 32)
             )
         }
@@ -147,14 +160,18 @@ abstract contract TransferableUpgradeable is Initializable {
             mstore(add(freeMemoryPointer, 68), value_)
 
             success := and(
-                or(and(eq(mload(0), 1), gt(returndatasize(), 31)), iszero(returndatasize())),
+                or(
+                    and(eq(mload(0), 1), gt(returndatasize(), 31)),
+                    iszero(returndatasize())
+                ),
                 call(gas(), token_, 0, freeMemoryPointer, 100, 0, 32)
             )
         }
     }
 
     function __checkValidTransfer(address to_, uint256 value_) private pure {
-        if (value_ == 0 || to_ == address(0)) revert Transferable__InvalidArguments();
+        if (value_ == 0 || to_ == address(0))
+            revert Transferable__InvalidArguments();
     }
 
     uint256[50] private __gap;

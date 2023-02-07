@@ -44,7 +44,10 @@ library ECDSAUpgradeable {
             }
             case 65 {
                 // Compute `v` and store it in the scratch space.
-                mstore(0x20, byte(0, calldataload(add(signature.offset, 0x40))))
+                mstore(
+                    0x20,
+                    byte(0, calldataload(add(signature.offset, 0x40)))
+                )
             }
 
             // If `s` in lower half order, such that the signature is not malleable.
@@ -121,7 +124,9 @@ library ECDSAUpgradeable {
      *
      * See {recover}.
      */
-    function toEthSignedMessageHash(bytes32 hash) internal pure returns (bytes32 result) {
+    function toEthSignedMessageHash(
+        bytes32 hash
+    ) internal pure returns (bytes32 result) {
         // 32 is the length in bytes of hash,
         // enforced by the type signature above
         assembly {
@@ -141,7 +146,9 @@ library ECDSAUpgradeable {
      *
      * See {recover}.
      */
-    function toEthSignedMessageHash(bytes memory s) internal pure returns (bytes32 result) {
+    function toEthSignedMessageHash(
+        bytes memory s
+    ) internal pure returns (bytes32 result) {
         assembly {
             // We need at most 128 bytes for Ethereum signed message header.
             // The max length of the ASCII reprenstation of a uint256 is 78 bytes.
@@ -179,7 +186,10 @@ library ECDSAUpgradeable {
             // `start` marks the start of the memory which we will compute the keccak256 of.
             let start := sub(ptr, 32)
             // Copy the header over to the memory.
-            mstore(start, "\x00\x00\x00\x00\x00\x00\x19Ethereum Signed Message:\n")
+            mstore(
+                start,
+                "\x00\x00\x00\x00\x00\x00\x19Ethereum Signed Message:\n"
+            )
             start := add(start, 6)
 
             // Compute the keccak256 of the memory.
@@ -210,7 +220,10 @@ library ECDSAUpgradeable {
             // Load free memory pointer
             let memPtr := mload(64)
 
-            mstore(memPtr, 0x1901000000000000000000000000000000000000000000000000000000000000) // EIP191 header
+            mstore(
+                memPtr,
+                0x1901000000000000000000000000000000000000000000000000000000000000
+            ) // EIP191 header
             mstore(add(memPtr, 2), domainSeparator) // EIP712 domain hash
             mstore(add(memPtr, 34), structHash) // Hash of struct
 

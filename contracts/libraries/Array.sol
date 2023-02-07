@@ -7,7 +7,9 @@ library Array {
     using BitMap256 for uint256;
 
     // 100 record ~= 60k gas
-    function buildSet(uint256[] memory arr_) internal pure returns (uint256[] memory) {
+    function buildSet(
+        uint256[] memory arr_
+    ) internal pure returns (uint256[] memory) {
         uint256 length = arr_.length;
         {
             uint256 val;
@@ -15,9 +17,14 @@ library Array {
             for (uint256 i; i < length; ) {
                 unchecked {
                     val = arr_[i];
-                    while (length > i && bitmap.get({value_: val, shouldHash_: true}))
-                        val = arr_[--length];
-                    bitmap = bitmap.set({value_: arr_[i] = val, shouldHash_: true});
+                    while (
+                        length > i &&
+                        bitmap.get({value_: val, shouldHash_: true})
+                    ) val = arr_[--length];
+                    bitmap = bitmap.set({
+                        value_: arr_[i] = val,
+                        shouldHash_: true
+                    });
                     ++i;
                 }
             }
@@ -28,7 +35,9 @@ library Array {
         return arr_;
     }
 
-    function trimZero(uint256[] memory arr_) internal pure returns (uint256[] memory res) {
+    function trimZero(
+        uint256[] memory arr_
+    ) internal pure returns (uint256[] memory res) {
         res = arr_;
         uint256 length = res.length;
         uint256 counter;

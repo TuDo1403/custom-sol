@@ -3,7 +3,7 @@
 
 pragma solidity ^0.8.17;
 
-import "../utils/Context.sol";
+import {Context} from "../utils/Context.sol";
 
 error Pausable__Paused();
 error Pausable__NotPaused();
@@ -91,8 +91,7 @@ abstract contract Pausable is Context {
      *
      * - The contract must not be paused.
      */
-    function _pause() internal virtual {
-        _requireNotPaused();
+    function _pause() internal virtual whenNotPaused {
         __paused = 2;
         emit Paused(_msgSender());
     }
@@ -104,8 +103,7 @@ abstract contract Pausable is Context {
      *
      * - The contract must be paused.
      */
-    function _unpause() internal virtual {
-        _requirePaused();
+    function _unpause() internal virtual whenPaused {
         __paused = 1;
         emit Unpaused(_msgSender());
     }

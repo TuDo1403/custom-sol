@@ -3,9 +3,9 @@
 
 pragma solidity ^0.8.10;
 
-import "../ERC721.sol";
+import {ERC721} from "../ERC721.sol";
 
-import "../../../../libraries/StringLib.sol";
+import {StringLib} from "../../../../libraries/StringLib.sol";
 
 /**
  * @dev ERC721 token with storage based token URI management.
@@ -16,29 +16,38 @@ abstract contract ERC721URIStorage is ERC721 {
     string internal _baseTokenURI;
 
     // Optional mapping for token URIs
-    mapping(uint256 => string) private _tokenURIs;
+    mapping(uint256 => string) private __tokenURIs;
 
     constructor(string memory baseURI_) payable {
         _baseTokenURI = baseURI_;
     }
 
-    function _baseURI() internal view virtual override returns (string memory) {
+    function _baseURI()
+        internal
+        view
+        virtual
+        override
+        returns (string memory)
+    {
         return _baseTokenURI;
     }
 
     /**
      * @dev See {IERC721Metadata-tokenURI}.
      */
-    function tokenURI(uint256 tokenId) public view virtual override returns (string memory) {
+    function tokenURI(
+        uint256 tokenId
+    ) public view virtual override returns (string memory) {
         ownerOf(tokenId);
 
-        string memory _tokenURI = _tokenURIs[tokenId];
+        string memory _tokenURI = __tokenURIs[tokenId];
 
         // If there is no base URI, return the token URI.
         if (bytes(_baseTokenURI).length == 0) return _tokenURI;
 
         // If both are set, concatenate the baseURI and tokenURI (via abi.encodePacked).
-        if (bytes(_tokenURI).length != 0) return string(abi.encodePacked(_baseTokenURI, _tokenURI));
+        if (bytes(_tokenURI).length != 0)
+            return string(abi.encodePacked(_baseTokenURI, _tokenURI));
 
         return tokenURI(tokenId);
     }
@@ -50,9 +59,12 @@ abstract contract ERC721URIStorage is ERC721 {
      *
      * - `tokenId` must exist.
      */
-    function _setTokenURI(uint256 tokenId, string memory _tokenURI) internal virtual {
+    function _setTokenURI(
+        uint256 tokenId,
+        string calldata _tokenURI
+    ) internal virtual {
         ownerOf(tokenId);
-        _tokenURIs[tokenId] = _tokenURI;
+        __tokenURIs[tokenId] = _tokenURI;
     }
 
     /**
@@ -63,8 +75,7 @@ abstract contract ERC721URIStorage is ERC721 {
     function _burn(uint256 tokenId) internal virtual override {
         super._burn(tokenId);
 
-        if (bytes(_tokenURIs[tokenId]).length != 0) {
-            delete _tokenURIs[tokenId];
-        }
+        if (bytes(__tokenURIs[tokenId]).length != 0)
+            delete __tokenURIs[tokenId];
     }
 }

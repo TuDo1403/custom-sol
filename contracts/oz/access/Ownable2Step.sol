@@ -3,7 +3,7 @@
 
 pragma solidity ^0.8.0;
 
-import "./Ownable.sol";
+import {Ownable, Bytes32Address} from "./Ownable.sol";
 
 error Ownable2Step__CallerIsNotTheNewOwner();
 
@@ -23,12 +23,20 @@ abstract contract Ownable2Step is Ownable {
 
     bytes32 private __pendingOwner;
 
-    event OwnershipTransferStarted(address indexed previousOwner, address indexed newOwner);
+    event OwnershipTransferStarted(
+        address indexed previousOwner,
+        address indexed newOwner
+    );
 
     /**
      * @dev Returns the address of the pending owner.
      */
-    function pendingOwner() public view virtual returns (address _pendingOwner) {
+    function pendingOwner()
+        public
+        view
+        virtual
+        returns (address _pendingOwner)
+    {
         assembly {
             _pendingOwner := sload(__pendingOwner.slot)
         }
@@ -38,7 +46,9 @@ abstract contract Ownable2Step is Ownable {
      * @dev Starts the ownership transfer of the contract to a new account. Replaces the pending transfer if there is one.
      * Can only be called by the current owner.
      */
-    function transferOwnership(address newOwner_) public virtual override onlyOwner {
+    function transferOwnership(
+        address newOwner_
+    ) public virtual override onlyOwner {
         assembly {
             sstore(__pendingOwner.slot, newOwner_)
         }
@@ -59,7 +69,8 @@ abstract contract Ownable2Step is Ownable {
      */
     function acceptOwnership() external {
         address sender = _msgSender();
-        if (pendingOwner() != sender) revert Ownable2Step__CallerIsNotTheNewOwner();
+        if (pendingOwner() != sender)
+            revert Ownable2Step__CallerIsNotTheNewOwner();
 
         _transferOwnership(sender);
     }

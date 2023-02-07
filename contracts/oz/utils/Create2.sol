@@ -37,7 +37,8 @@ library Create2 {
         bytes memory bytecode
     ) internal returns (address) {
         address addr;
-        if (address(this).balance < amount) revert Create2__InsufficientBalance();
+        if (address(this).balance < amount)
+            revert Create2__InsufficientBalance();
         if (bytecode.length == 0) revert Create2__ZeroLengthByteCode();
         /// @solidity memory-safe-assembly
         assembly {
@@ -51,7 +52,10 @@ library Create2 {
      * @dev Returns the address where a contract will be stored if deployed via {deploy}. Any change in the
      * `bytecodeHash` or `salt` will result in a new destination address.
      */
-    function computeAddress(bytes32 salt, bytes32 bytecodeHash) internal view returns (address) {
+    function computeAddress(
+        bytes32 salt,
+        bytes32 bytecodeHash
+    ) internal view returns (address) {
         return computeAddress(salt, bytecodeHash, address(this));
     }
 
@@ -64,7 +68,9 @@ library Create2 {
         bytes32 bytecodeHash,
         address deployer
     ) internal pure returns (address addr) {
-        bytes32 _data = keccak256(abi.encodePacked(bytes1(0xff), deployer, salt, bytecodeHash));
+        bytes32 _data = keccak256(
+            abi.encodePacked(bytes1(0xff), deployer, salt, bytecodeHash)
+        );
         assembly {
             addr := _data
         }

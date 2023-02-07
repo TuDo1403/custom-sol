@@ -13,7 +13,10 @@ import {PausableUpgradeable} from "../../../security/PausableUpgradeable.sol";
  * period, or having an emergency switch for freezing all token transfers in the
  * event of a large bug.
  */
-abstract contract ERC721PausableUpgradeable is ERC721Upgradeable, PausableUpgradeable {
+abstract contract ERC721PausableUpgradeable is
+    ERC721Upgradeable,
+    PausableUpgradeable
+{
     function __ERC721Pausable_init() internal onlyInitializing {
         __Pausable_init_unchained();
     }

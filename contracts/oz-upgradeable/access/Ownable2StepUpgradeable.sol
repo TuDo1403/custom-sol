@@ -19,7 +19,10 @@ error Ownable2Step__CallerIsNotTheNewOwner();
  * This module is used through inheritance. It will make available all functions
  * from parent (Ownable).
  */
-abstract contract Ownable2StepUpgradeable is Initializable, OwnableUpgradeable {
+abstract contract Ownable2StepUpgradeable is
+    Initializable,
+    OwnableUpgradeable
+{
     using Bytes32Address for *;
 
     bytes32 private __pendingOwner;
@@ -30,7 +33,10 @@ abstract contract Ownable2StepUpgradeable is Initializable, OwnableUpgradeable {
 
     function __Ownable2Step_init_unchained() internal onlyInitializing {}
 
-    event OwnershipTransferStarted(address indexed previousOwner, address indexed newOwner);
+    event OwnershipTransferStarted(
+        address indexed previousOwner,
+        address indexed newOwner
+    );
 
     /**
      * @dev Returns the address of the pending owner.
@@ -43,7 +49,9 @@ abstract contract Ownable2StepUpgradeable is Initializable, OwnableUpgradeable {
      * @dev Starts the ownership transfer of the contract to a new account. Replaces the pending transfer if there is one.
      * Can only be called by the current owner.
      */
-    function transferOwnership(address newOwner_) public virtual override onlyOwner {
+    function transferOwnership(
+        address newOwner_
+    ) public virtual override onlyOwner {
         __pendingOwner = newOwner_.fillLast12Bytes();
         emit OwnershipTransferStarted(owner(), newOwner_);
     }
@@ -62,7 +70,8 @@ abstract contract Ownable2StepUpgradeable is Initializable, OwnableUpgradeable {
      */
     function acceptOwnership() external {
         address sender = _msgSender();
-        if (pendingOwner() != sender) revert Ownable2Step__CallerIsNotTheNewOwner();
+        if (pendingOwner() != sender)
+            revert Ownable2Step__CallerIsNotTheNewOwner();
 
         _transferOwnership(sender);
     }

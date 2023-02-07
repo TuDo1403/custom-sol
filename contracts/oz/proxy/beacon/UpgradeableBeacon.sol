@@ -3,9 +3,9 @@
 
 pragma solidity ^0.8.0;
 
-import "./IBeacon.sol";
-import "../../access/Ownable.sol";
-import "../../utils/Address.sol";
+import {IBeacon} from "./IBeacon.sol";
+import {Ownable} from "../../access/Ownable.sol";
+import {Address} from "../../utils/Address.sol";
 
 /**
  * @dev This contract is used in conjunction with one or more instances of {BeaconProxy} to determine their
@@ -25,14 +25,20 @@ contract UpgradeableBeacon is IBeacon, Ownable {
      * @dev Sets the address of the initial implementation, and the deployer account as the owner who can upgrade the
      * beacon.
      */
-    constructor(address implementation_) {
+    constructor(address implementation_) payable {
         _setImplementation(implementation_);
     }
 
     /**
      * @dev Returns the current implementation address.
      */
-    function implementation() public view virtual override returns (address _implementation) {
+    function implementation()
+        public
+        view
+        virtual
+        override
+        returns (address _implementation)
+    {
         assembly {
             _implementation := sload(__implementation.slot)
         }

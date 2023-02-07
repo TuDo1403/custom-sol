@@ -26,7 +26,10 @@ abstract contract Signable is Context, EIP712, ISignable {
      * @param name_ Name of the typed data
      * @param version_ Version of the typed data
      */
-    constructor(string memory name_, string memory version_) payable EIP712(name_, version_) {}
+    constructor(
+        string memory name_,
+        string memory version_
+    ) payable EIP712(name_, version_) {}
 
     /**
      * @dev Verifies that the signer of the typed data is the given address
@@ -58,7 +61,8 @@ abstract contract Signable is Context, EIP712, ISignable {
         bytes32 r,
         bytes32 s
     ) internal view virtual {
-        if (_recoverSigner(structHash_, v, r, s) != verifier_) revert Signable__InvalidSignature();
+        if (_recoverSigner(structHash_, v, r, s) != verifier_)
+            revert Signable__InvalidSignature();
     }
 
     /**
@@ -113,7 +117,9 @@ abstract contract Signable is Context, EIP712, ISignable {
      * @param id_ ID to get the nonce for
      * @return nonce Nonce of the given address
      */
-    function _nonce(bytes32 id_) internal view virtual returns (uint256 nonce) {
+    function _nonce(
+        bytes32 id_
+    ) internal view virtual returns (uint256 nonce) {
         assembly {
             mstore(0x00, id_)
             mstore(0x20, _nonces.slot)

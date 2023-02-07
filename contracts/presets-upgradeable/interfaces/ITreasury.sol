@@ -27,7 +27,10 @@ interface ITreasury {
         bytes calldata signature_
     ) external;
 
-    function ownerOf(address token_, uint256 tokenId_) external view returns (bool);
+    function ownerOf(
+        address token_,
+        uint256 tokenId_
+    ) external view returns (bool);
 
     function nonces(address account_) external view returns (uint256);
 }

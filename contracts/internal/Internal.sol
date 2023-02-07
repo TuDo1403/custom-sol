@@ -9,12 +9,21 @@ abstract contract ModuleIdentity {
 
 error FACMI__Unauthorized();
 
-abstract contract FunctionalAccessControlForModuleIdentity is Context, ModuleIdentity {
+abstract contract FunctionalAccessControlForModuleIdentity is
+    Context,
+    ModuleIdentity
+{
     function _checkAccess(bytes4 interfaceId_) internal view override {
-        if (!_hasRole(_authorizedRole(interfaceId_), _msgSender())) revert FACMI__Unauthorized();
+        if (!_hasRole(_authorizedRole(interfaceId_), _msgSender()))
+            revert FACMI__Unauthorized();
     }
 
-    function _hasRole(bytes32 role_, address account_) internal view virtual returns (bool);
+    function _hasRole(
+        bytes32 role_,
+        address account_
+    ) internal view virtual returns (bool);
 
-    function _authorizedRole(bytes4 interfaceId_) internal pure virtual returns (bytes32);
+    function _authorizedRole(
+        bytes4 interfaceId_
+    ) internal pure virtual returns (bytes32);
 }

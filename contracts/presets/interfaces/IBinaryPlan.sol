@@ -20,9 +20,15 @@ interface IBinaryPlan {
 
     function initialize(address root_) external;
 
-    function getTree(address root) external view returns (address[] memory tree);
+    function getTree(
+        address root
+    ) external view returns (address[] memory tree);
 
-    function addReferrer(address referrer, address referree, bool isLeft) external;
+    function addReferrer(
+        address referrer,
+        address referree,
+        bool isLeft
+    ) external;
 
     function updateVolume(address account, uint96 volume) external;
 

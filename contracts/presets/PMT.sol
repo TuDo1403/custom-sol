@@ -1,7 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import {ERC20, ERC20Permit} from "../oz/token/ERC20/extensions/draft-ERC20Permit.sol";
+import {
+    ERC20,
+    ERC20Permit
+} from "../oz/token/ERC20/extensions/draft-ERC20Permit.sol";
 
 contract PMT is ERC20Permit {
     constructor(

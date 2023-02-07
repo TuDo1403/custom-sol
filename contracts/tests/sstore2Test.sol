@@ -33,7 +33,10 @@ contract SSTORE2Test {
         _dataPtr = abi.encode(data).write();
     }
 
-    function set(address[] calldata tokens, uint96[] calldata prices) external {
+    function set(
+        address[] calldata tokens,
+        uint96[] calldata prices
+    ) external {
         uint256 length = tokens.length;
         for (uint256 i; i < length; ) {
             tokenPrices[tokens[i]] = prices[i];

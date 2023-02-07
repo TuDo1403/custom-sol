@@ -1,11 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "./ProxyCheckerUpgradeable.sol";
+import {ProxyCheckerUpgradeable} from "./ProxyCheckerUpgradeable.sol";
 
-import "./interfaces/IMultiLevelReferralUpgradeable.sol";
+import {
+    IMultiLevelReferralUpgradeable
+} from "./interfaces/IMultiLevelReferralUpgradeable.sol";
 
-import "../libraries/FixedPointMathLib.sol";
+import {FixedPointMathLib} from "../libraries/FixedPointMathLib.sol";
 
 /**
  * @title MultiLevelReferralUpgradeable
@@ -52,14 +54,14 @@ abstract contract MultiLevelReferralUpgradeable is
      */
     function __MultiLevelReferral_init(
         uint64 activeTimestampThreshold_,
-        uint16[] memory ratePerTier_
+        uint16[] calldata ratePerTier_
     ) internal onlyInitializing {
         __MultiLevelReferral_init(activeTimestampThreshold_, ratePerTier_);
     }
 
     function __MultiLevelReferral_init_unchained(
         uint64 activeTimestampThreshold_,
-        uint16[] memory ratePerTier_
+        uint16[] calldata ratePerTier_
     ) internal onlyInitializing {
         // Check that the sum of the ratePerTier values is equal to 10,000
         uint256 length = ratePerTier_.length;
@@ -70,14 +72,17 @@ abstract contract MultiLevelReferralUpgradeable is
                 ++i;
             }
         }
-        if (sum != PERCENTAGE_FRACTION) revert MultiLevelReferral__InvalidArguments();
+        if (sum != PERCENTAGE_FRACTION)
+            revert MultiLevelReferral__InvalidArguments();
 
         ratePerTier = ratePerTier_;
         activeTimestampThreshold = activeTimestampThreshold_;
     }
 
     /// @inheritdoc IMultiLevelReferralUpgradeable
-    function referrerOf(address account_) external view returns (Referrer memory) {
+    function referrerOf(
+        address account_
+    ) external view returns (Referrer memory) {
         return __referrals[account_];
     }
 
@@ -92,14 +97,16 @@ abstract contract MultiLevelReferralUpgradeable is
      */
     function _addReferrer(address referrer_, address referree_) internal {
         if (_isProxy(referree_)) revert MultiLevelReferral__ProxyNotAllowed();
-        if (__referrals[referree_].addr != address(0)) revert MultiLevelReferral__ReferralExisted();
+        if (__referrals[referree_].addr != address(0))
+            revert MultiLevelReferral__ReferralExisted();
 
         __referrals[referree_].addr = referrer_;
 
         uint256 maxLevel = ratePerTier.length;
         uint256 level;
         for (uint256 i; i < maxLevel; ) {
-            if (referrer_ == referree_) revert MultiLevelReferral__CircularRefUnallowed();
+            if (referrer_ == referree_)
+                revert MultiLevelReferral__CircularRefUnallowed();
 
             unchecked {
                 level = ++__referrals[referrer_].level;
@@ -118,7 +125,10 @@ abstract contract MultiLevelReferralUpgradeable is
      * @param referree_ Address of the referree
      * @param amount_ Amount of reward that the referree received
      */
-    function _updateReferrerBonuses(address referree_, uint256 amount_) internal {
+    function _updateReferrerBonuses(
+        address referree_,
+        uint256 amount_
+    ) internal {
         uint16[] memory rates = ratePerTier;
         uint256 length = rates.length;
 
@@ -141,8 +151,12 @@ abstract contract MultiLevelReferralUpgradeable is
      * @param account_ Account to check for recent activity
      * @return True if the given account has been active recently, false otherwise
      */
-    function _isAccountActiveLately(address account_) internal view virtual returns (bool) {
-        return block.timestamp - lastActiveTimestamp[account_] <= activeTimestampThreshold;
+    function _isAccountActiveLately(
+        address account_
+    ) internal view virtual returns (bool) {
+        return
+            block.timestamp - lastActiveTimestamp[account_] <=
+            activeTimestampThreshold;
     }
 
     /**

@@ -4,7 +4,11 @@ pragma solidity ^0.8.17;
 interface ISignableUpgradeable {
     error Signable__InvalidSignature();
 
-    event NonceIncremented(address indexed operator, bytes32 indexed id, uint256 indexed value);
+    event NonceIncremented(
+        address indexed operator,
+        bytes32 indexed id,
+        uint256 indexed value
+    );
 
     /**
      * @dev Returns the domain separator for EIP712 v4

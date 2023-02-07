@@ -16,7 +16,10 @@ interface IERC721BurnableUpgradeable is IERC20Upgradeable {
  * tokens and those that they have an allowance for, in a way that can be
  * recognized off-chain (via event analysis).
  */
-abstract contract ERC20BurnableUpgradeable is ERC20Upgradeable, IERC721BurnableUpgradeable {
+abstract contract ERC20BurnableUpgradeable is
+    ERC20Upgradeable,
+    IERC721BurnableUpgradeable
+{
     function __ERC20Burnable_init() internal onlyInitializing {}
 
     function __ERC20Burnable_init_unchained() internal onlyInitializing {}

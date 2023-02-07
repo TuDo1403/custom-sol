@@ -3,8 +3,8 @@
 
 pragma solidity ^0.8.0;
 
-import "../Proxy.sol";
-import "./ERC1967Upgrade.sol";
+import {Proxy} from "../Proxy.sol";
+import {ERC1967Upgrade} from "./ERC1967Upgrade.sol";
 
 /**
  * @dev This contract implements an upgradeable proxy. It is upgradeable because calls are delegated to an
@@ -26,7 +26,13 @@ contract ERC1967Proxy is Proxy, ERC1967Upgrade {
     /**
      * @dev Returns the current implementation address.
      */
-    function _implementation() internal view virtual override returns (address impl) {
+    function _implementation()
+        internal
+        view
+        virtual
+        override
+        returns (address impl)
+    {
         return ERC1967Upgrade._getImplementation();
     }
 }

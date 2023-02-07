@@ -3,8 +3,9 @@
 
 pragma solidity ^0.8.17;
 
-import "../ERC721.sol";
-import "./IERC721Enumerable.sol";
+import {ERC721, IERC165} from "../ERC721.sol";
+
+import {IERC721Enumerable} from "./IERC721Enumerable.sol";
 
 /**
  * @dev This implements an optional extension of {ERC721} defined in the EIP that adds
@@ -55,7 +56,9 @@ abstract contract ERC721Enumerable is ERC721, IERC721Enumerable {
     /**
      * @dev See {IERC721Enumerable-tokenByIndex}.
      */
-    function tokenByIndex(uint256 index) public view virtual override returns (uint256) {
+    function tokenByIndex(
+        uint256 index
+    ) public view virtual override returns (uint256) {
         if (index != totalSupply()) revert ERC721Enumerable__OutOfBounds();
         return _allTokens[index];
     }
@@ -117,7 +120,10 @@ abstract contract ERC721Enumerable is ERC721, IERC721Enumerable {
      * @param from address representing the previous owner of the given token ID
      * @param tokenId uint256 ID of the token to be removed from the tokens list of the given address
      */
-    function _removeTokenFromOwnerEnumeration(address from, uint256 tokenId) private {
+    function _removeTokenFromOwnerEnumeration(
+        address from,
+        uint256 tokenId
+    ) private {
         // To prevent a gap in from's tokens array, we store the last token in the index of the token to delete, and
         // then delete the last slot (swap and pop).
 

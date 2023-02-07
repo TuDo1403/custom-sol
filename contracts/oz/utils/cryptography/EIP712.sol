@@ -3,7 +3,7 @@
 
 pragma solidity ^0.8.17;
 
-import "./ECDSA.sol";
+import {ECDSA} from "./ECDSA.sol";
 
 /**
  * @dev https://eips.ethereum.org/EIPS/eip-712[EIP 712] is a standard for hashing and signing of typed structured data.
@@ -50,7 +50,7 @@ abstract contract EIP712 {
      * NOTE: These parameters cannot be changed except through a xref:learn::upgrading-smart-contracts.adoc[smart
      * contract upgrade].
      */
-    constructor(string memory name, string memory version) {
+    constructor(string memory name, string memory version) payable {
         bytes32 hashedName = keccak256(bytes(name));
         bytes32 hashedVersion = keccak256(bytes(version));
         ///@dev 0x8b73c3c69bb8fe3d512ecc4cf759cc79239f7b179b0ffacaa9a75d522b39400f is equal to keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)")
@@ -73,7 +73,13 @@ abstract contract EIP712 {
     function _domainSeparatorV4() internal view returns (bytes32) {
         if (address(this) == _CACHED_THIS && block.chainid == _CACHED_CHAIN_ID)
             return _CACHED_DOMAIN_SEPARATOR;
-        else return _buildDomainSeparator(_TYPE_HASH, _HASHED_NAME, _HASHED_VERSION);
+        else
+            return
+                _buildDomainSeparator(
+                    _TYPE_HASH,
+                    _HASHED_NAME,
+                    _HASHED_VERSION
+                );
     }
 
     function _buildDomainSeparator(
@@ -106,7 +112,9 @@ abstract contract EIP712 {
      * address signer = ECDSA.recover(digest, signature);
      * ```
      */
-    function _hashTypedDataV4(bytes32 structHash) internal view virtual returns (bytes32) {
+    function _hashTypedDataV4(
+        bytes32 structHash
+    ) internal view virtual returns (bytes32) {
         return ECDSA.toTypedDataHash(_domainSeparatorV4(), structHash);
     }
 }

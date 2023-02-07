@@ -86,7 +86,9 @@ abstract contract ERC721PermitUpgradeable is
         }
     }
 
-    function nonces(uint256 tokenId_) external view override returns (uint256) {
+    function nonces(
+        uint256 tokenId_
+    ) external view override returns (uint256) {
         return _nonces[bytes32(tokenId_)];
     }
 

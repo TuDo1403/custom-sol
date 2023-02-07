@@ -84,7 +84,9 @@ abstract contract AccessControlUpgradeable is
     /**
      * @dev See {IERC165-supportsInterface}.
      */
-    function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
+    function supportsInterface(
+        bytes4 interfaceId
+    ) public view virtual override returns (bool) {
         return
             interfaceId == type(IAccessControlUpgradeable).interfaceId ||
             super.supportsInterface(interfaceId);
@@ -93,8 +95,12 @@ abstract contract AccessControlUpgradeable is
     /**
      * @dev Returns `true` if `account` has been granted `role`.
      */
-    function hasRole(bytes32 role, address account) public view virtual override returns (bool) {
-        return _roles[account].get({value_: uint256(role), shouldHash_: false});
+    function hasRole(
+        bytes32 role,
+        address account
+    ) public view virtual override returns (bool) {
+        return
+            _roles[account].get({value_: uint256(role), shouldHash_: false});
     }
 
     /**
@@ -117,7 +123,8 @@ abstract contract AccessControlUpgradeable is
      *  /^AccessControl: account (0x[0-9a-f]{40}) is missing role (0x[0-9a-f]{64})$/
      */
     function _checkRole(bytes32 role, address account) internal view virtual {
-        if (!hasRole(role, account)) revert AccessControl__RoleMissing(role, account);
+        if (!hasRole(role, account))
+            revert AccessControl__RoleMissing(role, account);
     }
 
     /**
@@ -126,7 +133,9 @@ abstract contract AccessControlUpgradeable is
      *
      * To change a role's admin, use {_setRoleAdmin}.
      */
-    function getRoleAdmin(bytes32 role) public view virtual override returns (bytes32) {
+    function getRoleAdmin(
+        bytes32 role
+    ) public view virtual override returns (bytes32) {
         return _adminRoles[role];
     }
 
@@ -183,7 +192,10 @@ abstract contract AccessControlUpgradeable is
      *
      * May emit a {RoleRevoked} event.
      */
-    function renounceRole(bytes32 role, address account) public virtual override {
+    function renounceRole(
+        bytes32 role,
+        address account
+    ) public virtual override {
         if (account != _msgSender()) revert AccessControl__Unauthorized();
         _revokeRole(role, account);
     }

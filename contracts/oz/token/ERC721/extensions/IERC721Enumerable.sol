@@ -3,7 +3,7 @@
 
 pragma solidity ^0.8.17;
 
-import "../IERC721.sol";
+import {IERC721} from "../IERC721.sol";
 
 /**
  * @title ERC-721 Non-Fungible Token Standard, optional enumeration extension
@@ -21,7 +21,10 @@ interface IERC721Enumerable is IERC721 {
      * @dev Returns a token ID owned by `owner` at a given `index` of its token list.
      * Use along with {balanceOf} to enumerate all of ``owner``'s tokens.
      */
-    function tokenOfOwnerByIndex(address owner, uint256 index) external view returns (uint256);
+    function tokenOfOwnerByIndex(
+        address owner,
+        uint256 index
+    ) external view returns (uint256);
 
     /**
      * @dev Returns a token ID at a given `index` of all the tokens stored by the contract.

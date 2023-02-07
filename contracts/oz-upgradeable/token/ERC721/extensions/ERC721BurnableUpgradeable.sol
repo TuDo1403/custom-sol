@@ -16,7 +16,10 @@ interface IERC721BurnableUpgradeable is IERC721Upgradeable {
  * @dev ERC721 Token that can be burned (destroyed).
  */
 
-abstract contract ERC721BurnableUpgradeable is ERC721Upgradeable, IERC721BurnableUpgradeable {
+abstract contract ERC721BurnableUpgradeable is
+    ERC721Upgradeable,
+    IERC721BurnableUpgradeable
+{
     function __ERC721Burnable_init() internal onlyInitializing {}
 
     function __ERC721Burnable_init_unchained() internal onlyInitializing {}

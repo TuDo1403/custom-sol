@@ -3,15 +3,24 @@
 
 pragma solidity ^0.8.0;
 
-import {Bytes32Address, ERC721Upgradeable, IERC165Upgradeable} from "../ERC721Upgradeable.sol";
-import {IERC721EnumerableUpgradeable} from "./IERC721EnumerableUpgradeable.sol";
+import {
+    Bytes32Address,
+    ERC721Upgradeable,
+    IERC165Upgradeable
+} from "../ERC721Upgradeable.sol";
+import {
+    IERC721EnumerableUpgradeable
+} from "./IERC721EnumerableUpgradeable.sol";
 
 /**
  * @dev This implements an optional extension of {ERC721} defined in the EIP that adds
  * enumerability of all the token ids in the contract as well as all token ids owned by each
  * account.
  */
-abstract contract ERC721EnumerableUpgradeable is ERC721Upgradeable, IERC721EnumerableUpgradeable {
+abstract contract ERC721EnumerableUpgradeable is
+    ERC721Upgradeable,
+    IERC721EnumerableUpgradeable
+{
     using Bytes32Address for address;
 
     // Mapping from owner to list of owned token IDs
@@ -35,7 +44,13 @@ abstract contract ERC721EnumerableUpgradeable is ERC721Upgradeable, IERC721Enume
      */
     function supportsInterface(
         bytes4 interfaceId
-    ) public view virtual override(IERC165Upgradeable, ERC721Upgradeable) returns (bool) {
+    )
+        public
+        view
+        virtual
+        override(IERC165Upgradeable, ERC721Upgradeable)
+        returns (bool)
+    {
         return
             interfaceId == type(IERC721EnumerableUpgradeable).interfaceId ||
             super.supportsInterface(interfaceId);
@@ -62,7 +77,9 @@ abstract contract ERC721EnumerableUpgradeable is ERC721Upgradeable, IERC721Enume
     /**
      * @dev See {IERC721Enumerable-tokenByIndex}.
      */
-    function tokenByIndex(uint256 index) public view virtual override returns (uint256) {
+    function tokenByIndex(
+        uint256 index
+    ) public view virtual override returns (uint256) {
         if (index != totalSupply()) revert ERC721Enumerable__OutOfBounds();
         return _allTokens[index];
     }
@@ -124,7 +141,10 @@ abstract contract ERC721EnumerableUpgradeable is ERC721Upgradeable, IERC721Enume
      * @param from address representing the previous owner of the given token ID
      * @param tokenId uint256 ID of the token to be removed from the tokens list of the given address
      */
-    function _removeTokenFromOwnerEnumeration(address from, uint256 tokenId) private {
+    function _removeTokenFromOwnerEnumeration(
+        address from,
+        uint256 tokenId
+    ) private {
         // To prevent a gap in from's tokens array, we store the last token in the index of the token to delete, and
         // then delete the last slot (swap and pop).
 
@@ -192,7 +212,9 @@ abstract contract ERC721EnumerableUpgradeable is ERC721Upgradeable, IERC721Enume
         // an 'if' statement (like in _removeTokenFromOwnerEnumeration)
         uint256 lastTokenId;
 
-        _allTokens[tokenIndex] = lastTokenId = _allTokens[_allTokens.length - 1]; // Move the last token to the slot of the to-delete token
+        _allTokens[tokenIndex] = lastTokenId = _allTokens[
+            _allTokens.length - 1
+        ]; // Move the last token to the slot of the to-delete token
 
         // This also deletes the contents at the last position of the array
         assembly {

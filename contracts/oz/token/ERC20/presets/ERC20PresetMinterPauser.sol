@@ -3,12 +3,12 @@
 
 pragma solidity ^0.8.17;
 
-import "../ERC20.sol";
-import "../extensions/ERC20Burnable.sol";
-import "../extensions/ERC20Pausable.sol";
-import "../../../access/AccessControlEnumerable.sol";
-
-//import "../../../utils/Context.sol";
+import {ERC20} from "../ERC20.sol";
+import {ERC20Burnable} from "../extensions/ERC20Burnable.sol";
+import {ERC20Pausable} from "../extensions/ERC20Pausable.sol";
+import {
+    AccessControlEnumerable
+} from "../../../access/AccessControlEnumerable.sol";
 
 /**
  * @dev {ERC20} token, including:
@@ -26,7 +26,11 @@ import "../../../access/AccessControlEnumerable.sol";
  *
  * _Deprecated in favor of https://wizard.openzeppelin.com/[Contracts Wizard]._
  */
-abstract contract ERC20PresetMinterPauser is AccessControlEnumerable, ERC20Burnable, ERC20Pausable {
+abstract contract ERC20PresetMinterPauser is
+    AccessControlEnumerable,
+    ERC20Burnable,
+    ERC20Pausable
+{
     ///@dev value is equal to keccak256("MINTER_ROLE")
     bytes32 public constant MINTER_ROLE =
         0x9f2df0fed2c77648de5860a4cc508cd0818c85b8b8a1ab4ceeef8d981c8956a6;
@@ -61,7 +65,10 @@ abstract contract ERC20PresetMinterPauser is AccessControlEnumerable, ERC20Burna
      *
      * - the caller must have the `MINTER_ROLE`.
      */
-    function mint(address to, uint256 amount) public virtual onlyRole(MINTER_ROLE) {
+    function mint(
+        address to,
+        uint256 amount
+    ) public virtual onlyRole(MINTER_ROLE) {
         _mint(to, amount);
     }
 

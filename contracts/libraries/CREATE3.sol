@@ -34,7 +34,8 @@ library Create3 {
     // 0x60       |  0x6018               | PUSH1 18         | 24 8                   //
     // 0xf3       |  0xf3                 | RETURN           |                        //
     //--------------------------------------------------------------------------------//
-    uint256 internal constant PROXY_BYTECODE = 0x67_36_3d_3d_37_36_3d_34_f0_3d_52_60_08_60_18_f3;
+    uint256 internal constant PROXY_BYTECODE =
+        0x67_36_3d_3d_37_36_3d_34_f0_3d_52_60_08_60_18_f3;
 
     /// @dev value is equal to keccak256(PROXY_BYTECODE)
     bytes32 internal constant PROXY_BYTECODE_HASH =
@@ -98,7 +99,9 @@ library Create3 {
         }
     }
 
-    function getDeployed(bytes32 salt) internal view returns (address deployed) {
+    function getDeployed(
+        bytes32 salt
+    ) internal view returns (address deployed) {
         assembly {
             // Cache the free memory pointer.
             let m := mload(0x40)

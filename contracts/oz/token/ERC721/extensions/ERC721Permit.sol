@@ -1,16 +1,14 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 pragma solidity ^0.8.10;
 
-import "../ERC721.sol";
-import "./IERC721Permit.sol";
+import {ERC721} from "../ERC721.sol";
+import {Signable} from "../../../../internal/Signable.sol";
 
-import "../../../../internal/Signable.sol";
+import {IERC721Permit} from "./IERC721Permit.sol";
 
 /// @title ERC721 with permit
 /// @notice Nonfungible tokens that support an approve via signature, i.e. permit
 abstract contract ERC721Permit is ERC721, IERC721Permit, Signable {
-    using Bytes32Address for address;
-
     constructor(
         string memory name_,
         string memory symbol_
@@ -19,7 +17,12 @@ abstract contract ERC721Permit is ERC721, IERC721Permit, Signable {
     /// @dev Gets the current nonce for a token ID and then increments it, returning the original value
 
     /// @inheritdoc IERC721Permit
-    function DOMAIN_SEPARATOR() public view override(IERC721Permit, Signable) returns (bytes32) {
+    function DOMAIN_SEPARATOR()
+        public
+        view
+        override(Signable, IERC721Permit)
+        returns (bytes32)
+    {
         return _domainSeparatorV4();
     }
 
@@ -35,6 +38,7 @@ abstract contract ERC721Permit is ERC721, IERC721Permit, Signable {
         bytes calldata signature_
     ) external override {
         if (block.timestamp > deadline_) revert ERC721Permit__Expired();
+
         address owner = ownerOf(tokenId_);
         if (spender_ == owner) revert ERC721Permit__SelfApproving();
 
@@ -68,7 +72,9 @@ abstract contract ERC721Permit is ERC721, IERC721Permit, Signable {
         }
     }
 
-    function nonces(uint256 tokenId_) external view override returns (uint256) {
+    function nonces(
+        uint256 tokenId_
+    ) external view override returns (uint256) {
         return _nonces[bytes32(tokenId_)];
     }
 }

@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import {ContextUpgradeable} from "../oz-upgradeable/utils/ContextUpgradeable.sol";
+import {
+    ContextUpgradeable
+} from "../oz-upgradeable/utils/ContextUpgradeable.sol";
 import {
     ECDSAUpgradeable,
     EIP712Upgradeable
@@ -77,7 +79,8 @@ abstract contract SignableUpgradeable is
         bytes32 r,
         bytes32 s
     ) internal view virtual {
-        if (_recoverSigner(structHash_, v, r, s) != verifier_) revert Signable__InvalidSignature();
+        if (_recoverSigner(structHash_, v, r, s) != verifier_)
+            revert Signable__InvalidSignature();
     }
 
     /**
@@ -132,7 +135,9 @@ abstract contract SignableUpgradeable is
      * @param id_ ID to get the nonce for
      * @return nonce Nonce of the given address
      */
-    function _nonce(bytes32 id_) internal view virtual returns (uint256 nonce) {
+    function _nonce(
+        bytes32 id_
+    ) internal view virtual returns (uint256 nonce) {
         assembly {
             mstore(0x00, id_)
             mstore(0x20, _nonces.slot)

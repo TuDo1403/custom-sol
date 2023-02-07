@@ -28,5 +28,7 @@ interface ICloner {
      * @param implement_ The implementation address
      * @return clones The array of cloned contract instances
      */
-    function allClonesOf(address implement_) external view returns (address[] memory clones);
+    function allClonesOf(
+        address implement_
+    ) external view returns (address[] memory clones);
 }

@@ -27,7 +27,10 @@ abstract contract OwnableUpgradeable is ContextUpgradeable {
 
     bytes32 private _owner;
 
-    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
+    event OwnershipTransferred(
+        address indexed previousOwner,
+        address indexed newOwner
+    );
 
     /**
      * @dev Initializes the contract setting the deployer as the initial owner.
@@ -59,7 +62,8 @@ abstract contract OwnableUpgradeable is ContextUpgradeable {
      * @dev Throws if the sender is not the owner.
      */
     function _checkOwner(address sender_) internal view virtual {
-        if (_owner != sender_.fillLast12Bytes()) revert Ownable__Unauthorized();
+        if (_owner != sender_.fillLast12Bytes())
+            revert Ownable__Unauthorized();
     }
 
     /**

@@ -5,7 +5,9 @@ pragma solidity ^0.8.0;
 
 import {ERC721Upgradeable} from "../ERC721Upgradeable.sol";
 import {ERC2981Upgradeable} from "../../common/ERC2981Upgradeable.sol";
-import {ERC165Upgradeable} from "../../../utils/introspection/ERC165Upgradeable.sol";
+import {
+    ERC165Upgradeable
+} from "../../../utils/introspection/ERC165Upgradeable.sol";
 
 /**
  * @dev Extension of ERC721 with the ERC2981 NFT Royalty Standard, a standardized way to retrieve royalty payment
@@ -20,7 +22,10 @@ import {ERC165Upgradeable} from "../../../utils/introspection/ERC165Upgradeable.
  *
  * _Available since v4.5._
  */
-abstract contract ERC721RoyaltyUpgradeable is ERC721Upgradeable, ERC2981Upgradeable {
+abstract contract ERC721RoyaltyUpgradeable is
+    ERC721Upgradeable,
+    ERC2981Upgradeable
+{
     function __ERC721Royalty_init() internal onlyInitializing {}
 
     function __ERC721Royalty_init_unchained() internal onlyInitializing {}
@@ -30,7 +35,13 @@ abstract contract ERC721RoyaltyUpgradeable is ERC721Upgradeable, ERC2981Upgradea
      */
     function supportsInterface(
         bytes4 interfaceId
-    ) public view virtual override(ERC721Upgradeable, ERC2981Upgradeable) returns (bool) {
+    )
+        public
+        view
+        virtual
+        override(ERC721Upgradeable, ERC2981Upgradeable)
+        returns (bool)
+    {
         return super.supportsInterface(interfaceId);
     }
 

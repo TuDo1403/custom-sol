@@ -3,11 +3,13 @@
 
 pragma solidity ^0.8.17;
 
-import "../ERC721.sol";
-import "../extensions/ERC721Burnable.sol";
-import "../extensions/ERC721Pausable.sol";
-import "../extensions/ERC721Enumerable.sol";
-import "../../../access/AccessControlEnumerable.sol";
+import {ERC721, IERC165} from "../ERC721.sol";
+import {ERC721Burnable} from "../extensions/ERC721Burnable.sol";
+import {ERC721Pausable} from "../extensions/ERC721Pausable.sol";
+import {ERC721Enumerable} from "../extensions/ERC721Enumerable.sol";
+import {
+    AccessControlEnumerable
+} from "../../../access/AccessControlEnumerable.sol";
 
 /**
  * @dev {ERC721} token, including:
@@ -28,9 +30,9 @@ import "../../../access/AccessControlEnumerable.sol";
  */
 abstract contract ERC721PresetMinterPauserAutoId is
     AccessControlEnumerable,
+    ERC721Enumerable,
     ERC721Pausable,
-    ERC721Burnable,
-    ERC721Enumerable
+    ERC721Burnable
 {
     ///@dev value is equal to keccak256("MINTER_ROLE")
     bytes32 public constant MINTER_ROLE =
@@ -41,7 +43,7 @@ abstract contract ERC721PresetMinterPauserAutoId is
 
     uint256 internal _tokenIdTracker;
 
-    string private _baseTokenURI;
+    string private __baseTokenURI;
 
     /**
      * @dev Grants `DEFAULT_ADMIN_ROLE`, `MINTER_ROLE` and `PAUSER_ROLE` to the
@@ -51,11 +53,11 @@ abstract contract ERC721PresetMinterPauserAutoId is
      * See {ERC721-tokenURI}.
      */
     constructor(
-        string memory name,
-        string memory symbol,
-        string memory baseTokenURI
-    ) payable ERC721(name, symbol) {
-        _baseTokenURI = baseTokenURI;
+        string memory name_,
+        string memory symbol_,
+        string memory baseTokenURI_
+    ) payable ERC721Pausable() ERC721(name_, symbol_) {
+        __baseTokenURI = baseTokenURI_;
 
         address sender = _msgSender();
         _grantRole(MINTER_ROLE, sender);
@@ -63,8 +65,14 @@ abstract contract ERC721PresetMinterPauserAutoId is
         _grantRole(DEFAULT_ADMIN_ROLE, sender);
     }
 
-    function _baseURI() internal view virtual override returns (string memory) {
-        return _baseTokenURI;
+    function _baseURI()
+        internal
+        view
+        virtual
+        override
+        returns (string memory)
+    {
+        return __baseTokenURI;
     }
 
     /**
@@ -78,9 +86,7 @@ abstract contract ERC721PresetMinterPauserAutoId is
      *
      * - the caller must have the `MINTER_ROLE`.
      */
-    function mint(address to) public virtual {
-        _checkRole(MINTER_ROLE, _msgSender());
-
+    function mint(address to) public virtual onlyRole(MINTER_ROLE) {
         // We cannot just use balanceOf to create the new tokenId because tokens
         // can be burned (destroyed), so we need a separate counter.
         unchecked {
@@ -97,8 +103,7 @@ abstract contract ERC721PresetMinterPauserAutoId is
      *
      * - the caller must have the `PAUSER_ROLE`.
      */
-    function pause() public virtual {
-        _checkRole(PAUSER_ROLE, _msgSender());
+    function pause() public virtual onlyRole(PAUSER_ROLE) {
         _pause();
     }
 
@@ -111,8 +116,7 @@ abstract contract ERC721PresetMinterPauserAutoId is
      *
      * - the caller must have the `PAUSER_ROLE`.
      */
-    function unpause() public virtual {
-        _checkRole(PAUSER_ROLE, _msgSender());
+    function unpause() public virtual onlyRole(PAUSER_ROLE) {
         _unpause();
     }
 
@@ -133,7 +137,7 @@ abstract contract ERC721PresetMinterPauserAutoId is
         public
         view
         virtual
-        override(AccessControlEnumerable, ERC721, ERC721Enumerable)
+        override(IERC165, ERC721, ERC721Enumerable, AccessControlEnumerable)
         returns (bool)
     {
         return super.supportsInterface(interfaceId);

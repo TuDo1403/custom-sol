@@ -4,8 +4,12 @@
 pragma solidity ^0.8.17;
 
 import {ERC20Upgradeable} from "../ERC20Upgradeable.sol";
-import {ERC20BurnableUpgradeable} from "../extensions/ERC20BurnableUpgradeable.sol";
-import {ERC20PausableUpgradeable} from "../extensions/ERC20PausableUpgradeable.sol";
+import {
+    ERC20BurnableUpgradeable
+} from "../extensions/ERC20BurnableUpgradeable.sol";
+import {
+    ERC20PausableUpgradeable
+} from "../extensions/ERC20PausableUpgradeable.sol";
 import {
     AccessControlEnumerableUpgradeable
 } from "../../../access/AccessControlEnumerableUpgradeable.sol";
@@ -54,7 +58,10 @@ abstract contract ERC20PresetMinterPauserUpgradeable is
         __ERC20PresetMinterPauser_init_unchained();
     }
 
-    function __ERC20PresetMinterPauser_init_unchained() internal onlyInitializing {
+    function __ERC20PresetMinterPauser_init_unchained()
+        internal
+        onlyInitializing
+    {
         address sender = _msgSender();
 
         _grantRole(MINTER_ROLE, sender);

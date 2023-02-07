@@ -20,22 +20,34 @@ abstract contract ERC721URIStorageUpgradeable is ERC721Upgradeable {
     // Optional mapping for token URIs
     mapping(uint256 => bytes32) private _tokenURIs;
 
-    function __ERC721URIStorage_init(string calldata baseURI_) internal onlyInitializing {
+    function __ERC721URIStorage_init(
+        string calldata baseURI_
+    ) internal onlyInitializing {
         __ERC721URIStorage_init_unchained(baseURI_);
     }
 
-    function __ERC721URIStorage_init_unchained(string calldata baseURI_) internal onlyInitializing {
+    function __ERC721URIStorage_init_unchained(
+        string calldata baseURI_
+    ) internal onlyInitializing {
         _baseTokenURIPtr = bytes(baseURI_).write();
     }
 
-    function _baseURI() internal view virtual override returns (string memory) {
+    function _baseURI()
+        internal
+        view
+        virtual
+        override
+        returns (string memory)
+    {
         return string(_baseTokenURIPtr.read());
     }
 
     /**
      * @dev See {IERC721Metadata-tokenURI}.
      */
-    function tokenURI(uint256 tokenId) public view virtual override returns (string memory) {
+    function tokenURI(
+        uint256 tokenId
+    ) public view virtual override returns (string memory) {
         ownerOf(tokenId);
 
         bytes memory _tokenURI = _tokenURIs[tokenId].read();
@@ -44,7 +56,8 @@ abstract contract ERC721URIStorageUpgradeable is ERC721Upgradeable {
         if (_baseTokenURI.length == 0) return string(_tokenURI);
 
         // If both are set, concatenate the baseURI and tokenURI (via abi.encodePacked).
-        if (_tokenURI.length != 0) return string(abi.encodePacked(_baseTokenURI, _tokenURI));
+        if (_tokenURI.length != 0)
+            return string(abi.encodePacked(_baseTokenURI, _tokenURI));
 
         return tokenURI(tokenId);
     }
@@ -56,7 +69,10 @@ abstract contract ERC721URIStorageUpgradeable is ERC721Upgradeable {
      *
      * - `tokenId` must exist.
      */
-    function _setTokenURI(uint256 tokenId, string calldata _tokenURI) internal virtual {
+    function _setTokenURI(
+        uint256 tokenId,
+        string calldata _tokenURI
+    ) internal virtual {
         ownerOf(tokenId);
         _tokenURIs[tokenId] = bytes(_tokenURI).write();
     }
@@ -69,7 +85,8 @@ abstract contract ERC721URIStorageUpgradeable is ERC721Upgradeable {
     function _burn(uint256 tokenId) internal virtual override {
         super._burn(tokenId);
 
-        if ((_tokenURIs[tokenId].read()).length != 0) delete _tokenURIs[tokenId];
+        if ((_tokenURIs[tokenId].read()).length != 0)
+            delete _tokenURIs[tokenId];
     }
 
     /**

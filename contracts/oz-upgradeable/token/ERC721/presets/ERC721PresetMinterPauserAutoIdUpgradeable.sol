@@ -7,7 +7,9 @@ import {
     ERC721Upgradeable,
     ERC721BurnableUpgradeable
 } from "../extensions/ERC721BurnableUpgradeable.sol";
-import {ERC721PausableUpgradeable} from "../extensions/ERC721PausableUpgradeable.sol";
+import {
+    ERC721PausableUpgradeable
+} from "../extensions/ERC721PausableUpgradeable.sol";
 import {
     IERC165Upgradeable,
     ERC721EnumerableUpgradeable
@@ -79,7 +81,13 @@ abstract contract ERC721PresetMinterPauserAutoIdUpgradeable is
         _grantRole(DEFAULT_ADMIN_ROLE, sender);
     }
 
-    function _baseURI() internal view virtual override returns (string memory) {
+    function _baseURI()
+        internal
+        view
+        virtual
+        override
+        returns (string memory)
+    {
         return _baseTokenURI;
     }
 
@@ -137,7 +145,11 @@ abstract contract ERC721PresetMinterPauserAutoIdUpgradeable is
     )
         internal
         virtual
-        override(ERC721Upgradeable, ERC721PausableUpgradeable, ERC721EnumerableUpgradeable)
+        override(
+            ERC721Upgradeable,
+            ERC721PausableUpgradeable,
+            ERC721EnumerableUpgradeable
+        )
     {
         super._beforeTokenTransfer(from, to, tokenId);
     }

@@ -3,15 +3,25 @@ pragma solidity ^0.8.17;
 
 import {ITreasury, Treasury} from "./Treasury.sol";
 
-import {UUPSUpgradeable} from "../oz-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import {PausableUpgradeable} from "../oz-upgradeable/security/PausableUpgradeable.sol";
+import {
+    UUPSUpgradeable
+} from "../oz-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import {
+    PausableUpgradeable
+} from "../oz-upgradeable/security/PausableUpgradeable.sol";
 import {
     AccessControlEnumerableUpgradeable
 } from "../oz-upgradeable/access/AccessControlEnumerableUpgradeable.sol";
 
-import {ProxyCheckerUpgradeable} from "../internal-upgradeable/ProxyCheckerUpgradeable.sol";
-import {FundForwarderUpgradeable} from "../internal-upgradeable/FundForwarderUpgradeable.sol";
-import {BlacklistableUpgradeable} from "../internal-upgradeable/BlacklistableUpgradeable.sol";
+import {
+    ProxyCheckerUpgradeable
+} from "../internal-upgradeable/ProxyCheckerUpgradeable.sol";
+import {
+    FundForwarderUpgradeable
+} from "../internal-upgradeable/FundForwarderUpgradeable.sol";
+import {
+    BlacklistableUpgradeable
+} from "../internal-upgradeable/BlacklistableUpgradeable.sol";
 
 import {IAuthority} from "./interfaces/IAuthority.sol";
 
@@ -30,11 +40,16 @@ abstract contract AuthorityUpgradeable is
     bytes32 public constant VERSION =
         0x095dd5e04e0f3f5bce98e4ee904d9f7209827187c4201f036596b2f7fdd602e7;
 
-    function changeVault(address vault_) external override onlyRole(DEFAULT_ADMIN_ROLE) {
+    function changeVault(
+        address vault_
+    ) external override onlyRole(DEFAULT_ADMIN_ROLE) {
         _changeVault(vault_);
     }
 
-    function setRoleAdmin(bytes32 role_, bytes32 adminRole_) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    function setRoleAdmin(
+        bytes32 role_,
+        bytes32 adminRole_
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         _setRoleAdmin(role_, adminRole_);
     }
 
@@ -59,7 +74,12 @@ abstract contract AuthorityUpgradeable is
         _unpause();
     }
 
-    function paused() public view override(IAuthority, PausableUpgradeable) returns (bool) {
+    function paused()
+        public
+        view
+        override(IAuthority, PausableUpgradeable)
+        returns (bool)
+    {
         return PausableUpgradeable.paused();
     }
 

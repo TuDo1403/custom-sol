@@ -26,7 +26,9 @@ library StringLib {
         }
     }
 
-    function toString(uint256 value) internal pure returns (string memory str) {
+    function toString(
+        uint256 value
+    ) internal pure returns (string memory str) {
         /// @solidity memory-safe-assembly
         assembly {
             // The maximum value of a uint256 contains 78 digits (1 byte per digit), but we allocate 160 bytes

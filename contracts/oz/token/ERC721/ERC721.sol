@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity >=0.8.10;
 
-import "../../utils/Context.sol";
-import "../../utils/introspection/ERC165.sol";
-import "../../utils/structs/BitMaps.sol";
-import "./IERC721.sol";
-import "./extensions/IERC721Metadata.sol";
+import {Context} from "../../utils/Context.sol";
+import {ERC165, IERC165} from "../../utils/introspection/ERC165.sol";
+import {BitMaps} from "../../utils/structs/BitMaps.sol";
+import {IERC721} from "./IERC721.sol";
+import {IERC721Metadata} from "./extensions/IERC721Metadata.sol";
 
-import "../../../libraries/Bytes32Address.sol";
+import {Bytes32Address} from "../../../libraries/Bytes32Address.sol";
 
 /// @notice Modern, minimalist, and gas efficient ERC-721 implementation.
 /// @author Solmate (https://github.com/transmissions11/solmate/blob/main/src/tokens/ERC721.sol)
@@ -33,7 +33,9 @@ abstract contract ERC721 is Context, ERC165, IERC721, IERC721Metadata {
     mapping(uint256 => bytes32) internal _ownerOf;
     mapping(address => uint256) internal _balanceOf;
 
-    function ownerOf(uint256 id) public view virtual override returns (address owner) {
+    function ownerOf(
+        uint256 id
+    ) public view virtual override returns (address owner) {
         assembly {
             mstore(0, id)
             mstore(32, _ownerOf.slot)
@@ -43,7 +45,9 @@ abstract contract ERC721 is Context, ERC165, IERC721, IERC721Metadata {
         if (owner == address(0)) revert ERC721__NotMinted();
     }
 
-    function balanceOf(address owner) public view virtual override returns (uint256 balance_) {
+    function balanceOf(
+        address owner
+    ) public view virtual override returns (uint256 balance_) {
         if (owner == address(0)) revert ERC721__NonZeroAddress();
 
         assembly {
@@ -66,7 +70,8 @@ abstract contract ERC721 is Context, ERC165, IERC721, IERC721Metadata {
     //////////////////////////////////////////////////////////////*/
 
     constructor(string memory _name, string memory _symbol) payable {
-        if (bytes(_name).length > 32 || bytes(_symbol).length > 32) revert ERC721__StringTooLong();
+        if (bytes(_name).length > 32 || bytes(_symbol).length > 32)
+            revert ERC721__StringTooLong();
 
         name = _name;
         symbol = _symbol;
@@ -85,8 +90,10 @@ abstract contract ERC721 is Context, ERC165, IERC721, IERC721Metadata {
         }
 
         address sender = _msgSender();
-        if (sender != owner && !_isApprovedForAll[owner].get(sender.fillLast96Bits()))
-            revert ERC721__Unauthorized();
+        if (
+            sender != owner &&
+            !_isApprovedForAll[owner].get(sender.fillLast96Bits())
+        ) revert ERC721__Unauthorized();
 
         assembly {
             //mstore(0, id)
@@ -97,7 +104,10 @@ abstract contract ERC721 is Context, ERC165, IERC721, IERC721Metadata {
         emit Approval(owner, spender, id);
     }
 
-    function setApprovalForAll(address operator, bool approved) public virtual {
+    function setApprovalForAll(
+        address operator,
+        bool approved
+    ) public virtual {
         address sender = _msgSender();
 
         _isApprovedForAll[sender].setTo(operator.fillLast96Bits(), approved);
@@ -109,7 +119,10 @@ abstract contract ERC721 is Context, ERC165, IERC721, IERC721Metadata {
         return _getApproved[tokenId].fromFirst20Bytes();
     }
 
-    function isApprovedForAll(address owner, address operator) external view returns (bool) {
+    function isApprovedForAll(
+        address owner,
+        address operator
+    ) external view returns (bool) {
         return _isApprovedForAll[owner].get(operator.fillLast96Bits());
     }
 
@@ -119,15 +132,28 @@ abstract contract ERC721 is Context, ERC165, IERC721, IERC721Metadata {
     ) internal view virtual returns (bool) {
         address owner = ownerOf(tokenId);
         return
-            (spender == owner || _getApproved[tokenId] == spender.fillLast12Bytes()) ||
+            (spender == owner ||
+                _getApproved[tokenId] == spender.fillLast12Bytes()) ||
             _isApprovedForAll[owner].get(spender.fillLast96Bits());
     }
 
-    function _beforeTokenTransfer(address from, address to, uint256 tokenId) internal virtual {}
+    function _beforeTokenTransfer(
+        address from,
+        address to,
+        uint256 tokenId
+    ) internal virtual {}
 
-    function _afterTokenTransfer(address from, address to, uint256 tokenId) internal virtual {}
+    function _afterTokenTransfer(
+        address from,
+        address to,
+        uint256 tokenId
+    ) internal virtual {}
 
-    function transferFrom(address from, address to, uint256 id) public virtual {
+    function transferFrom(
+        address from,
+        address to,
+        uint256 id
+    ) public virtual {
         if (to == address(0)) revert ERC721__InvalidRecipient();
 
         bytes32 ownerOfKey;
@@ -166,12 +192,21 @@ abstract contract ERC721 is Context, ERC165, IERC721, IERC721Metadata {
         _afterTokenTransfer(from, to, id);
     }
 
-    function safeTransferFrom(address from, address to, uint256 id) public virtual {
+    function safeTransferFrom(
+        address from,
+        address to,
+        uint256 id
+    ) public virtual {
         transferFrom(from, to, id);
 
         if (
             to.code.length != 0 &&
-            ERC721TokenReceiver(to).onERC721Received(_msgSender(), from, id, "") !=
+            ERC721TokenReceiver(to).onERC721Received(
+                _msgSender(),
+                from,
+                id,
+                ""
+            ) !=
             ERC721TokenReceiver.onERC721Received.selector
         ) revert ERC721__UnsafeRecipient();
     }
@@ -186,12 +221,21 @@ abstract contract ERC721 is Context, ERC165, IERC721, IERC721Metadata {
 
         if (
             to.code.length != 0 &&
-            ERC721TokenReceiver(to).onERC721Received(_msgSender(), from, id, data) !=
+            ERC721TokenReceiver(to).onERC721Received(
+                _msgSender(),
+                from,
+                id,
+                data
+            ) !=
             ERC721TokenReceiver.onERC721Received.selector
         ) revert ERC721__UnsafeRecipient();
     }
 
-    function _transfer(address from, address to, uint256 tokenId) internal virtual {
+    function _transfer(
+        address from,
+        address to,
+        uint256 tokenId
+    ) internal virtual {
         if (to == address(0)) revert ERC721__InvalidRecipient();
 
         address owner;
@@ -304,17 +348,31 @@ abstract contract ERC721 is Context, ERC165, IERC721, IERC721Metadata {
 
         if (
             to.code.length != 0 &&
-            ERC721TokenReceiver(to).onERC721Received(_msgSender(), address(0), id, "") !=
+            ERC721TokenReceiver(to).onERC721Received(
+                _msgSender(),
+                address(0),
+                id,
+                ""
+            ) !=
             ERC721TokenReceiver.onERC721Received.selector
         ) revert ERC721__UnsafeRecipient();
     }
 
-    function _safeMint(address to, uint256 id, bytes memory data) internal virtual {
+    function _safeMint(
+        address to,
+        uint256 id,
+        bytes memory data
+    ) internal virtual {
         _mint(to, id);
 
         if (
             to.code.length != 0 &&
-            ERC721TokenReceiver(to).onERC721Received(_msgSender(), address(0), id, data) !=
+            ERC721TokenReceiver(to).onERC721Received(
+                _msgSender(),
+                address(0),
+                id,
+                data
+            ) !=
             ERC721TokenReceiver.onERC721Received.selector
         ) revert ERC721__UnsafeRecipient();
     }

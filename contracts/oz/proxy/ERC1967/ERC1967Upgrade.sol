@@ -3,10 +3,10 @@
 
 pragma solidity ^0.8.2;
 
-import "../beacon/IBeacon.sol";
-import "../../interfaces/draft-IERC1822.sol";
-import "../../utils/Address.sol";
-import "../../utils/StorageSlot.sol";
+import {IBeacon} from "../beacon/IBeacon.sol";
+import {IERC1822Proxiable} from "../../interfaces/draft-IERC1822.sol";
+import {Address} from "../../utils/Address.sol";
+import {StorageSlot} from "../../utils/StorageSlot.sol";
 
 error ERC1967__ZeroAddress();
 error ERC1967__NewBeaconIsNotAContract();
@@ -25,7 +25,7 @@ error ERC1967__BeaconImplementationIsNotAContract();
  */
 abstract contract ERC1967Upgrade {
     // This is the keccak-256 hash of "eip1967.proxy.rollback" subtracted by 1
-    bytes32 private constant _ROLLBACK_SLOT =
+    bytes32 private constant __ROLLBACK_SLOT =
         0x4910fdfa16fed3260ed0e7147f7cc6da11a60208b5b9406d12a635614ffd9143;
 
     /**
@@ -54,7 +54,9 @@ abstract contract ERC1967Upgrade {
     function _setImplementation(address newImplementation) private {
         if (!Address.isContract(newImplementation))
             revert ERC1967__NewImplementationIsNotAContract();
-        StorageSlot.getAddressSlot(_IMPLEMENTATION_SLOT).value = newImplementation;
+        StorageSlot
+            .getAddressSlot(_IMPLEMENTATION_SLOT)
+            .value = newImplementation;
     }
 
     /**
@@ -78,7 +80,8 @@ abstract contract ERC1967Upgrade {
         bool forceCall
     ) internal {
         _upgradeTo(newImplementation);
-        if (forceCall || data.length != 0) Address.functionDelegateCall(newImplementation, data);
+        if (forceCall || data.length != 0)
+            Address.functionDelegateCall(newImplementation, data);
     }
 
     /**
@@ -94,11 +97,14 @@ abstract contract ERC1967Upgrade {
         // Upgrades from old implementations will perform a rollback test. This test requires the new
         // implementation to upgrade back to the old, non-ERC1822 compliant, implementation. Removing
         // this special case will break upgrade paths from old UUPS implementation to new ones.
-        if (StorageSlot.getBooleanSlot(_ROLLBACK_SLOT).value) {
+        if (StorageSlot.getBooleanSlot(__ROLLBACK_SLOT).value) {
             _setImplementation(newImplementation);
         } else {
-            try IERC1822Proxiable(newImplementation).proxiableUUID() returns (bytes32 slot) {
-                if (slot != _IMPLEMENTATION_SLOT) revert ERC1967__UnsupportedProxiableUUID();
+            try IERC1822Proxiable(newImplementation).proxiableUUID() returns (
+                bytes32 slot
+            ) {
+                if (slot != _IMPLEMENTATION_SLOT)
+                    revert ERC1967__UnsupportedProxiableUUID();
             } catch {
                 revert ERC1967__NewImplementationIsNotUUPS();
             }
@@ -167,7 +173,8 @@ abstract contract ERC1967Upgrade {
      * @dev Stores a new beacon in the EIP1967 beacon slot.
      */
     function _setBeacon(address newBeacon) private {
-        if (!Address.isContract(newBeacon)) revert ERC1967__NewBeaconIsNotAContract();
+        if (!Address.isContract(newBeacon))
+            revert ERC1967__NewBeaconIsNotAContract();
         if (!Address.isContract(IBeacon(newBeacon).implementation()))
             revert ERC1967__BeaconImplementationIsNotAContract();
 
@@ -188,7 +195,10 @@ abstract contract ERC1967Upgrade {
         _setBeacon(newBeacon);
         emit BeaconUpgraded(newBeacon);
         if (forceCall || data.length != 0) {
-            Address.functionDelegateCall(IBeacon(newBeacon).implementation(), data);
+            Address.functionDelegateCall(
+                IBeacon(newBeacon).implementation(),
+                data
+            );
         }
     }
 }
