@@ -35,6 +35,8 @@ contract BinaryPlan is Manager, IBinaryPlan, Initializable {
      */
     IAuthority public immutable cachedAuthority;
 
+    address private immutable __original;
+
     /**
      * @dev The rate of bonuses for referrals.
      */
@@ -58,6 +60,11 @@ contract BinaryPlan is Manager, IBinaryPlan, Initializable {
      */
     mapping(uint256 => address) public binaryHeap;
 
+    modifier nonDelegatecall() {
+        __nonDelegatecall();
+        _;
+    }
+
     /**
      * @dev Constructor that sets the authority contract instance.
      * @param authority_ The authority contract instance.
@@ -65,6 +72,7 @@ contract BinaryPlan is Manager, IBinaryPlan, Initializable {
      *   instance.
      */
     constructor(IAuthority authority_) payable Manager(authority_, 0) {
+        __original = address(this);
         cachedAuthority = authority_;
     }
 
@@ -72,7 +80,7 @@ contract BinaryPlan is Manager, IBinaryPlan, Initializable {
      * @dev Destroys the contract and sends the balance to the caller.
      * @notice This function only allows the operator to call.
      */
-    function kill() external onlyRole(Roles.OPERATOR_ROLE) {
+    function kill() external onlyRole(Roles.OPERATOR_ROLE) nonDelegatecall {
         selfdestruct(payable(_msgSender()));
     }
 
@@ -333,6 +341,10 @@ contract BinaryPlan is Manager, IBinaryPlan, Initializable {
         uint256 leafIndex = indices[leaf_];
         uint256 rootIndex = indices[root_];
         return rootIndex >> 1 == leafIndex;
+    }
+
+    function __nonDelegatecall() private view {
+        require(address(this) != __original, "BINARY_PLAN: NON_DELEGATE_CALL");
     }
 
     function __isLeftBranch(

@@ -71,7 +71,7 @@ abstract contract ManagerUpgradeable is
             abi.encodeCall(IAuthority.requestAccess, (role_))
         );
 
-        ok.handleRevertIfNotOk(revertData);
+        ok.handleRevertIfNotSuccess(revertData);
 
         __updateAuthority(authority_);
         emit AuthorityUpdated(sender, IAuthority(address(0)), authority_);
@@ -88,7 +88,7 @@ abstract contract ManagerUpgradeable is
             abi.encodeCall(IAuthority.requestAccess, (__requestedRole))
         );
 
-        ok.handleRevertIfNotOk(revertData);
+        ok.handleRevertIfNotSuccess(revertData);
 
         __updateAuthority(authority_);
 
@@ -126,7 +126,7 @@ abstract contract ManagerUpgradeable is
             abi.encodeCall(IBlacklistableUpgradeable.isBlacklisted, (account_))
         );
 
-        ok.handleRevertIfNotOk(returnOrRevertData);
+        ok.handleRevertIfNotSuccess(returnOrRevertData);
 
         if (abi.decode(returnOrRevertData, (bool)))
             revert Manager__Blacklisted();
@@ -155,7 +155,7 @@ abstract contract ManagerUpgradeable is
             abi.encodeCall(IAuthority.paused, ())
         );
 
-        ok.handleRevertIfNotOk(returnOrRevertData);
+        ok.handleRevertIfNotSuccess(returnOrRevertData);
 
         if (!abi.decode(returnOrRevertData, (bool)))
             revert Manager__NotPaused();
@@ -165,7 +165,7 @@ abstract contract ManagerUpgradeable is
         (bool ok, bytes memory returnOrRevertData) = _authority().staticcall(
             abi.encodeCall(IAuthority.paused, ())
         );
-        ok.handleRevertIfNotOk(returnOrRevertData);
+        ok.handleRevertIfNotSuccess(returnOrRevertData);
 
         if (abi.decode(returnOrRevertData, (bool))) revert Manager__Paused();
     }
@@ -181,7 +181,7 @@ abstract contract ManagerUpgradeable is
             )
         );
 
-        ok.handleRevertIfNotOk(returnOrRevertData);
+        ok.handleRevertIfNotSuccess(returnOrRevertData);
 
         return abi.decode(returnOrRevertData, (bool));
     }

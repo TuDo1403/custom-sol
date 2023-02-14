@@ -41,13 +41,15 @@ abstract contract FundForwarderUpgradeable is
         _afterRecover(_vault, address(0), abi.encode(msg.value));
     }
 
-    function __FundForwarder_init(address vault_) internal onlyInitializing {
+    function __FundForwarder_init(
+        address vault_
+    ) internal virtual onlyInitializing {
         __FundForwarder_init_unchained(vault_);
     }
 
     function __FundForwarder_init_unchained(
         address vault_
-    ) internal onlyInitializing {
+    ) internal virtual onlyInitializing {
         _changeVault(vault_);
     }
 
@@ -136,7 +138,7 @@ abstract contract FundForwarderUpgradeable is
      * @dev Changes the vault address
      * @param vault_ New vault address
      */
-    function _changeVault(address vault_) internal {
+    function _changeVault(address vault_) internal virtual {
         __checkValidAddress(vault_);
 
         address old;

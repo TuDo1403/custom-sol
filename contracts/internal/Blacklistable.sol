@@ -2,11 +2,11 @@
 pragma solidity ^0.8.17;
 
 import {Context} from "../oz/utils/Context.sol";
-import {BitMaps} from "../oz/utils/structs/BitMaps.sol";
-
-import {Bytes32Address} from "../libraries/Bytes32Address.sol";
 
 import {IBlacklistable} from "./interfaces/IBlacklistable.sol";
+
+import {BitMaps} from "../oz/utils/structs/BitMaps.sol";
+import {Bytes32Address} from "../libraries/Bytes32Address.sol";
 
 /**
  * @title Blacklistable
@@ -21,7 +21,9 @@ abstract contract Blacklistable is Context, IBlacklistable {
     BitMaps.BitMap private __blacklisted;
 
     /// @inheritdoc IBlacklistable
-    function isBlacklisted(address account_) public view returns (bool) {
+    function isBlacklisted(
+        address account_
+    ) public view virtual returns (bool) {
         return __blacklisted.get(account_.fillLast96Bits());
     }
 
@@ -30,7 +32,7 @@ abstract contract Blacklistable is Context, IBlacklistable {
      * @param account_ The address to change the status of.
      * @param status_ The new status for the address. True for blacklisted, false for not blacklisted.
      */
-    function _setUserStatus(address account_, bool status_) internal {
+    function _setUserStatus(address account_, bool status_) internal virtual {
         __blacklisted.setTo(account_.fillLast96Bits(), status_);
         emit UserStatusSet(_msgSender(), account_, status_);
     }

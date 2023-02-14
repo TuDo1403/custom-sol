@@ -31,7 +31,7 @@ contract Multicall is Context, IMulticall, ReentrancyGuard {
         CallData[] calldata calldata_,
         bytes calldata data_
     ) external payable virtual returns (bytes[] memory results) {
-        return _multicall(calldata_, data_);
+        results = _multicall(calldata_, data_);
     }
 
     function _multicall(
@@ -53,7 +53,7 @@ contract Multicall is Context, IMulticall, ReentrancyGuard {
                 calldata_[i].data
             );
 
-            ok.handleRevertIfNotOk(result);
+            ok.handleRevertIfNotSuccess(result);
 
             results[i] = result;
 

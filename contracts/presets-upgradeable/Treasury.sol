@@ -178,8 +178,7 @@ contract Treasury is
         if (
             token_ == address(0) ||
             token_ == address(this) ||
-            token_.supportsInterface(type(IERC721).interfaceId) ||
-            token_.supportsInterface(type(IERC1155).interfaceId)
+            token_.supportsInterface(type(IERC721).interfaceId)
         ) revert Treasury__InvalidTokenAddress();
 
         erc20Balances[token_] += value_;

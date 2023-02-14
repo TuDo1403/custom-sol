@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import {Pausable} from "../oz/security/Pausable.sol";
+import {Pausable, IPausable} from "../oz/security/Pausable.sol";
 import {
     AccessControl,
     AccessControlEnumerable
@@ -30,8 +30,8 @@ abstract contract Authority is
 
     constructor(
         address admin_,
-        address[] memory operators_,
-        bytes32[] memory roles_
+        bytes32[] memory roles_,
+        address[] memory operators_
     ) payable Pausable() FundForwarder(_deployDefaultTreasury(admin_, "")) {
         _grantRole(Roles.PAUSER_ROLE, admin_);
         _grantRole(Roles.SIGNER_ROLE, admin_);
@@ -87,12 +87,12 @@ abstract contract Authority is
         _setRoleAdmin(role, adminRole);
     }
 
-    /// @inheritdoc IAuthority
+    /// @inheritdoc IPausable
     function pause() external onlyRole(Roles.PAUSER_ROLE) {
         _pause();
     }
 
-    /// @inheritdoc IAuthority
+    /// @inheritdoc IPausable
     function unpause() external onlyRole(Roles.PAUSER_ROLE) {
         _unpause();
     }

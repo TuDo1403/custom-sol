@@ -73,7 +73,7 @@ library Address {
         (bool success, bytes memory revertData) = recipient.call{
             value: amount
         }("");
-        success.handleRevertIfNotOk(revertData);
+        success.handleRevertIfNotSuccess(revertData);
     }
 
     /**

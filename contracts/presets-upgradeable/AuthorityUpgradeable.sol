@@ -93,8 +93,8 @@ abstract contract AuthorityUpgradeable is
     function __Authority_init(
         address admin_,
         bytes calldata data_,
-        address[] calldata operators_,
-        bytes32[] calldata roles_
+        bytes32[] calldata roles_,
+        address[] calldata operators_
     ) internal virtual onlyInitializing {
         __Pausable_init_unchained();
         __Authority_init_unchained(admin_, operators_, roles_);

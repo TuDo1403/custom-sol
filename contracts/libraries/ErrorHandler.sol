@@ -4,7 +4,7 @@ pragma solidity ^0.8.17;
 error ErrorHandler__ExecutionFailed();
 
 library ErrorHandler {
-    function handleRevertIfNotOk(
+    function handleRevertIfNotSuccess(
         bool ok_,
         bytes memory revertData_
     ) internal pure {

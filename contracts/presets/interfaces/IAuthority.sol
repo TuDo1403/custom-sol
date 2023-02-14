@@ -15,16 +15,6 @@ interface IAuthority {
     function setRoleAdmin(bytes32 role, bytes32 adminRole) external;
 
     /**
-     * @dev Pauses all functions in the contract. Only callable by accounts with the PAUSER_ROLE.
-     */
-    function pause() external;
-
-    /**
-     * @dev Unpauses all functions in the contract. Only callable by accounts with the PAUSER_ROLE.
-     */
-    function unpause() external;
-
-    /**
      * @dev Returns true if all functions in the contract are paused, false otherwise.
      * @return isPaused bool isPaused representing the paused state of the contract
      */

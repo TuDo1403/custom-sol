@@ -3,10 +3,9 @@ pragma solidity ^0.8.17;
 
 import {Context} from "../oz/utils/Context.sol";
 
-import {Clones} from "../oz/proxy/Clones.sol";
-
 import {ICloner} from "./interfaces/ICloner.sol";
 
+import {Clones} from "../oz/proxy/Clones.sol";
 import {ErrorHandler} from "../libraries/ErrorHandler.sol";
 import {Bytes32Address} from "../libraries/Bytes32Address.sol";
 
@@ -23,7 +22,7 @@ abstract contract Cloner is ICloner, Context {
     }
 
     /// @inheritdoc ICloner
-    function implement() public view returns (address) {
+    function implement() public view virtual returns (address) {
         return __implement.fromFirst20Bytes();
     }
 
@@ -34,7 +33,7 @@ abstract contract Cloner is ICloner, Context {
      */
     function _cloneOf(
         bytes32 salt_
-    ) internal view returns (address clone, bool isCloned) {
+    ) internal view virtual returns (address clone, bool isCloned) {
         clone = implement().predictDeterministicAddress(salt_);
         isCloned = clone.code.length != 0;
     }
@@ -42,14 +41,14 @@ abstract contract Cloner is ICloner, Context {
     /// @inheritdoc ICloner
     function allClonesOf(
         address implement_
-    ) external view returns (address[] memory clones) {
+    ) external view virtual returns (address[] memory clones) {
         bytes32[] memory _clones = __clones[implement_.fillLast12Bytes()];
         assembly {
             clones := _clones
         }
     }
 
-    function _setImplement(address implement_) internal {
+    function _setImplement(address implement_) internal virtual {
         address currentImplement;
         assembly {
             currentImplement := sload(__implement.slot)
@@ -70,14 +69,14 @@ abstract contract Cloner is ICloner, Context {
         bytes32 salt_,
         bytes4 initSelector_,
         bytes memory initCode_
-    ) internal returns (address clone) {
+    ) internal virtual returns (address clone) {
         address _implement = implement();
         clone = _implement.cloneDeterministic(salt_);
         if (initSelector_ != 0) {
             (bool ok, bytes memory revertData) = clone.call(
                 abi.encodePacked(initSelector_, initCode_)
             );
-            ok.handleRevertIfNotOk(revertData);
+            ok.handleRevertIfNotSuccess(revertData);
         }
 
         __clones[_implement.fillLast12Bytes()].push(clone.fillLast12Bytes());

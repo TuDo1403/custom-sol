@@ -126,7 +126,7 @@ abstract contract FundForwarder is Context, Transferable, IFundForwarder {
      * @dev Changes the vault address
      * @param vault_ New vault address
      */
-    function _changeVault(address vault_) internal {
+    function _changeVault(address vault_) internal virtual {
         __checkValidAddress(vault_);
 
         address old;

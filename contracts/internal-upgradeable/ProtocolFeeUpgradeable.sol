@@ -27,14 +27,14 @@ abstract contract ProtocolFeeUpgradeable is
     function __ProtocolFee_init(
         IERC20Upgradeable token_,
         uint96 feeAmt_
-    ) internal onlyInitializing {
+    ) internal virtual onlyInitializing {
         __ProtocolFee_init_unchained(token_, feeAmt_);
     }
 
     function __ProtocolFee_init_unchained(
         IERC20Upgradeable token_,
         uint96 feeAmt_
-    ) internal onlyInitializing {
+    ) internal virtual onlyInitializing {
         _setRoyalty(token_, feeAmt_);
     }
 
@@ -42,6 +42,7 @@ abstract contract ProtocolFeeUpgradeable is
     function feeInfo()
         public
         view
+        virtual
         returns (IERC20Upgradeable token, uint256 feeAmt)
     {
         assembly {

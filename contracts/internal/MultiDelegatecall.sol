@@ -51,7 +51,13 @@ abstract contract MultiDelegatecall is Context, ReentrancyGuard {
      */
     function _multiDelegatecall(
         bytes[] calldata data_
-    ) internal nonDelegatecall nonReentrant returns (bytes[] memory results) {
+    )
+        internal
+        virtual
+        nonDelegatecall
+        nonReentrant
+        returns (bytes[] memory results)
+    {
         uint256 length = data_.length;
         results = new bytes[](length);
         bool ok;
@@ -59,7 +65,7 @@ abstract contract MultiDelegatecall is Context, ReentrancyGuard {
         for (uint256 i; i < length; ) {
             (ok, result) = address(this).delegatecall(data_[i]);
 
-            ok.handleRevertIfNotOk(result);
+            ok.handleRevertIfNotSuccess(result);
 
             results[i] = result;
 

@@ -9,7 +9,7 @@ library SigUtil {
      * @param s ECDSA s value
      * @return signature Combined signature bytes
      */
-    function mergeSignature(
+    function merge(
         uint8 v,
         bytes32 r,
         bytes32 s
@@ -27,7 +27,7 @@ library SigUtil {
      * @param signature_ Signature bytes to split
      * @return r s v Tuple of ECDSA values
      */
-    function splitSignature(
+    function split(
         bytes calldata signature_
     ) internal pure returns (bytes32 r, bytes32 s, uint8 v) {
         assembly {

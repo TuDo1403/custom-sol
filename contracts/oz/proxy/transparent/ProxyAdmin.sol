@@ -33,7 +33,7 @@ contract ProxyAdmin is Ownable {
             hex"5c60da1b"
         );
 
-        success.handleRevertIfNotOk(returndata);
+        success.handleRevertIfNotSuccess(returndata);
 
         return abi.decode(returndata, (address));
     }
@@ -54,7 +54,7 @@ contract ProxyAdmin is Ownable {
             hex"f851a440"
         );
 
-        success.handleRevertIfNotOk(returndata);
+        success.handleRevertIfNotSuccess(returndata);
 
         return abi.decode(returndata, (address));
     }

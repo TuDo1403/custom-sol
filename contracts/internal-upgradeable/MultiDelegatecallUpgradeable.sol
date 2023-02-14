@@ -48,12 +48,16 @@ abstract contract MultiDelegatecallUpgradeable is
         bytes[] results
     );
 
-    function __MultiDelegatecall_init() internal onlyInitializing {
+    function __MultiDelegatecall_init() internal virtual onlyInitializing {
         __ReentrancyGuard_init_unchained();
         __MultiDelegatecall_init_unchained();
     }
 
-    function __MultiDelegatecall_init_unchained() internal onlyInitializing {
+    function __MultiDelegatecall_init_unchained()
+        internal
+        virtual
+        onlyInitializing
+    {
         assembly {
             sstore(__original.slot, address())
         }
@@ -66,7 +70,13 @@ abstract contract MultiDelegatecallUpgradeable is
      */
     function _multiDelegatecall(
         bytes[] calldata data_
-    ) internal nonDelegatecall nonReentrant returns (bytes[] memory results) {
+    )
+        internal
+        virtual
+        nonDelegatecall
+        nonReentrant
+        returns (bytes[] memory results)
+    {
         uint256 length = data_.length;
         results = new bytes[](length);
         bool ok;
@@ -74,7 +84,7 @@ abstract contract MultiDelegatecallUpgradeable is
         for (uint256 i; i < length; ) {
             (ok, result) = address(this).delegatecall(data_[i]);
 
-            ok.handleRevertIfNotOk(result);
+            ok.handleRevertIfNotSuccess(result);
 
             results[i] = result;
 

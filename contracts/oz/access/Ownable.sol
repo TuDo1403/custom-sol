@@ -6,8 +6,21 @@ pragma solidity ^0.8.17;
 import {Context} from "../utils/Context.sol";
 import {Bytes32Address} from "../../libraries/Bytes32Address.sol";
 
-error Ownable__Unauthorized();
-error Ownable__NonZeroAddress();
+interface IOwnable {
+    error Ownable__Unauthorized();
+    error Ownable__NonZeroAddress();
+
+    event OwnershipTransferred(
+        address indexed previousOwner,
+        address indexed newOwner
+    );
+
+    function renounceOwnership() external;
+
+    function transferOwnership(address newOwner) external;
+
+    function owner() external view returns (address _owner);
+}
 
 /**
  * @dev Contract module which provides a basic access control mechanism, where
@@ -21,15 +34,10 @@ error Ownable__NonZeroAddress();
  * `onlyOwner`, which can be applied to your functions to restrict their use to
  * the owner.
  */
-abstract contract Ownable is Context {
+abstract contract Ownable is Context, IOwnable {
     using Bytes32Address for *;
 
     bytes32 private __owner;
-
-    event OwnershipTransferred(
-        address indexed previousOwner,
-        address indexed newOwner
-    );
 
     /**
      * @dev Throws if called by any account other than the owner.

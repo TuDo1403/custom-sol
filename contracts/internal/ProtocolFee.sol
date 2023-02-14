@@ -14,7 +14,12 @@ abstract contract ProtocolFee is Context, IProtocolFee {
     FeeInfo private __feeInfo;
 
     /// @inheritdoc IProtocolFee
-    function feeInfo() public view returns (IERC20 token, uint256 feeAmt) {
+    function feeInfo()
+        public
+        view
+        virtual
+        returns (IERC20 token, uint256 feeAmt)
+    {
         assembly {
             let data := sload(__feeInfo.slot)
             token := data

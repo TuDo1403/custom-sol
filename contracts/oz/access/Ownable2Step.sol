@@ -5,7 +5,18 @@ pragma solidity ^0.8.0;
 
 import {Ownable, Bytes32Address} from "./Ownable.sol";
 
-error Ownable2Step__CallerIsNotTheNewOwner();
+interface IOwnable2Step {
+    error Ownable2Step__CallerIsNotTheNewOwner();
+
+    event OwnershipTransferStarted(
+        address indexed previousOwner,
+        address indexed newOwner
+    );
+
+    function pendingOwner() external view returns (address _pendingOwner);
+
+    function acceptOwnership() external;
+}
 
 /**
  * @dev Contract module which provides access control mechanism, where
@@ -18,15 +29,10 @@ error Ownable2Step__CallerIsNotTheNewOwner();
  * This module is used through inheritance. It will make available all functions
  * from parent (Ownable).
  */
-abstract contract Ownable2Step is Ownable {
+abstract contract Ownable2Step is Ownable, IOwnable2Step {
     using Bytes32Address for *;
 
     bytes32 private __pendingOwner;
-
-    event OwnershipTransferStarted(
-        address indexed previousOwner,
-        address indexed newOwner
-    );
 
     /**
      * @dev Returns the address of the pending owner.
