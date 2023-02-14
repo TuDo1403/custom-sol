@@ -43,8 +43,8 @@ abstract contract SignableUpgradeable is
     }
 
     function __Signable_init_unchained(
-        string calldata name_,
-        string calldata version_
+        string memory name_,
+        string memory version_
     ) internal onlyInitializing {
         __EIP712_init_unchained(name_, version_);
     }
