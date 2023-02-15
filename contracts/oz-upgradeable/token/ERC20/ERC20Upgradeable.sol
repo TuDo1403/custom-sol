@@ -1,15 +1,27 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity ^0.8.17;
 
+import {
+    ERC165Upgradeable,
+    IERC165Upgradeable
+} from "../../utils/introspection/ERC165Upgradeable.sol";
 import {ContextUpgradeable} from "../../utils/ContextUpgradeable.sol";
 
+import {
+    IERC20MetadataUpgradeable
+} from "./extensions/IERC20MetadataUpgradeable.sol";
 import {IERC20Upgradeable} from "./IERC20Upgradeable.sol";
 
 /// @notice Modern and gas efficient ERC20 + EIP-2612 implementation.
 /// @author Solmate (https://github.com/transmissions11/solmate/blob/main/src/tokens/ERC20.sol)
 /// @author Modified from Uniswap (https://github.com/Uniswap/uniswap-v2-core/blob/master/contracts/UniswapV2ERC20.sol)
 /// @dev Do not manually set balances without updating totalSupply, as the sum of all user balances must not exceed it.
-abstract contract ERC20Upgradeable is ContextUpgradeable, IERC20Upgradeable {
+abstract contract ERC20Upgradeable is
+    ContextUpgradeable,
+    ERC165Upgradeable,
+    IERC20Upgradeable,
+    IERC20MetadataUpgradeable
+{
     /*//////////////////////////////////////////////////////////////
                             METADATA STORAGE
     //////////////////////////////////////////////////////////////*/
@@ -18,7 +30,7 @@ abstract contract ERC20Upgradeable is ContextUpgradeable, IERC20Upgradeable {
 
     string public symbol;
 
-    uint256 public decimals;
+    uint8 public decimals;
 
     /*//////////////////////////////////////////////////////////////
                               ERC20 STORAGE
@@ -37,7 +49,7 @@ abstract contract ERC20Upgradeable is ContextUpgradeable, IERC20Upgradeable {
     function __ERC20_init(
         string calldata name_,
         string calldata symbol_,
-        uint256 decimals_
+        uint8 decimals_
     ) internal onlyInitializing {
         __ERC20_init_unchained(name_, symbol_, decimals_);
     }
@@ -45,11 +57,11 @@ abstract contract ERC20Upgradeable is ContextUpgradeable, IERC20Upgradeable {
     function __ERC20_init_unchained(
         string memory name_,
         string memory symbol_,
-        uint256 decimals_
+        uint8 decimals_
     ) internal onlyInitializing {
         name = name_;
         symbol = symbol_;
-        decimals = decimals_ & ~uint8(0);
+        decimals = decimals_;
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -110,6 +122,19 @@ abstract contract ERC20Upgradeable is ContextUpgradeable, IERC20Upgradeable {
 
         _afterTokenTransfer(from, to, amount);
         return true;
+    }
+
+    /*//////////////////////////////////////////////////////////////
+                              ERC165 LOGIC
+    //////////////////////////////////////////////////////////////*/
+
+    function supportsInterface(
+        bytes4 interfaceId
+    ) public view virtual override returns (bool) {
+        return
+            interfaceId == 0x01ffc9a7 || // ERC165 Interface ID for ERC165
+            interfaceId == type(IERC20Upgradeable).interfaceId || // ERC165 Interface ID for ERC20
+            interfaceId == type(IERC20MetadataUpgradeable).interfaceId; // ERC165 Interface ID for ERC20Metadata
     }
 
     function balanceOf(

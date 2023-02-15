@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "../libraries/BitMap256.sol";
+import "../libraries/structs/BitMap256.sol";
 
 //import "../oz/utils/structs/BitMaps.sol";
 

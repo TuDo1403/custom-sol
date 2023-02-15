@@ -34,14 +34,14 @@ abstract contract ReentrancyGuardUpgradeable is Initializable {
     // amount. Since refunds are capped to a percentage of the total
     // transaction's gas, it is best to keep them low in cases like this one, to
     // increase the likelihood of the full refund coming into effect.
-    uint256 private _locked;
+    uint256 private __locked;
 
     function __ReentrancyGuard_init() internal onlyInitializing {
         __ReentrancyGuard_init_unchained();
     }
 
     function __ReentrancyGuard_init_unchained() internal onlyInitializing {
-        _locked = 1;
+        __locked = 1;
     }
 
     /**
@@ -58,13 +58,13 @@ abstract contract ReentrancyGuardUpgradeable is Initializable {
     }
 
     function __nonReentrantBefore() private {
-        if (_locked != 1) revert ReentrancyGuard__Locked();
+        if (__locked != 1) revert ReentrancyGuard__Locked();
 
-        _locked = 2;
+        __locked = 2;
     }
 
     function __nonReentrantAfter() private {
-        _locked = 1;
+        __locked = 1;
     }
 
     /**

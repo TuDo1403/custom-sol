@@ -3,7 +3,7 @@
 
 pragma solidity ^0.8.17;
 
-import {Array} from "./Array.sol";
+import {Array} from "../Array.sol";
 import {BitMap256} from "./BitMap256.sol";
 
 library EnumerableSet256 {

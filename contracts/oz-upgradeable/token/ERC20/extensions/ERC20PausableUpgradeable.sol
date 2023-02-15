@@ -21,8 +21,6 @@ abstract contract ERC20PausableUpgradeable is
         __Pausable_init_unchained();
     }
 
-    function __ERC20Pausable_init_unchained() internal onlyInitializing {}
-
     /**
      * @dev See {ERC20-_beforeTokenTransfer}.
      *

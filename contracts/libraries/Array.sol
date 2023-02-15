@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import {BitMap256} from "./BitMap256.sol";
+import {BitMap256} from "./structs/BitMap256.sol";
 
 library Array {
     using BitMap256 for uint256;

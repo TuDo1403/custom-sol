@@ -26,10 +26,6 @@ abstract contract ERC721RoyaltyUpgradeable is
     ERC721Upgradeable,
     ERC2981Upgradeable
 {
-    function __ERC721Royalty_init() internal onlyInitializing {}
-
-    function __ERC721Royalty_init_unchained() internal onlyInitializing {}
-
     /**
      * @dev See {IERC165-supportsInterface}.
      */

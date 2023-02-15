@@ -8,8 +8,24 @@ import {ERC165Upgradeable} from "../utils/introspection/ERC165Upgradeable.sol";
 
 import {IAccessControlUpgradeable} from "./IAccessControlUpgradeable.sol";
 
-import {BitMap256} from "../../libraries/BitMap256.sol";
+import {BitMap256} from "../../libraries/structs/BitMap256.sol";
 import {Bytes32Address} from "../../libraries/Bytes32Address.sol";
+
+interface IOwnableUpgradeable {
+    error Ownable__Unauthorized();
+    error Ownable__NonZeroAddress();
+
+    event OwnershipTransferred(
+        address indexed previousOwner,
+        address indexed newOwner
+    );
+
+    function renounceOwnership() external;
+
+    function transferOwnership(address newOwner) external;
+
+    function owner() external view returns (address _owner);
+}
 
 /**
  * @dev Contract module that allows children to implement role-based access
@@ -56,10 +72,6 @@ abstract contract AccessControlUpgradeable is
 {
     using Bytes32Address for address;
     using BitMap256 for BitMap256.BitMap;
-
-    function __AccessControl_init() internal onlyInitializing {}
-
-    function __AccessControl_init_unchained() internal onlyInitializing {}
 
     bytes32 public constant DEFAULT_ADMIN_ROLE = 0x00;
 

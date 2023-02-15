@@ -7,7 +7,7 @@ import {AccessControl} from "./AccessControl.sol";
 
 import {IAccessControlEnumerable} from "./IAccessControlEnumerable.sol";
 
-import {EnumerableSet256} from "../../libraries/EnumerableSet256.sol";
+import {EnumerableSet256} from "../../libraries/structs/EnumerableSet256.sol";
 
 /**
  * @dev Extension of {AccessControl} that allows enumerating the members of each role.

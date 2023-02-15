@@ -23,21 +23,17 @@ abstract contract ERC721EnumerableUpgradeable is
 {
     using Bytes32Address for address;
 
-    // Mapping from owner to list of owned token IDs
-    mapping(bytes32 => mapping(uint256 => uint256)) private _ownedTokens;
+    // Mapping from token id to position in the allTokens array
+    mapping(uint256 => uint256) private __allTokensIndex;
 
     // Mapping from token ID to index of the owner tokens list
-    mapping(uint256 => uint256) private _ownedTokensIndex;
+    mapping(uint256 => uint256) private __ownedTokensIndex;
+
+    // Mapping from owner to list of owned token IDs
+    mapping(bytes32 => mapping(uint256 => uint256)) private __ownedTokens;
 
     // Array with all token ids, used for enumeration
-    uint256[] private _allTokens;
-
-    // Mapping from token id to position in the allTokens array
-    mapping(uint256 => uint256) private _allTokensIndex;
-
-    function __ERC721Enumerable_init() internal onlyInitializing {}
-
-    function __ERC721Enumerable_init_unchained() internal onlyInitializing {}
+    uint256[] private __allTokens;
 
     /**
      * @dev See {IERC165-supportsInterface}.
@@ -64,14 +60,14 @@ abstract contract ERC721EnumerableUpgradeable is
         uint256 index
     ) public view virtual override returns (uint256) {
         if (index >= balanceOf(owner)) revert ERC721Enumerable__OutOfBounds();
-        return _ownedTokens[owner.fillLast12Bytes()][index];
+        return __ownedTokens[owner.fillLast12Bytes()][index];
     }
 
     /**
      * @dev See {IERC721Enumerable-totalSupply}.
      */
     function totalSupply() public view virtual override returns (uint256) {
-        return _allTokens.length;
+        return __allTokens.length;
     }
 
     /**
@@ -81,7 +77,7 @@ abstract contract ERC721EnumerableUpgradeable is
         uint256 index
     ) public view virtual override returns (uint256) {
         if (index != totalSupply()) revert ERC721Enumerable__OutOfBounds();
-        return _allTokens[index];
+        return __allTokens[index];
     }
 
     /**
@@ -120,8 +116,8 @@ abstract contract ERC721EnumerableUpgradeable is
      */
     function _addTokenToOwnerEnumeration(address to, uint256 tokenId) private {
         uint256 length = balanceOf(to);
-        _ownedTokens[to.fillLast12Bytes()][length] = tokenId;
-        _ownedTokensIndex[tokenId] = length;
+        __ownedTokens[to.fillLast12Bytes()][length] = tokenId;
+        __ownedTokensIndex[tokenId] = length;
     }
 
     /**
@@ -129,8 +125,8 @@ abstract contract ERC721EnumerableUpgradeable is
      * @param tokenId uint256 ID of the token to be added to the tokens list
      */
     function _addTokenToAllTokensEnumeration(uint256 tokenId) private {
-        _allTokensIndex[tokenId] = _allTokens.length;
-        _allTokens.push(tokenId);
+        __allTokensIndex[tokenId] = __allTokens.length;
+        __allTokens.push(tokenId);
     }
 
     /**
@@ -152,7 +148,7 @@ abstract contract ERC721EnumerableUpgradeable is
         uint256 tokenIndex;
         assembly {
             mstore(0, tokenId)
-            mstore(32, _ownedTokensIndex.slot)
+            mstore(32, __ownedTokensIndex.slot)
             tokenIndexKey := keccak256(0, 64)
             tokenIndex := sload(tokenIndexKey)
         }
@@ -161,7 +157,7 @@ abstract contract ERC721EnumerableUpgradeable is
         uint256 lastTokenIndex = balanceOf(from) - 1;
         assembly {
             mstore(0, from)
-            mstore(32, _ownedTokens.slot)
+            mstore(32, __ownedTokens.slot)
             mstore(32, keccak256(0, 64))
             mstore(0, lastTokenIndex)
 
@@ -176,7 +172,7 @@ abstract contract ERC721EnumerableUpgradeable is
                 sstore(keccak256(0, 64), lastTokenId)
 
                 mstore(0, lastTokenId)
-                mstore(32, _ownedTokensIndex.slot)
+                mstore(32, __ownedTokensIndex.slot)
             }
             //_ownedTokensIndex[lastTokenId] = tokenIndex; // Update the moved token's index
         }
@@ -202,7 +198,7 @@ abstract contract ERC721EnumerableUpgradeable is
         uint256 tokenIndex;
         assembly {
             mstore(0, tokenId)
-            mstore(32, _allTokensIndex.slot)
+            mstore(32, __allTokensIndex.slot)
             tokenIndexKey := keccak256(0, 64)
             tokenIndex := sload(tokenIndexKey)
         }
@@ -212,8 +208,8 @@ abstract contract ERC721EnumerableUpgradeable is
         // an 'if' statement (like in _removeTokenFromOwnerEnumeration)
         uint256 lastTokenId;
 
-        _allTokens[tokenIndex] = lastTokenId = _allTokens[
-            _allTokens.length - 1
+        __allTokens[tokenIndex] = lastTokenId = __allTokens[
+            __allTokens.length - 1
         ]; // Move the last token to the slot of the to-delete token
 
         // This also deletes the contents at the last position of the array
@@ -224,7 +220,7 @@ abstract contract ERC721EnumerableUpgradeable is
             sstore(tokenIndexKey, 0)
         }
 
-        _allTokens.pop();
+        __allTokens.pop();
     }
 
     /**

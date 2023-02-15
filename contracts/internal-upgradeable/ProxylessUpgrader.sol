@@ -19,10 +19,6 @@ abstract contract ProxylessUpgrader is
 {
     IKillable public instance;
 
-    function __ProxylessUpgrader_init() internal onlyInitializing {}
-
-    function __ProxylessUpgrader_init_unchained() internal onlyInitializing {}
-
     function _destroy() internal {
         instance.kill();
     }

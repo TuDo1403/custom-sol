@@ -17,10 +17,6 @@ abstract contract ERC721RentableUpgradeable is
 
     mapping(uint256 => UserInfo) internal _users;
 
-    function __ERC721Rentable_init() internal onlyInitializing {}
-
-    function __ERC721Rentable_init_unchained() internal onlyInitializing {}
-
     function setUser(
         uint256 tokenId,
         address user,

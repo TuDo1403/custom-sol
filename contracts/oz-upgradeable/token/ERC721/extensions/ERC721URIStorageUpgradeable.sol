@@ -18,7 +18,7 @@ abstract contract ERC721URIStorageUpgradeable is ERC721Upgradeable {
     bytes32 internal _baseTokenURIPtr;
 
     // Optional mapping for token URIs
-    mapping(uint256 => bytes32) private _tokenURIs;
+    mapping(uint256 => bytes32) private __tokenURIs;
 
     function __ERC721URIStorage_init(
         string calldata baseURI_
@@ -50,7 +50,7 @@ abstract contract ERC721URIStorageUpgradeable is ERC721Upgradeable {
     ) public view virtual override returns (string memory) {
         ownerOf(tokenId);
 
-        bytes memory _tokenURI = _tokenURIs[tokenId].read();
+        bytes memory _tokenURI = __tokenURIs[tokenId].read();
         bytes memory _baseTokenURI = _baseTokenURIPtr.read();
         // If there is no base URI, return the token URI.
         if (_baseTokenURI.length == 0) return string(_tokenURI);
@@ -74,7 +74,7 @@ abstract contract ERC721URIStorageUpgradeable is ERC721Upgradeable {
         string calldata _tokenURI
     ) internal virtual {
         ownerOf(tokenId);
-        _tokenURIs[tokenId] = bytes(_tokenURI).write();
+        __tokenURIs[tokenId] = bytes(_tokenURI).write();
     }
 
     /**
@@ -85,8 +85,8 @@ abstract contract ERC721URIStorageUpgradeable is ERC721Upgradeable {
     function _burn(uint256 tokenId) internal virtual override {
         super._burn(tokenId);
 
-        if ((_tokenURIs[tokenId].read()).length != 0)
-            delete _tokenURIs[tokenId];
+        if ((__tokenURIs[tokenId].read()).length != 0)
+            delete __tokenURIs[tokenId];
     }
 
     /**

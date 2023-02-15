@@ -34,10 +34,6 @@ abstract contract ERC2981Upgradeable is
     RoyaltyInfo internal _defaultRoyaltyInfo;
     mapping(uint256 => RoyaltyInfo) internal _tokenRoyaltyInfo;
 
-    function __ERC2981_init() internal onlyInitializing {}
-
-    function __ERC2981_init_unchained() internal onlyInitializing {}
-
     /**
      * @dev See {IERC165-supportsInterface}.
      */
@@ -62,17 +58,9 @@ abstract contract ERC2981Upgradeable is
         uint256 _tokenId,
         uint256 _salePrice
     ) public view virtual override returns (address, uint256) {
-        RoyaltyInfo memory royalty;
-        assembly {
-            mstore(0, _tokenId)
-            mstore(32, _tokenRoyaltyInfo.slot)
-            royalty := sload(keccak256(0, 64))
-        }
+        RoyaltyInfo memory royalty = _tokenRoyaltyInfo[_tokenId];
 
-        if (royalty.receiver == address(0))
-            assembly {
-                royalty := sload(_defaultRoyaltyInfo.slot)
-            }
+        if (royalty.receiver == address(0)) royalty = _defaultRoyaltyInfo;
 
         return (
             royalty.receiver,

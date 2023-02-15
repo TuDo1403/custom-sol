@@ -5,19 +5,10 @@ pragma solidity ^0.8.0;
 
 import {ContextUpgradeable} from "../utils/ContextUpgradeable.sol";
 
-error Pausable__Paused();
-error Pausable__NotPaused();
+interface IPausableUpgradeable {
+    error Pausable__Paused();
+    error Pausable__NotPaused();
 
-/**
- * @dev Contract module which allows children to implement an emergency stop
- * mechanism that can be triggered by an authorized account.
- *
- * This module is used through inheritance. It will make available the
- * modifiers `whenNotPaused` and `whenPaused`, which can be applied to
- * the functions of your contract. Note that they will not be pausable by
- * simply including this module, only once the modifiers are put in place.
- */
-abstract contract PausableUpgradeable is ContextUpgradeable {
     /**
      * @dev Emitted when the pause is triggered by `account`.
      */
@@ -28,7 +19,33 @@ abstract contract PausableUpgradeable is ContextUpgradeable {
      */
     event Unpaused(address account);
 
-    uint256 private _paused;
+    /**
+     * @dev Pauses all functions in the contract. Only callable by accounts with the PAUSER_ROLE.
+     */
+    function pause() external;
+
+    /**
+     * @dev Unpauses all functions in the contract. Only callable by accounts with the PAUSER_ROLE.
+     */
+    function unpause() external;
+
+    function paused() external view returns (bool isPaused);
+}
+
+/**
+ * @dev Contract module which allows children to implement an emergency stop
+ * mechanism that can be triggered by an authorized account.
+ *
+ * This module is used through inheritance. It will make available the
+ * modifiers `whenNotPaused` and `whenPaused`, which can be applied to
+ * the functions of your contract. Note that they will not be pausable by
+ * simply including this module, only once the modifiers are put in place.
+ */
+abstract contract PausableUpgradeable is
+    ContextUpgradeable,
+    IPausableUpgradeable
+{
+    uint256 private __paused;
 
     /**
      * @dev Initializes the contract in unpaused state.
@@ -38,7 +55,7 @@ abstract contract PausableUpgradeable is ContextUpgradeable {
     }
 
     function __Pausable_init_unchained() internal onlyInitializing {
-        _paused = 1;
+        __paused = 1;
     }
 
     /**
@@ -70,7 +87,7 @@ abstract contract PausableUpgradeable is ContextUpgradeable {
      */
     function paused() public view virtual returns (bool isPaused) {
         assembly {
-            isPaused := eq(2, sload(_paused.slot))
+            isPaused := eq(2, sload(__paused.slot))
         }
     }
 
@@ -97,7 +114,7 @@ abstract contract PausableUpgradeable is ContextUpgradeable {
      */
     function _pause() internal virtual {
         _requireNotPaused();
-        _paused = 2;
+        __paused = 2;
         emit Paused(_msgSender());
     }
 
@@ -110,7 +127,7 @@ abstract contract PausableUpgradeable is ContextUpgradeable {
      */
     function _unpause() internal virtual {
         _requirePaused();
-        _paused = 1;
+        __paused = 1;
         emit Unpaused(_msgSender());
     }
 

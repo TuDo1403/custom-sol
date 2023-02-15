@@ -29,12 +29,8 @@ error ERC1967UpgradeUpgradeable__ImplementationIsNotContract();
  * @custom:oz-upgrades-unsafe-allow delegatecall
  */
 abstract contract ERC1967UpgradeUpgradeable is Initializable {
-    function __ERC1967Upgrade_init() internal onlyInitializing {}
-
-    function __ERC1967Upgrade_init_unchained() internal onlyInitializing {}
-
     // This is the keccak-256 hash of "eip1967.proxy.rollback" subtracted by 1
-    bytes32 private constant _ROLLBACK_SLOT =
+    bytes32 private constant __ROLLBACK_SLOT =
         0x4910fdfa16fed3260ed0e7147f7cc6da11a60208b5b9406d12a635614ffd9143;
 
     /**
@@ -108,7 +104,7 @@ abstract contract ERC1967UpgradeUpgradeable is Initializable {
         // Upgrades from old implementations will perform a rollback test. This test requires the new
         // implementation to upgrade back to the old, non-ERC1822 compliant, implementation. Removing
         // this special case will break upgrade paths from old UUPS implementation to new ones.
-        if (StorageSlotUpgradeable.getBooleanSlot(_ROLLBACK_SLOT).value) {
+        if (StorageSlotUpgradeable.getBooleanSlot(__ROLLBACK_SLOT).value) {
             _setImplementation(newImplementation);
         } else {
             try

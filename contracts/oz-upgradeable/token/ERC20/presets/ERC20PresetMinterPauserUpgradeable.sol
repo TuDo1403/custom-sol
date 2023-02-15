@@ -111,6 +111,17 @@ abstract contract ERC20PresetMinterPauserUpgradeable is
         _unpause();
     }
 
+    function supportsInterface(
+        bytes4 interfaceId_
+    )
+        public
+        view
+        override(ERC20Upgradeable, AccessControlEnumerableUpgradeable)
+        returns (bool)
+    {
+        return super.supportsInterface(interfaceId_);
+    }
+
     function _beforeTokenTransfer(
         address from,
         address to,

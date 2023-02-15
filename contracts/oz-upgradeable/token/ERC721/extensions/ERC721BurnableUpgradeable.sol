@@ -3,7 +3,11 @@
 
 pragma solidity ^0.8.10;
 
-import {ERC721Upgradeable, IERC721Upgradeable} from "../ERC721Upgradeable.sol";
+import {
+    ERC721Upgradeable,
+    IERC165Upgradeable,
+    IERC721Upgradeable
+} from "../ERC721Upgradeable.sol";
 
 interface IERC721BurnableUpgradeable is IERC721Upgradeable {
     error ERC721Burnable__OnlyOwnerOrApproved();
@@ -20,10 +24,6 @@ abstract contract ERC721BurnableUpgradeable is
     ERC721Upgradeable,
     IERC721BurnableUpgradeable
 {
-    function __ERC721Burnable_init() internal onlyInitializing {}
-
-    function __ERC721Burnable_init_unchained() internal onlyInitializing {}
-
     /**
      * @dev Burns `tokenId`. See {ERC721-_burn}.
      *
@@ -36,6 +36,20 @@ abstract contract ERC721BurnableUpgradeable is
         if (!_isApprovedOrOwner(_msgSender(), tokenId))
             revert ERC721Burnable__OnlyOwnerOrApproved();
         _burn(tokenId);
+    }
+
+    function supportsInterface(
+        bytes4 interfaceId_
+    )
+        public
+        view
+        virtual
+        override(ERC721Upgradeable, IERC165Upgradeable)
+        returns (bool)
+    {
+        return
+            interfaceId_ == type(IERC721BurnableUpgradeable).interfaceId ||
+            super.supportsInterface(interfaceId_);
     }
 
     /**

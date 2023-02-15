@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 pragma solidity ^0.8.10;
 
-import {ERC721Upgradeable} from "../ERC721Upgradeable.sol";
+import {ERC721Upgradeable, IERC165Upgradeable} from "../ERC721Upgradeable.sol";
 import {
     Bytes32Address,
     SignableUpgradeable
@@ -25,8 +25,6 @@ abstract contract ERC721PermitUpgradeable is
         __EIP712_init_unchained(name_, "1");
         __ERC721_init_unchained(name_, symbol_);
     }
-
-    function __ERC721Permit_init_unchained() internal onlyInitializing {}
 
     /// @dev Gets the current nonce for a token ID and then increments it, returning the original value
 
@@ -90,6 +88,25 @@ abstract contract ERC721PermitUpgradeable is
         uint256 tokenId_
     ) external view override returns (uint256) {
         return _nonces[bytes32(tokenId_)];
+    }
+
+    /// @notice Query if a contract implements an interface
+    /// @param interfaceId The interface identifier, as specified in ERC-165
+    /// @dev Overridden from ERC721 here in order to include the interface of this EIP
+    /// @return `true` if the contract implements `interfaceID` and
+    ///  `interfaceID` is not 0xffffffff, `false` otherwise
+    function supportsInterface(
+        bytes4 interfaceId
+    )
+        public
+        view
+        virtual
+        override(ERC721Upgradeable, IERC165Upgradeable)
+        returns (bool)
+    {
+        return
+            interfaceId == type(IERC721PermitUpgradeable).interfaceId ||
+            super.supportsInterface(interfaceId);
     }
 
     /**

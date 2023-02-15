@@ -4,9 +4,9 @@ pragma solidity ^0.8.17;
 import {
     ERC20,
     ERC20Permit
-} from "../oz/token/ERC20/extensions/draft-ERC20Permit.sol";
+} from "../../oz/token/ERC20/extensions/draft-ERC20Permit.sol";
 
-import {Transferable} from "../internal/Transferable.sol";
+import {Transferable} from "../../internal/Transferable.sol";
 
 import {IWNT} from "./interfaces/IWNT.sol";
 

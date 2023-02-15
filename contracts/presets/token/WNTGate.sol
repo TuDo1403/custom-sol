@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import {Context} from "../oz/utils/Context.sol";
+import {Context} from "../../oz/utils/Context.sol";
 
-import {Transferable} from "../internal/Transferable.sol";
+import {Transferable} from "../../internal/Transferable.sol";
 
 import {IWNT} from "./interfaces/IWNT.sol";
 import {IWNTGate} from "./interfaces/IWNTGate.sol";

@@ -7,7 +7,6 @@ import {
 } from "../oz-upgradeable/utils/ContextUpgradeable.sol";
 
 import {
-    IERC20Upgradeable,
     IProtocolFeeUpgradeable
 } from "./interfaces/IProtocolFeeUpgradeable.sol";
 
@@ -22,34 +21,23 @@ abstract contract ProtocolFeeUpgradeable is
     ContextUpgradeable,
     IProtocolFeeUpgradeable
 {
-    FeeInfo private __feeInfo;
+    address internal constant _ANY_LABEL = address(1);
+    address internal constant _NATIVE_LABEL = address(0);
+
+    FeeInfo public feeInfo;
 
     function __ProtocolFee_init(
-        IERC20Upgradeable token_,
+        address token_,
         uint96 feeAmt_
     ) internal virtual onlyInitializing {
         __ProtocolFee_init_unchained(token_, feeAmt_);
     }
 
     function __ProtocolFee_init_unchained(
-        IERC20Upgradeable token_,
+        address token_,
         uint96 feeAmt_
     ) internal virtual onlyInitializing {
         _setRoyalty(token_, feeAmt_);
-    }
-
-    /// @inheritdoc IProtocolFeeUpgradeable
-    function feeInfo()
-        public
-        view
-        virtual
-        returns (IERC20Upgradeable token, uint256 feeAmt)
-    {
-        assembly {
-            let data := sload(__feeInfo.slot)
-            token := data
-            feeAmt := shr(160, data)
-        }
     }
 
     /**
@@ -57,12 +45,9 @@ abstract contract ProtocolFeeUpgradeable is
      * @param token_ Token address of the fee
      * @param amount_ Fee amount
      */
-    function _setRoyalty(
-        IERC20Upgradeable token_,
-        uint96 amount_
-    ) internal virtual {
+    function _setRoyalty(address token_, uint96 amount_) internal virtual {
         assembly {
-            sstore(__feeInfo.slot, or(shl(160, amount_), token_))
+            sstore(feeInfo.slot, or(shl(160, amount_), token_))
         }
 
         emit ProtocolFeeUpdated(_msgSender(), token_, amount_);

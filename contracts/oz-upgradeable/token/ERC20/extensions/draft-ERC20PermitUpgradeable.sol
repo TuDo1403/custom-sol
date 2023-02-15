@@ -29,7 +29,7 @@ abstract contract ERC20PermitUpgradeable is
     using Bytes32Address for address;
 
     // solhint-disable-next-line var-name-mixedcase
-    //
+    /// @dev value is equal to keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)")
     bytes32 private constant __PERMIT_TYPEHASH =
         0x6e71edae12b1b97f4d1f60370fef10105fa2faae0126114a169c64845d6126c9;
 
@@ -43,8 +43,6 @@ abstract contract ERC20PermitUpgradeable is
     ) internal onlyInitializing {
         __EIP712_init_unchained(name_, "1");
     }
-
-    function __ERC20Permit_init_unchained() internal onlyInitializing {}
 
     /**
      * @dev See {IERC20Permit-permit}.

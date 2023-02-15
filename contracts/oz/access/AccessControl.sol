@@ -8,7 +8,7 @@ import {ERC165} from "../utils/introspection/ERC165.sol";
 
 import {IAccessControl} from "./IAccessControl.sol";
 
-import {BitMap256} from "../../libraries/BitMap256.sol";
+import {BitMap256} from "../../libraries/structs/BitMap256.sol";
 import {Bytes32Address} from "../../libraries/Bytes32Address.sol";
 
 /**

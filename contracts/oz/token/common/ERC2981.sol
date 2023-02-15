@@ -47,17 +47,9 @@ abstract contract ERC2981 is IERC2981, ERC165 {
         uint256 _tokenId,
         uint256 _salePrice
     ) public view virtual override returns (address, uint256) {
-        RoyaltyInfo memory royalty;
-        assembly {
-            mstore(0, _tokenId)
-            mstore(32, _tokenRoyaltyInfo.slot)
-            royalty := sload(keccak256(0, 64))
-        }
+        RoyaltyInfo memory royalty = _tokenRoyaltyInfo[_tokenId];
 
-        if (royalty.receiver == address(0))
-            assembly {
-                royalty := sload(_defaultRoyaltyInfo.slot)
-            }
+        if (royalty.receiver == address(0)) royalty = _defaultRoyaltyInfo;
 
         return (
             royalty.receiver,

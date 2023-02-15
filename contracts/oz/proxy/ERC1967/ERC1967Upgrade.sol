@@ -4,7 +4,9 @@
 pragma solidity ^0.8.2;
 
 import {IBeacon} from "../beacon/IBeacon.sol";
+
 import {IERC1822Proxiable} from "../../interfaces/draft-IERC1822.sol";
+
 import {Address} from "../../utils/Address.sol";
 import {StorageSlot} from "../../utils/StorageSlot.sol";
 

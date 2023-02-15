@@ -6,6 +6,8 @@ import {
     IERC20Upgradeable
 } from "../oz-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 
+import {ErrorHandler} from "../libraries/ErrorHandler.sol";
+
 error Transferable__TransferFailed();
 error Transferable__InvalidArguments();
 
@@ -13,6 +15,8 @@ error Transferable__InvalidArguments();
  * @dev Library for transferring Ether and tokens between accounts
  */
 abstract contract TransferableUpgradeable is Initializable {
+    using ErrorHandler for bool;
+
     function __Transferable_init() internal onlyInitializing {}
 
     function __Transferable_init_unchained() internal onlyInitializing {}
@@ -112,7 +116,9 @@ abstract contract TransferableUpgradeable is Initializable {
         uint256 amount_,
         bytes memory data_
     ) internal virtual returns (bool success) {
-        (success, ) = to_.call{value: amount_}(data_);
+        bytes memory revertData;
+        (success, revertData) = to_.call{value: amount_}(data_);
+        success.handleRevertIfNotSuccess(revertData);
     }
 
     function _ERC20Transfer(

@@ -6,7 +6,18 @@ pragma solidity ^0.8.0;
 import {Initializable} from "../proxy/utils/Initializable.sol";
 import {OwnableUpgradeable, Bytes32Address} from "./OwnableUpgradeable.sol";
 
-error Ownable2Step__CallerIsNotTheNewOwner();
+interface IOwnable2StepUpgradeable {
+    error Ownable2Step__CallerIsNotTheNewOwner();
+
+    event OwnershipTransferStarted(
+        address indexed previousOwner,
+        address indexed newOwner
+    );
+
+    function pendingOwner() external view returns (address _pendingOwner);
+
+    function acceptOwnership() external;
+}
 
 /**
  * @dev Contract module which provides access control mechanism, where
@@ -21,7 +32,8 @@ error Ownable2Step__CallerIsNotTheNewOwner();
  */
 abstract contract Ownable2StepUpgradeable is
     Initializable,
-    OwnableUpgradeable
+    OwnableUpgradeable,
+    IOwnable2StepUpgradeable
 {
     using Bytes32Address for *;
 
@@ -30,13 +42,6 @@ abstract contract Ownable2StepUpgradeable is
     function __Ownable2Step_init() internal onlyInitializing {
         __Ownable_init_unchained();
     }
-
-    function __Ownable2Step_init_unchained() internal onlyInitializing {}
-
-    event OwnershipTransferStarted(
-        address indexed previousOwner,
-        address indexed newOwner
-    );
 
     /**
      * @dev Returns the address of the pending owner.

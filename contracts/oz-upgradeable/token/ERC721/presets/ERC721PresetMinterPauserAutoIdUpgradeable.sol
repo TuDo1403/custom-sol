@@ -50,7 +50,7 @@ abstract contract ERC721PresetMinterPauserAutoIdUpgradeable is
 
     uint256 internal _tokenIdTracker;
 
-    string private _baseTokenURI;
+    string private __baseTokenURI;
 
     /**
      * @dev Grants `DEFAULT_ADMIN_ROLE`, `MINTER_ROLE` and `PAUSER_ROLE` to the
@@ -73,7 +73,7 @@ abstract contract ERC721PresetMinterPauserAutoIdUpgradeable is
     function __ERC721PresetMinterPauserAutoId_init_unchained(
         string calldata baseTokenURI
     ) internal onlyInitializing {
-        _baseTokenURI = baseTokenURI;
+        __baseTokenURI = baseTokenURI;
 
         address sender = _msgSender();
         _grantRole(MINTER_ROLE, sender);
@@ -88,7 +88,7 @@ abstract contract ERC721PresetMinterPauserAutoIdUpgradeable is
         override
         returns (string memory)
     {
-        return _baseTokenURI;
+        return __baseTokenURI;
     }
 
     /**
@@ -165,7 +165,7 @@ abstract contract ERC721PresetMinterPauserAutoIdUpgradeable is
         virtual
         override(
             ERC721Upgradeable,
-            IERC165Upgradeable,
+            ERC721BurnableUpgradeable,
             ERC721EnumerableUpgradeable,
             AccessControlEnumerableUpgradeable
         )

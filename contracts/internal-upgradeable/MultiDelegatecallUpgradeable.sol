@@ -32,13 +32,13 @@ abstract contract MultiDelegatecallUpgradeable is
      */
     bytes32 private __original;
 
-    modifier onlyDelegatecalll() virtual {
-        __onlyDelegateCall();
+    modifier onlyDelegatecalll() {
+        __onlyDelegateCall(__original);
         _;
     }
 
-    modifier nonDelegatecall() virtual {
-        __nonDelegatecall();
+    modifier nonDelegatecall() {
+        __nonDelegatecall(__original);
         _;
     }
 
@@ -96,13 +96,13 @@ abstract contract MultiDelegatecallUpgradeable is
         emit BatchExecutionDelegated(_msgSender(), data_, results);
     }
 
-    function __onlyDelegateCall() private view {
-        if (address(this).fillLast12Bytes() != __original)
+    function __onlyDelegateCall(bytes32 originalBytes_) private view {
+        if (address(this).fillLast12Bytes() != originalBytes_)
             revert MultiDelegatecall__OnlyDelegatecall();
     }
 
-    function __nonDelegatecall() private view {
-        if (address(this).fillLast12Bytes() == __original)
+    function __nonDelegatecall(bytes32 originalBytes_) private view {
+        if (address(this).fillLast12Bytes() == originalBytes_)
             revert MultiDelegatecall__DelegatecallNotAllowed();
     }
 

@@ -23,10 +23,6 @@ abstract contract ProxyCheckerUpgradeable is Initializable {
         _;
     }
 
-    function __ProxyChecker_init() internal onlyInitializing {}
-
-    function __ProxyChecker_init_unchained() internal onlyInitializing {}
-
     function _onlyEOA(address sender_) internal view {
         _onlyEOA(sender_, _txOrigin());
     }

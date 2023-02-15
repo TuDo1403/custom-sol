@@ -21,8 +21,6 @@ abstract contract ERC721PausableUpgradeable is
         __Pausable_init_unchained();
     }
 
-    function __ERC721Pausable_init_unchained() internal onlyInitializing {}
-
     /**
      * @dev See {ERC721-_beforeTokenTransfer}.
      *

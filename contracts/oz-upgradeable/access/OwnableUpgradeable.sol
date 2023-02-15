@@ -7,8 +7,21 @@ import {ContextUpgradeable} from "../utils/ContextUpgradeable.sol";
 
 import {Bytes32Address} from "../../libraries/Bytes32Address.sol";
 
-error Ownable__Unauthorized();
-error Ownable__NonZeroAddress();
+interface IOwnableUpgradeable {
+    error Ownable__Unauthorized();
+    error Ownable__NonZeroAddress();
+
+    event OwnershipTransferred(
+        address indexed previousOwner,
+        address indexed newOwner
+    );
+
+    function renounceOwnership() external;
+
+    function transferOwnership(address newOwner) external;
+
+    function owner() external view returns (address _owner);
+}
 
 /**
  * @dev Contract module which provides a basic access control mechanism, where
@@ -22,15 +35,13 @@ error Ownable__NonZeroAddress();
  * `onlyOwner`, which can be applied to your functions to restrict their use to
  * the owner.
  */
-abstract contract OwnableUpgradeable is ContextUpgradeable {
+abstract contract OwnableUpgradeable is
+    IOwnableUpgradeable,
+    ContextUpgradeable
+{
     using Bytes32Address for *;
 
-    bytes32 private _owner;
-
-    event OwnershipTransferred(
-        address indexed previousOwner,
-        address indexed newOwner
-    );
+    bytes32 private __owner;
 
     /**
      * @dev Initializes the contract setting the deployer as the initial owner.
@@ -55,14 +66,14 @@ abstract contract OwnableUpgradeable is ContextUpgradeable {
      * @dev Returns the address of the current owner.
      */
     function owner() public view virtual returns (address) {
-        return _owner.fromFirst20Bytes();
+        return __owner.fromFirst20Bytes();
     }
 
     /**
      * @dev Throws if the sender is not the owner.
      */
     function _checkOwner(address sender_) internal view virtual {
-        if (_owner != sender_.fillLast12Bytes())
+        if (__owner != sender_.fillLast12Bytes())
             revert Ownable__Unauthorized();
     }
 
@@ -91,8 +102,8 @@ abstract contract OwnableUpgradeable is ContextUpgradeable {
      * Internal function without access restriction.
      */
     function _transferOwnership(address newOwner) internal virtual {
-        emit OwnershipTransferred(_owner.fromFirst20Bytes(), newOwner);
-        _owner = newOwner.fillLast12Bytes();
+        emit OwnershipTransferred(__owner.fromFirst20Bytes(), newOwner);
+        __owner = newOwner.fillLast12Bytes();
     }
 
     /**
