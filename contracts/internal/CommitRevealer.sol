@@ -7,7 +7,7 @@ abstract contract CommitRevealer is ICommitRevealer {
     mapping(address => Commitment) public commitments;
 
     function _commit(address account_, bytes32 commitment_) internal virtual {
-        commitments[account_] = Commitment(commitment_, block.number);
+        commitments[account_] = Commitment(commitment_, block.timestamp);
         emit Commited(account_, commitment_);
     }
 
