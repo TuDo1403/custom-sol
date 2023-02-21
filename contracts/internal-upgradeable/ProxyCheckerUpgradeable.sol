@@ -33,12 +33,12 @@ abstract contract ProxyCheckerUpgradeable is Initializable {
     }
 
     function _onlyProxy(address sender_) internal view {
-        if (!_isProxyCall(sender_, _txOrigin()) && !_isProxy(sender_))
+        if (!(_isProxyCall(sender_, _txOrigin()) || _isProxy(sender_)))
             revert ProxyChecker__EOAUnallowed();
     }
 
     function _onlyProxy(address msgSender_, address txOrigin_) internal view {
-        if (!_isProxyCall(msgSender_, txOrigin_) && !_isProxy(msgSender_))
+        if (!(_isProxyCall(msgSender_, txOrigin_) || _isProxy(msgSender_)))
             revert ProxyChecker__EOAUnallowed();
     }
 

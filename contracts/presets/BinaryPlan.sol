@@ -172,9 +172,9 @@ contract BinaryPlan is Manager, IBinaryPlan, Initializable {
         bool isLeft
     ) external onlyRole(Roles.OPERATOR_ROLE) {
         require(
-            referree != referrer &&
-                referree != address(0) &&
-                referrer != address(0),
+            !(referree == referrer ||
+                referree == address(0) ||
+                referrer == address(0)),
             "BINARY_PLAN: INVALID_ARGUMENT"
         );
         require(indices[referrer] != 0, "BINARY_PLAN: NON_EXISTED_REF");
@@ -233,7 +233,7 @@ contract BinaryPlan is Manager, IBinaryPlan, Initializable {
             if (leftAddr == address(0) || rightAddr == address(0))
                 return false;
 
-            if (leftAddr != address(0) && rightAddr != address(0))
+            if (!(leftAddr == address(0) || rightAddr == address(0)))
                 return
                     isPerfect(left, depth_, level_ + 1) &&
                     isPerfect(right, depth_, level_ + 1);

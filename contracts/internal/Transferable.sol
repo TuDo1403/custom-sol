@@ -100,7 +100,19 @@ abstract contract Transferable {
         uint256 amount_,
         bytes memory data_
     ) internal virtual returns (bool success) {
-        (success, ) = to_.call{value: amount_}(data_);
+        /// @solidity memory-safe-assembly
+        assembly {
+            // Transfer the ETH and store if it succeeded or not.
+            success := call(
+                gas(),
+                to_,
+                amount_,
+                add(data_, 32),
+                mload(data_),
+                0,
+                0
+            )
+        }
     }
 
     function _ERC20Transfer(
@@ -158,7 +170,8 @@ abstract contract Transferable {
     }
 
     function __checkValidTransfer(address to_, uint256 value_) private pure {
-        if (value_ == 0 || to_ == address(0))
-            revert Transferable__InvalidArguments();
+        // if (to_ == address(0) || value_ == 0)
+        //     revert Transferable__InvalidArguments();
+        if (to_ == address(0)) revert Transferable__InvalidArguments();
     }
 }

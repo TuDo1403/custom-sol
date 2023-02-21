@@ -10,7 +10,5 @@ contract PMT is ERC20Permit {
     constructor(
         string memory name_,
         string memory symbol_
-    ) payable ERC20(name_, symbol_, 18) ERC20Permit(name_) {
-        _mint(_msgSender(), 1_000_000_000 * 1 ether);
-    }
+    ) payable ERC20(name_, symbol_, 18) ERC20Permit(name_) {}
 }

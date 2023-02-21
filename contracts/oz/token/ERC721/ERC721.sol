@@ -62,7 +62,6 @@ abstract contract ERC721 is Context, ERC165, IERC721, IERC721Metadata {
     //////////////////////////////////////////////////////////////*/
 
     mapping(uint256 => bytes32) internal _getApproved;
-
     mapping(address => BitMaps.BitMap) internal _isApprovedForAll;
 
     /*//////////////////////////////////////////////////////////////
@@ -91,8 +90,8 @@ abstract contract ERC721 is Context, ERC165, IERC721, IERC721Metadata {
 
         address sender = _msgSender();
         if (
-            sender != owner &&
-            !_isApprovedForAll[owner].get(sender.fillLast96Bits())
+            !(sender == owner ||
+                _isApprovedForAll[owner].get(sender.fillLast96Bits()))
         ) revert ERC721__Unauthorized();
 
         assembly {
@@ -170,9 +169,9 @@ abstract contract ERC721 is Context, ERC165, IERC721, IERC721Metadata {
 
         address sender = _msgSender();
         if (
-            sender != from &&
-            sender.fillLast12Bytes() != _getApproved[id] &&
-            !_isApprovedForAll[from].get(sender.fillLast96Bits())
+            !(sender == from ||
+                sender.fillLast12Bytes() == _getApproved[id] ||
+                _isApprovedForAll[from].get(sender.fillLast96Bits()))
         ) revert ERC721__Unauthorized();
 
         // Underflow of the sender's balance is impossible because we check for
@@ -200,14 +199,14 @@ abstract contract ERC721 is Context, ERC165, IERC721, IERC721Metadata {
         transferFrom(from, to, id);
 
         if (
-            to.code.length != 0 &&
-            ERC721TokenReceiver(to).onERC721Received(
-                _msgSender(),
-                from,
-                id,
-                ""
-            ) !=
-            ERC721TokenReceiver.onERC721Received.selector
+            !(to.code.length == 0 ||
+                ERC721TokenReceiver(to).onERC721Received(
+                    _msgSender(),
+                    from,
+                    id,
+                    ""
+                ) ==
+                ERC721TokenReceiver.onERC721Received.selector)
         ) revert ERC721__UnsafeRecipient();
     }
 
@@ -220,14 +219,14 @@ abstract contract ERC721 is Context, ERC165, IERC721, IERC721Metadata {
         transferFrom(from, to, id);
 
         if (
-            to.code.length != 0 &&
-            ERC721TokenReceiver(to).onERC721Received(
-                _msgSender(),
-                from,
-                id,
-                data
-            ) !=
-            ERC721TokenReceiver.onERC721Received.selector
+            !(to.code.length == 0 ||
+                ERC721TokenReceiver(to).onERC721Received(
+                    _msgSender(),
+                    from,
+                    id,
+                    data
+                ) ==
+                ERC721TokenReceiver.onERC721Received.selector)
         ) revert ERC721__UnsafeRecipient();
     }
 
@@ -347,14 +346,14 @@ abstract contract ERC721 is Context, ERC165, IERC721, IERC721Metadata {
         _mint(to, id);
 
         if (
-            to.code.length != 0 &&
-            ERC721TokenReceiver(to).onERC721Received(
-                _msgSender(),
-                address(0),
-                id,
-                ""
-            ) !=
-            ERC721TokenReceiver.onERC721Received.selector
+            !(to.code.length == 0 ||
+                ERC721TokenReceiver(to).onERC721Received(
+                    _msgSender(),
+                    address(0),
+                    id,
+                    ""
+                ) ==
+                ERC721TokenReceiver.onERC721Received.selector)
         ) revert ERC721__UnsafeRecipient();
     }
 
@@ -366,14 +365,14 @@ abstract contract ERC721 is Context, ERC165, IERC721, IERC721Metadata {
         _mint(to, id);
 
         if (
-            to.code.length != 0 &&
-            ERC721TokenReceiver(to).onERC721Received(
-                _msgSender(),
-                address(0),
-                id,
-                data
-            ) !=
-            ERC721TokenReceiver.onERC721Received.selector
+            !(to.code.length == 0 ||
+                ERC721TokenReceiver(to).onERC721Received(
+                    _msgSender(),
+                    address(0),
+                    id,
+                    data
+                ) ==
+                ERC721TokenReceiver.onERC721Received.selector)
         ) revert ERC721__UnsafeRecipient();
     }
 }

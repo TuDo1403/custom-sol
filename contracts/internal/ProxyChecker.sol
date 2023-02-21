@@ -51,7 +51,7 @@ abstract contract ProxyChecker {
      * @param sender_ Address of the sender
      */
     function _onlyProxy(address sender_) internal view {
-        if (!_isProxyCall(sender_, _txOrigin()) && !_isProxy(sender_))
+        if (!(_isProxyCall(sender_, _txOrigin()) || _isProxy(sender_)))
             revert ProxyChecker__EOAUnallowed();
     }
 
@@ -61,7 +61,7 @@ abstract contract ProxyChecker {
      * @param txOrigin_ Origin of the transaction
      */
     function _onlyProxy(address msgSender_, address txOrigin_) internal view {
-        if (!_isProxyCall(msgSender_, txOrigin_) && !_isProxy(msgSender_))
+        if (!(_isProxyCall(msgSender_, txOrigin_) || _isProxy(msgSender_)))
             revert ProxyChecker__EOAUnallowed();
     }
 

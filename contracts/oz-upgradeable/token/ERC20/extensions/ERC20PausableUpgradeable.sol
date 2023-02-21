@@ -32,8 +32,7 @@ abstract contract ERC20PausableUpgradeable is
         address from,
         address to,
         uint256 amount
-    ) internal virtual override {
-        _requireNotPaused();
+    ) internal virtual override whenNotPaused {
         super._beforeTokenTransfer(from, to, amount);
     }
 

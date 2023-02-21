@@ -111,16 +111,7 @@ library SSTORE2 {
     //////////////////////////////////////////////////////////////*/
 
     function read(address ptr) internal view returns (bytes memory) {
-        address pointer;
-        assembly {
-            pointer := ptr
-        }
-        return
-            readBytecode(
-                pointer,
-                DATA_OFFSET,
-                pointer.code.length - DATA_OFFSET
-            );
+        return readBytecode(ptr, DATA_OFFSET, ptr.code.length - DATA_OFFSET);
     }
 
     function read(bytes32 ptr) internal view returns (bytes memory) {

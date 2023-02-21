@@ -68,7 +68,7 @@ abstract contract ERC20PresetMinterPauser is
     function mint(
         address to,
         uint256 amount
-    ) public virtual onlyRole(MINTER_ROLE) {
+    ) external virtual onlyRole(MINTER_ROLE) {
         _mint(to, amount);
     }
 
@@ -81,7 +81,7 @@ abstract contract ERC20PresetMinterPauser is
      *
      * - the caller must have the `PAUSER_ROLE`.
      */
-    function pause() public virtual onlyRole(PAUSER_ROLE) {
+    function pause() external virtual onlyRole(PAUSER_ROLE) {
         _pause();
     }
 
@@ -94,7 +94,7 @@ abstract contract ERC20PresetMinterPauser is
      *
      * - the caller must have the `PAUSER_ROLE`.
      */
-    function unpause() public virtual onlyRole(PAUSER_ROLE) {
+    function unpause() external virtual onlyRole(PAUSER_ROLE) {
         _unpause();
     }
 

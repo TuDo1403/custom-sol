@@ -112,21 +112,6 @@ abstract contract Signable is Context, EIP712, ISignable {
         emit NonceIncremented(_msgSender(), id_, nonce);
     }
 
-    /**
-     * @dev Returns the nonce for the given address
-     * @param id_ ID to get the nonce for
-     * @return nonce Nonce of the given address
-     */
-    function _nonce(
-        bytes32 id_
-    ) internal view virtual returns (uint256 nonce) {
-        assembly {
-            mstore(0x00, id_)
-            mstore(0x20, _nonces.slot)
-            nonce := sload(keccak256(0x00, 0x40))
-        }
-    }
-
     /// @inheritdoc ISignable
     function DOMAIN_SEPARATOR() external view virtual returns (bytes32) {
         return _domainSeparatorV4();

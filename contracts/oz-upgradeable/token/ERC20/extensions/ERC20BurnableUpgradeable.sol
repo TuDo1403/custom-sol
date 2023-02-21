@@ -25,7 +25,7 @@ abstract contract ERC20BurnableUpgradeable is
      *
      * See {ERC20-_burn}.
      */
-    function burn(uint256 amount) public virtual {
+    function burn(uint256 amount) external virtual {
         _burn(_msgSender(), amount);
     }
 
@@ -40,7 +40,7 @@ abstract contract ERC20BurnableUpgradeable is
      * - the caller must have allowance for ``accounts``'s tokens of at least
      * `amount`.
      */
-    function burnFrom(address account, uint256 amount) public virtual {
+    function burnFrom(address account, uint256 amount) external virtual {
         _spendAllowance(account, _msgSender(), amount);
         _burn(account, amount);
     }

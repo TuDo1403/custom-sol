@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import "../../utils/introspection/IERC165.sol";
+import {IERC165} from "../../utils/introspection/IERC165.sol";
 
 interface IERC1155 is IERC165 {
     error ERC1155__Unauthorized();

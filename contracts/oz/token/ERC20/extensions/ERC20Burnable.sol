@@ -22,7 +22,7 @@ abstract contract ERC20Burnable is ERC20, IERC20Burnabble {
      *
      * See {ERC20-_burn}.
      */
-    function burn(uint256 amount) public virtual {
+    function burn(uint256 amount) external virtual {
         _burn(_msgSender(), amount);
     }
 

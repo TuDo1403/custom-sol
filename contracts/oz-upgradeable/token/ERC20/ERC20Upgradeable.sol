@@ -73,7 +73,14 @@ abstract contract ERC20Upgradeable is
         uint256 amount
     ) public virtual returns (bool) {
         address sender = _msgSender();
-        _allowance[sender][spender] = amount;
+
+        assembly {
+            mstore(0, sender)
+            mstore(32, _allowance.slot)
+            mstore(32, keccak256(0, 64))
+            mstore(0, spender)
+            sstore(keccak256(0, 64), amount)
+        }
 
         emit Approval(sender, spender, amount);
 

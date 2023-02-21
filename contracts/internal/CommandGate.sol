@@ -117,8 +117,8 @@ abstract contract CommandGate is ICommandGate, FundForwarder, ProxyChecker {
 
         // check asset vault
         if (
-            command_.vault != mainVault_ &&
-            !__whitelistedVaults.get(command_.vault.fillLast96Bits())
+            !(command_.vault != mainVault_ ||
+                __whitelistedVaults.get(command_.vault.fillLast96Bits()))
         ) revert CommandGate__UnknownAddress();
     }
 

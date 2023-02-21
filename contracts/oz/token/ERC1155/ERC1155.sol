@@ -5,27 +5,49 @@ import {Context} from "../../utils/Context.sol";
 
 import {IERC1155} from "./IERC1155.sol";
 
+import {Bytes32Address} from "../../../libraries/Bytes32Address.sol";
+import {BitMaps} from "../../utils/structs/BitMaps.sol";
+
 /// @notice Minimalist and gas efficient standard ERC1155 implementation.
 /// @author Solmate (https://github.com/transmissions11/solmate/blob/main/src/tokens/ERC1155.sol)
 abstract contract ERC1155 is Context, IERC1155 {
+    using BitMaps for BitMaps.BitMap;
+    using Bytes32Address for address;
+
     /*//////////////////////////////////////////////////////////////
                              ERC1155 STORAGE
     //////////////////////////////////////////////////////////////*/
+    string private __uri;
+
+    mapping(address => BitMaps.BitMap) internal _isApprovedForAll;
 
     mapping(address => mapping(uint256 => uint256)) public balanceOf;
-
-    mapping(address => mapping(address => bool)) public isApprovedForAll;
 
     /*//////////////////////////////////////////////////////////////
                               ERC1155 LOGIC
     //////////////////////////////////////////////////////////////*/
+    // constructor(string memory uri_) payable {
+    //     _setURI(uri_);
+    // }
+
+    function uri(uint256) public view virtual returns (string memory) {
+        return __uri;
+    }
+
+    function isApprovedForAll(
+        address owner_,
+        address operator_
+    ) external view returns (bool) {
+        return _isApprovedForAll[owner_].get(operator_.fillLast96Bits());
+    }
 
     function setApprovalForAll(
         address operator,
         bool approved
     ) public virtual {
         address sender = _msgSender();
-        isApprovedForAll[sender][operator] = approved;
+
+        _isApprovedForAll[sender].setTo(operator.fillLast96Bits(), approved);
 
         emit ApprovalForAll(sender, operator, approved);
     }
@@ -38,28 +60,27 @@ abstract contract ERC1155 is Context, IERC1155 {
         bytes calldata data
     ) public virtual {
         address sender = _msgSender();
-        require(
-            sender == from || isApprovedForAll[from][sender],
-            "NOT_AUTHORIZED"
-        );
+        if (
+            !(sender == from ||
+                _isApprovedForAll[from].get(sender.fillLast96Bits()))
+        ) revert ERC1155__Unauthorized();
 
         balanceOf[from][id] -= amount;
         balanceOf[to][id] += amount;
 
         emit TransferSingle(sender, from, to, id, amount);
 
-        require(
-            to.code.length == 0
-                ? to != address(0)
-                : ERC1155TokenReceiver(to).onERC1155Received(
-                    sender,
-                    from,
-                    id,
-                    amount,
-                    data
-                ) == ERC1155TokenReceiver.onERC1155Received.selector,
-            "UNSAFE_RECIPIENT"
-        );
+        if (
+            (to == address(0) || to.code.length != 0) &&
+            ERC1155TokenReceiver(to).onERC1155Received(
+                sender,
+                from,
+                id,
+                amount,
+                data
+            ) !=
+            ERC1155TokenReceiver.onERC1155Received.selector
+        ) revert ERC1155__UnsafeRecipient();
     }
 
     function safeBatchTransferFrom(
@@ -69,19 +90,19 @@ abstract contract ERC1155 is Context, IERC1155 {
         uint256[] calldata amounts,
         bytes calldata data
     ) public virtual {
-        require(ids.length == amounts.length, "LENGTH_MISMATCH");
+        uint256 length = ids.length;
+        if (length != amounts.length) revert ERC1155__LengthMismatch();
 
         address sender = _msgSender();
-        require(
-            sender == from || isApprovedForAll[from][sender],
-            "NOT_AUTHORIZED"
-        );
+        if (
+            !(sender == from ||
+                _isApprovedForAll[from].get(sender.fillLast96Bits()))
+        ) revert ERC1155__Unauthorized();
 
         // Storing these outside the loop saves ~15 gas per iteration.
         uint256 id;
         uint256 amount;
-
-        for (uint256 i; i < ids.length; ) {
+        for (uint256 i; i < length; ) {
             id = ids[i];
             amount = amounts[i];
 
@@ -97,33 +118,35 @@ abstract contract ERC1155 is Context, IERC1155 {
 
         emit TransferBatch(sender, from, to, ids, amounts);
 
-        require(
-            to.code.length == 0
-                ? to != address(0)
-                : ERC1155TokenReceiver(to).onERC1155BatchReceived(
-                    sender,
-                    from,
-                    ids,
-                    amounts,
-                    data
-                ) == ERC1155TokenReceiver.onERC1155BatchReceived.selector,
-            "UNSAFE_RECIPIENT"
-        );
+        if (
+            (to == address(0) || to.code.length != 0) &&
+            ERC1155TokenReceiver(to).onERC1155BatchReceived(
+                sender,
+                from,
+                ids,
+                amounts,
+                data
+            ) !=
+            ERC1155TokenReceiver.onERC1155BatchReceived.selector
+        ) revert ERC1155__UnsafeRecipient();
     }
 
     function balanceOfBatch(
         address[] calldata owners,
         uint256[] calldata ids
     ) public view virtual returns (uint256[] memory balances) {
-        require(owners.length == ids.length, "LENGTH_MISMATCH");
+        uint256 length = owners.length;
+        if (length != ids.length) revert ERC1155__LengthMismatch();
 
-        balances = new uint256[](owners.length);
+        balances = new uint256[](length);
 
         // Unchecked because the only math done is incrementing
         // the array index counter which cannot possibly overflow.
-        unchecked {
-            for (uint256 i = 0; i < owners.length; ++i) {
-                balances[i] = balanceOf[owners[i]][ids[i]];
+
+        for (uint256 i; i < length; ) {
+            balances[i] = balanceOf[owners[i]][ids[i]];
+            unchecked {
+                ++i;
             }
         }
     }
@@ -144,6 +167,9 @@ abstract contract ERC1155 is Context, IERC1155 {
     /*//////////////////////////////////////////////////////////////
                         INTERNAL MINT/BURN LOGIC
     //////////////////////////////////////////////////////////////*/
+    function _setURI(string memory newURI_) internal virtual {
+        __uri = newURI_;
+    }
 
     function _mint(
         address to,
@@ -155,29 +181,27 @@ abstract contract ERC1155 is Context, IERC1155 {
         address sender = _msgSender();
         emit TransferSingle(sender, address(0), to, id, amount);
 
-        require(
-            to.code.length == 0
-                ? to != address(0)
-                : ERC1155TokenReceiver(to).onERC1155Received(
-                    sender,
-                    address(0),
-                    id,
-                    amount,
-                    data
-                ) == ERC1155TokenReceiver.onERC1155Received.selector,
-            "UNSAFE_RECIPIENT"
-        );
+        if (
+            (to == address(0) || to.code.length != 0) &&
+            ERC1155TokenReceiver(to).onERC1155Received(
+                sender,
+                address(0),
+                id,
+                amount,
+                data
+            ) !=
+            ERC1155TokenReceiver.onERC1155Received.selector
+        ) revert ERC1155__UnsafeRecipient();
     }
 
     function _batchMint(
         address to,
-        uint256[] memory ids,
-        uint256[] memory amounts,
+        uint256[] calldata ids,
+        uint256[] calldata amounts,
         bytes memory data
     ) internal virtual {
         uint256 idsLength = ids.length; // Saves MLOADs.
-
-        require(idsLength == amounts.length, "LENGTH_MISMATCH");
+        if (idsLength != amounts.length) revert ERC1155__LengthMismatch();
 
         for (uint256 i; i < idsLength; ) {
             balanceOf[to][ids[i]] += amounts[i];
@@ -192,28 +216,26 @@ abstract contract ERC1155 is Context, IERC1155 {
         address sender = _msgSender();
         emit TransferBatch(sender, address(0), to, ids, amounts);
 
-        require(
-            to.code.length == 0
-                ? to != address(0)
-                : ERC1155TokenReceiver(to).onERC1155BatchReceived(
-                    sender,
-                    address(0),
-                    ids,
-                    amounts,
-                    data
-                ) == ERC1155TokenReceiver.onERC1155BatchReceived.selector,
-            "UNSAFE_RECIPIENT"
-        );
+        if (
+            (to == address(0) || to.code.length != 0) &&
+            ERC1155TokenReceiver(to).onERC1155BatchReceived(
+                sender,
+                address(0),
+                ids,
+                amounts,
+                data
+            ) !=
+            ERC1155TokenReceiver.onERC1155BatchReceived.selector
+        ) revert ERC1155__UnsafeRecipient();
     }
 
     function _batchBurn(
         address from,
-        uint256[] memory ids,
-        uint256[] memory amounts
+        uint256[] calldata ids,
+        uint256[] calldata amounts
     ) internal virtual {
         uint256 idsLength = ids.length; // Saves MLOADs.
-
-        require(idsLength == amounts.length, "LENGTH_MISMATCH");
+        if (idsLength != amounts.length) revert ERC1155__LengthMismatch();
 
         for (uint256 i; i < idsLength; ) {
             balanceOf[from][ids[i]] -= amounts[i];

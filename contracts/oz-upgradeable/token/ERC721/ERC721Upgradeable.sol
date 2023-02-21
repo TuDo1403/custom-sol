@@ -114,8 +114,8 @@ abstract contract ERC721Upgradeable is
 
         address sender = _msgSender();
         if (
-            sender != owner &&
-            !_isApprovedForAll[owner].get(sender.fillLast96Bits())
+            !(sender == owner ||
+                _isApprovedForAll[owner].get(sender.fillLast96Bits()))
         ) revert ERC721__Unauthorized();
 
         assembly {
@@ -195,9 +195,9 @@ abstract contract ERC721Upgradeable is
 
         address sender = _msgSender();
         if (
-            sender != from &&
-            sender.fillLast12Bytes() != _getApproved[id] &&
-            !_isApprovedForAll[from].get(sender.fillLast96Bits())
+            !(sender == from ||
+                sender.fillLast12Bytes() == _getApproved[id] ||
+                _isApprovedForAll[from].get(sender.fillLast96Bits()))
         ) revert ERC721__Unauthorized();
 
         // Underflow of the sender's balance is impossible because we check for
@@ -225,14 +225,14 @@ abstract contract ERC721Upgradeable is
         transferFrom(from, to, id);
 
         if (
-            to.code.length != 0 &&
-            ERC721TokenReceiverUpgradeable(to).onERC721Received(
-                _msgSender(),
-                from,
-                id,
-                ""
-            ) !=
-            ERC721TokenReceiverUpgradeable.onERC721Received.selector
+            !(to.code.length == 0 ||
+                ERC721TokenReceiverUpgradeable(to).onERC721Received(
+                    _msgSender(),
+                    from,
+                    id,
+                    ""
+                ) ==
+                ERC721TokenReceiverUpgradeable.onERC721Received.selector)
         ) revert ERC721__UnsafeRecipient();
     }
 
@@ -279,14 +279,14 @@ abstract contract ERC721Upgradeable is
     ) public virtual {
         transferFrom(from, to, id);
         if (
-            to.code.length != 0 &&
-            ERC721TokenReceiverUpgradeable(to).onERC721Received(
-                _msgSender(),
-                from,
-                id,
-                data
-            ) !=
-            ERC721TokenReceiverUpgradeable.onERC721Received.selector
+            !(to.code.length == 0 ||
+                ERC721TokenReceiverUpgradeable(to).onERC721Received(
+                    _msgSender(),
+                    from,
+                    id,
+                    data
+                ) ==
+                ERC721TokenReceiverUpgradeable.onERC721Received.selector)
         ) revert ERC721__UnsafeRecipient();
     }
 
@@ -377,14 +377,14 @@ abstract contract ERC721Upgradeable is
         _mint(to, id);
 
         if (
-            to.code.length != 0 &&
-            ERC721TokenReceiverUpgradeable(to).onERC721Received(
-                _msgSender(),
-                address(0),
-                id,
-                ""
-            ) !=
-            ERC721TokenReceiverUpgradeable.onERC721Received.selector
+            !(to.code.length == 0 ||
+                ERC721TokenReceiverUpgradeable(to).onERC721Received(
+                    _msgSender(),
+                    address(0),
+                    id,
+                    ""
+                ) ==
+                ERC721TokenReceiverUpgradeable.onERC721Received.selector)
         ) revert ERC721__UnsafeRecipient();
     }
 
@@ -395,14 +395,14 @@ abstract contract ERC721Upgradeable is
     ) internal virtual {
         _mint(to, id);
         if (
-            to.code.length != 0 &&
-            ERC721TokenReceiverUpgradeable(to).onERC721Received(
-                _msgSender(),
-                address(0),
-                id,
-                data
-            ) !=
-            ERC721TokenReceiverUpgradeable.onERC721Received.selector
+            !(to.code.length == 0 ||
+                ERC721TokenReceiverUpgradeable(to).onERC721Received(
+                    _msgSender(),
+                    address(0),
+                    id,
+                    data
+                ) ==
+                ERC721TokenReceiverUpgradeable.onERC721Received.selector)
         ) revert ERC721__UnsafeRecipient();
     }
 

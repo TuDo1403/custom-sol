@@ -84,7 +84,7 @@ abstract contract ERC721RentableUpgradeable is
 
         if (block.timestamp < info.expires)
             revert Rentable__NotValidTransfer();
-        if (from != to && info.user != address(0)) {
+        if (!(from == to || info.user == address(0))) {
             assembly {
                 sstore(infoKey, 0)
             }

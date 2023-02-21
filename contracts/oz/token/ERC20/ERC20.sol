@@ -16,15 +16,14 @@ abstract contract ERC20 is Context, IERC20 {
 
     uint8 public immutable decimals;
 
-    string public name;
-
-    string public symbol;
-
     /*//////////////////////////////////////////////////////////////
                               ERC20 STORAGE
     //////////////////////////////////////////////////////////////*/
 
     uint256 public totalSupply;
+
+    string public name;
+    string public symbol;
 
     mapping(address => uint256) internal _balanceOf;
 
@@ -57,7 +56,14 @@ abstract contract ERC20 is Context, IERC20 {
         uint256 amount
     ) public virtual returns (bool) {
         address sender = _msgSender();
-        _allowance[sender][spender] = amount;
+
+        assembly {
+            mstore(0, sender)
+            mstore(32, _allowance.slot)
+            mstore(32, keccak256(0, 64))
+            mstore(0, spender)
+            sstore(keccak256(0, 64), amount)
+        }
 
         emit Approval(sender, spender, amount);
 
@@ -110,15 +116,25 @@ abstract contract ERC20 is Context, IERC20 {
 
     function balanceOf(
         address account
-    ) external view override returns (uint256) {
-        return _balanceOf[account];
+    ) external view override returns (uint256 _balance) {
+        assembly {
+            mstore(0, account)
+            mstore(32, _balanceOf.slot)
+            _balance := sload(keccak256(0, 64))
+        }
     }
 
     function allowance(
         address owner,
         address spender
-    ) external view override returns (uint256) {
-        return _allowance[owner][spender];
+    ) external view override returns (uint256 allowance_) {
+        assembly {
+            mstore(0, owner)
+            mstore(32, _allowance.slot)
+            mstore(32, keccak256(0, 64))
+            mstore(0, spender)
+            allowance_ := sload(keccak256(0, 64))
+        }
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -138,6 +154,9 @@ abstract contract ERC20 is Context, IERC20 {
             mstore(0, spender_)
             allowanceKey := keccak256(0, 64)
             allowed := sload(allowanceKey)
+            // if eq(allowed, 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff) {
+            //     revert(0, 0)
+            // }
         }
 
         if (allowed == ~uint256(0)) return;

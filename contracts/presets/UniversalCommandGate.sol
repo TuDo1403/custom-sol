@@ -207,8 +207,9 @@ contract UniversalCommandGate is
         Asset memory asset_
     ) internal virtual {
         if (
-            IERC721(asset_.token).ownerOf(asset_.value) != address(this) &&
-            IERC721(asset_.token).getApproved(asset_.value) != address(this)
+            !(IERC721(asset_.token).ownerOf(asset_.value) == address(this) ||
+                IERC721(asset_.token).getApproved(asset_.value) ==
+                address(this))
         )
             IERC721Permit(asset_.token).permit(
                 address(this),
