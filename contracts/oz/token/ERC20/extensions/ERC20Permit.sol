@@ -30,7 +30,11 @@ abstract contract ERC20Permit is ERC20, IERC20Permit, Signable {
      *
      * It's a good idea to use the same `name` that is defined as the ERC20 token name.
      */
-    constructor(string memory name_) payable Signable(name_, "1") {}
+    constructor(
+        string memory name_,
+        string memory symbol_,
+        uint8 decimals_
+    ) payable Signable(name_, "1") ERC20(name_, symbol_, decimals_) {}
 
     /**
      * @dev See {IERC20Permit-permit}.
