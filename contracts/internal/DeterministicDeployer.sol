@@ -1,13 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import {Context} from "../oz/utils/Context.sol";
-
 import {Create2} from "../oz/utils/Create2.sol";
 
 import {Create3} from "../libraries/Create3.sol";
 
-abstract contract DeterministicDeployer is Context {
+abstract contract DeterministicDeployer {
     event Deployed(
         address indexed deployer,
         address indexed instance,
@@ -40,7 +38,7 @@ abstract contract Create2Deployer is DeterministicDeployer {
         instance = Create2.deploy(amount_, salt_, bytecode_);
 
         emit Deployed(
-            _msgSender(),
+            msg.sender,
             instance,
             salt_,
             instance.codehash,
@@ -65,7 +63,7 @@ abstract contract Create3Deployer is DeterministicDeployer {
         instance = Create3.deploy(salt_, bytecode_, amount_);
 
         emit Deployed(
-            _msgSender(),
+            msg.sender,
             instance,
             salt_,
             instance.codehash,

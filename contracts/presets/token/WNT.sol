@@ -2,7 +2,6 @@
 pragma solidity ^0.8.17;
 
 import {
-    ERC20,
     ERC20Permit
 } from "../../oz/token/ERC20/extensions/draft-ERC20Permit.sol";
 
@@ -17,7 +16,7 @@ contract WNT is IWNT, ERC20Permit, Transferable {
     constructor(
         string memory name_,
         string memory symbol_
-    ) payable ERC20Permit(name_) ERC20(name_, symbol_, 18) {}
+    ) payable ERC20Permit(name_, symbol_, 18) {}
 
     function deposit() public payable virtual {
         address sender = _msgSender();

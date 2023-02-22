@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
+import {
+    ContextUpgradeable
+} from "../oz-upgradeable/utils/ContextUpgradeable.sol";
+
 import {DeterministicDeployer} from "../internal/DeterministicDeployer.sol";
 
 import {ProxyCreator} from "../libraries/ProxyCreator.sol";
@@ -9,7 +13,10 @@ interface IKillable {
     function kill() external;
 }
 
-abstract contract ProxylessUpgrader is DeterministicDeployer {
+abstract contract ProxylessUpgrader is
+    ContextUpgradeable,
+    DeterministicDeployer
+{
     IKillable public instance;
 
     function _destroy() internal {
