@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
+import {Initializable} from "../oz-upgradeable/proxy/utils/Initializable.sol";
 
 import {ProxyCheckerUpgradeable} from "./ProxyCheckerUpgradeable.sol";
 
@@ -18,6 +19,7 @@ import {FixedPointMathLib} from "../libraries/FixedPointMathLib.sol";
  * @dev Referral bonuses are only rewarded to active referrers
  */
 abstract contract MultiLevelReferralUpgradeable is
+    Initializable,
     ProxyCheckerUpgradeable,
     IMultiLevelReferralUpgradeable
 {

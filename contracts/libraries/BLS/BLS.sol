@@ -93,7 +93,10 @@ library BLS {
         if (size == 0) revert BLS__NoPublicKeysGiven();
         if (size != messages.length) revert BLS__LengthMismatch();
 
-        uint256 inputSize = (size + 1) * 6;
+        uint256 inputSize;
+        unchecked {
+            inputSize = (size + 1) * 6;
+        }
         uint256[] memory input = new uint256[](inputSize);
         input[0] = signature[0];
         input[1] = signature[1];
@@ -101,13 +104,19 @@ library BLS {
         input[3] = N_G2_X0;
         input[4] = N_G2_Y1;
         input[5] = N_G2_Y0;
-        for (uint256 i = 0; i < size; i++) {
-            input[i * 6 + 6] = messages[i][0];
-            input[i * 6 + 7] = messages[i][1];
-            input[i * 6 + 8] = pubkeys[i][1];
-            input[i * 6 + 9] = pubkeys[i][0];
-            input[i * 6 + 10] = pubkeys[i][3];
-            input[i * 6 + 11] = pubkeys[i][2];
+
+        uint256 _i;
+        for (uint256 i; i < size; ) {
+            unchecked {
+                _i = i * 6;
+                input[_i + 6] = messages[i][0];
+                input[_i + 7] = messages[i][1];
+                input[_i + 8] = pubkeys[i][1];
+                input[_i + 9] = pubkeys[i][0];
+                input[_i + 10] = pubkeys[i][3];
+                input[_i + 11] = pubkeys[i][2];
+                ++i;
+            }
         }
         uint256[1] memory out;
         bool success;
@@ -163,21 +172,15 @@ library BLS {
             (publicKey[0] >= N) ||
             (publicKey[1] >= N) ||
             (publicKey[2] >= N || (publicKey[3] >= N))
-        ) {
-            return false;
-        } else {
-            return isOnCurveG2(publicKey);
-        }
+        ) return false;
+        else return isOnCurveG2(publicKey);
     }
 
     function isValidSignature(
         uint256[2] memory signature
     ) internal pure returns (bool) {
-        if ((signature[0] >= N) || (signature[1] >= N)) {
-            return false;
-        } else {
-            return isOnCurveG1(signature);
-        }
+        if ((signature[0] >= N) || (signature[1] >= N)) return false;
+        else return isOnCurveG1(signature);
     }
 
     function pubkeyToUncompresed(
@@ -209,13 +212,9 @@ library BLS {
     ) internal view returns (bool) {
         uint256 x0 = publicKey[0] & FIELD_MASK;
         uint256 x1 = publicKey[1];
-        if ((x0 >= N) || (x1 >= N)) {
-            return false;
-        } else if ((x0 == 0) && (x1 == 0)) {
-            return false;
-        } else {
-            return isOnCurveG2([x0, x1]);
-        }
+        if ((x0 >= N) || (x1 >= N)) return false;
+        else if ((x0 == 0) && (x1 == 0)) return false;
+        else return isOnCurveG2([x0, x1]);
     }
 
     function isValidCompressedSignature(

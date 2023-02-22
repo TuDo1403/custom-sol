@@ -8,6 +8,9 @@ import {
     UUPSUpgradeable
 } from "../../oz-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
+import {
+    ProxyCheckerUpgradeable
+} from "../../internal-upgradeable/ProxyCheckerUpgradeable.sol";
 import {IManager, IAuthority} from "./interfaces/IManager.sol";
 
 import {
@@ -19,13 +22,18 @@ import {
 
 import {Roles} from "../../libraries/Roles.sol";
 import {ErrorHandler} from "../../libraries/ErrorHandler.sol";
+import {
+    ERC165CheckerUpgradeable
+} from "../../oz-upgradeable/utils/introspection/ERC165CheckerUpgradeable.sol";
 
 abstract contract ManagerUpgradeable is
     IManager,
     UUPSUpgradeable,
-    ContextUpgradeable
+    ContextUpgradeable,
+    ProxyCheckerUpgradeable
 {
     using ErrorHandler for bool;
+    using ERC165CheckerUpgradeable for address;
 
     bytes32 private __authority;
     bytes32 private __requestedRole;
@@ -96,11 +104,8 @@ abstract contract ManagerUpgradeable is
     }
 
     /// @inheritdoc IManager
-    function authority() public view returns (IAuthority authority_) {
-        /// @solidity memory-safe-assembly
-        assembly {
-            authority_ := sload(__authority.slot)
-        }
+    function authority() public view returns (IAuthority) {
+        return IAuthority(_authority());
     }
 
     /**
@@ -124,6 +129,20 @@ abstract contract ManagerUpgradeable is
     function _checkBlacklist(address account_) internal view {
         (bool ok, bytes memory returnOrRevertData) = _authority().staticcall(
             abi.encodeCall(IBlacklistableUpgradeable.isBlacklisted, (account_))
+        );
+
+        ok.handleRevertIfNotSuccess(returnOrRevertData);
+
+        if (abi.decode(returnOrRevertData, (bool)))
+            revert Manager__Blacklisted();
+    }
+
+    function _checkBlacklistMulti(address[] memory accounts_) internal view {
+        (bool ok, bytes memory returnOrRevertData) = _authority().staticcall(
+            abi.encodeCall(
+                IBlacklistableUpgradeable.areBlacklisted,
+                (accounts_)
+            )
         );
 
         ok.handleRevertIfNotSuccess(returnOrRevertData);
@@ -184,6 +203,14 @@ abstract contract ManagerUpgradeable is
         ok.handleRevertIfNotSuccess(returnOrRevertData);
 
         return abi.decode(returnOrRevertData, (bool));
+    }
+
+    function __checkAuthority(address authority_) private view {
+        if (
+            authority_ == address(0) ||
+            !_isProxy(authority_) ||
+            !authority_.supportsInterface(type(IAuthority).interfaceId)
+        ) revert Manager__InvalidArgument();
     }
 
     function _authorizeUpgrade(

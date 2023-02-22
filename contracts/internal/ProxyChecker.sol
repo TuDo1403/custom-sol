@@ -41,8 +41,8 @@ abstract contract ProxyChecker {
      * @param msgSender_ Address of the sender
      * @param txOrigin_ Origin of the transaction
      */
-    function _onlyEOA(address msgSender_, address txOrigin_) internal view {
-        if (_isProxyCall(msgSender_, txOrigin_) || _isProxy(msgSender_))
+    function _onlyEOA(address msgSender_, address txOrigin_) internal pure {
+        if (_isProxyCall(msgSender_, txOrigin_))
             revert ProxyChecker__ProxyUnallowed();
     }
 

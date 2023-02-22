@@ -37,6 +37,20 @@ abstract contract BlacklistableUpgradeable is
         return __blacklisted.get(account_.fillLast96Bits());
     }
 
+    function areBlacklisted(
+        address[] calldata accounts_
+    ) public view virtual returns (bool) {
+        uint256 length = accounts_.length;
+        for (uint256 i; i < length; ) {
+            if (__blacklisted.get(accounts_[i].fillLast96Bits())) return true;
+            unchecked {
+                ++i;
+            }
+        }
+
+        return false;
+    }
+
     /**
      * @dev Internal function to set the status of an account.
      * @param account_ The address to change the status of.

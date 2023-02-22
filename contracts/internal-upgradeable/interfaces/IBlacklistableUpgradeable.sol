@@ -21,4 +21,8 @@ interface IBlacklistableUpgradeable {
      * @return True if the address is blacklisted, false otherwise.
      */
     function isBlacklisted(address account_) external view returns (bool);
+
+    function areBlacklisted(
+        address[] calldata accounts_
+    ) external view returns (bool);
 }

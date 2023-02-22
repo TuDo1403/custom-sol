@@ -3,6 +3,8 @@ pragma solidity ^0.8.17;
 
 import {Context} from "../../oz/utils/Context.sol";
 
+import {ProxyChecker} from "../../internal/ProxyChecker.sol";
+
 import {IManager, IAuthority} from "./interfaces/IManager.sol";
 import {IAccessControl} from "../../oz/access/IAccessControl.sol";
 import {IBlacklistable} from "../../internal/interfaces/IBlacklistable.sol";
@@ -10,8 +12,11 @@ import {IBlacklistable} from "../../internal/interfaces/IBlacklistable.sol";
 import {Roles} from "../../libraries/Roles.sol";
 import {ErrorHandler} from "../../libraries/ErrorHandler.sol";
 
-abstract contract Manager is Context, IManager {
+import {ERC165Checker} from "../../oz/utils/introspection/ERC165Checker.sol";
+
+abstract contract Manager is Context, IManager, ProxyChecker {
     using ErrorHandler for bool;
+    using ERC165Checker for address;
 
     bytes32 private __authority;
     bytes32 private __requestedRole;
@@ -37,6 +42,8 @@ abstract contract Manager is Context, IManager {
     }
 
     constructor(IAuthority authority_, bytes32 role_) payable {
+        __checkAuthority(address(authority_));
+
         assembly {
             sstore(__requestedRole.slot, role_)
         }
@@ -57,6 +64,8 @@ abstract contract Manager is Context, IManager {
     function updateAuthority(
         IAuthority authority_
     ) external onlyRole(Roles.OPERATOR_ROLE) {
+        __checkAuthority(address(authority_));
+
         IAuthority old = authority();
         if (old == authority_) revert Manager__AlreadySet();
         (bool ok, bytes memory revertData) = address(authority_).call(
@@ -71,11 +80,8 @@ abstract contract Manager is Context, IManager {
     }
 
     /// @inheritdoc IManager
-    function authority() public view returns (IAuthority authority_) {
-        /// @solidity memory-safe-assembly
-        assembly {
-            authority_ := sload(__authority.slot)
-        }
+    function authority() public view returns (IAuthority) {
+        return IAuthority(_authority());
     }
 
     /**
@@ -99,6 +105,17 @@ abstract contract Manager is Context, IManager {
     function _checkBlacklist(address account_) internal view {
         (bool ok, bytes memory returnOrRevertData) = _authority().staticcall(
             abi.encodeCall(IBlacklistable.isBlacklisted, (account_))
+        );
+
+        ok.handleRevertIfNotSuccess(returnOrRevertData);
+
+        if (abi.decode(returnOrRevertData, (bool)))
+            revert Manager__Blacklisted();
+    }
+
+    function _checkBlacklistMulti(address[] memory accounts_) internal view {
+        (bool ok, bytes memory returnOrRevertData) = _authority().staticcall(
+            abi.encodeCall(IBlacklistable.areBlacklisted, (accounts_))
         );
 
         ok.handleRevertIfNotSuccess(returnOrRevertData);
@@ -156,5 +173,13 @@ abstract contract Manager is Context, IManager {
         ok.handleRevertIfNotSuccess(returnOrRevertData);
 
         return abi.decode(returnOrRevertData, (bool));
+    }
+
+    function __checkAuthority(address authority_) private view {
+        if (
+            authority_ == address(0) ||
+            !_isProxy(authority_) ||
+            !authority_.supportsInterface(type(IAuthority).interfaceId)
+        ) revert Manager__InvalidArgument();
     }
 }

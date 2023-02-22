@@ -9,7 +9,6 @@ pragma solidity ^0.8.0;
 interface IERC20 {
     error ERC20__Expired();
     error ERC20__StringTooLong();
-    error ERC20__InvalidSignature();
     /**
      * @dev Emitted when `value` tokens are moved from one account (`from`) to
      * another (`to`).

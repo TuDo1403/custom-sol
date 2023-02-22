@@ -3,19 +3,17 @@
 
 pragma solidity ^0.8.17;
 
-import {Array} from "../Array.sol";
-import {BitMap256} from "./BitMap256.sol";
+import {ArrayUtil, BitMap256} from "../ArrayUtil.sol";
 
 library EnumerableSet256 {
     using BitMap256 for *;
-    using Array for uint256[256];
+    using ArrayUtil for *;
 
     struct Set {
-        uint256 length;
+        uint8 length;
         // Storage of set values
         uint256[256] _values;
-        // Position of the value in the `values` array, plus 1 because index 0
-        // means a value is not in the set.
+        // Position of the value in the `values`
         BitMap256.BitMap _indexes;
     }
 
@@ -26,7 +24,8 @@ library EnumerableSet256 {
                 ++set.length;
             }
             return true;
-        } else return false;
+        }
+        return false;
     }
 
     /**
@@ -40,11 +39,13 @@ library EnumerableSet256 {
         uint256 idx = value.index({shouldHash_: false});
         uint256 valueIndex = set._values[idx] == value ? idx : 0;
 
-        if (valueIndex != 0) {
-            delete set._values[valueIndex];
-            return true;
+        if (valueIndex == 0) return false;
+
+        delete set._values[valueIndex];
+        unchecked {
+            --set.length;
         }
-        return false;
+        return true;
     }
 
     /**
@@ -90,8 +91,7 @@ library EnumerableSet256 {
      * uncallable if the set grows to a point where copying to memory consumes too much gas to fit in a block.
      */
     function _values(Set storage set) private view returns (uint256[] memory) {
-        uint256[256] memory val = set._values;
-        return val.trimZero(set.length);
+        return set._values.trim(0);
     }
 
     // Bytes32Set
@@ -285,16 +285,13 @@ library EnumerableSet256 {
      */
     function values(
         AddressSet storage set
-    ) internal view returns (address[] memory) {
+    ) internal view returns (address[] memory res) {
         uint256[] memory store = _values(set._inner);
-        address[] memory result;
 
         /// @solidity memory-safe-assembly
         assembly {
-            result := store
+            res := store
         }
-
-        return result;
     }
 
     // UintSet

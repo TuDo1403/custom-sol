@@ -26,10 +26,6 @@ abstract contract ERC20Upgradeable is
                             METADATA STORAGE
     //////////////////////////////////////////////////////////////*/
 
-    string public name;
-
-    string public symbol;
-
     uint8 public decimals;
 
     /*//////////////////////////////////////////////////////////////
@@ -37,6 +33,9 @@ abstract contract ERC20Upgradeable is
     //////////////////////////////////////////////////////////////*/
 
     uint256 public totalSupply;
+    string public name;
+
+    string public symbol;
 
     mapping(address => uint256) internal _balanceOf;
 

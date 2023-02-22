@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import {Initializable} from "../oz-upgradeable/proxy/utils/Initializable.sol";
-
 /**
  * @dev Revert error if call is made from a proxy contract
  */
@@ -17,7 +15,7 @@ error ProxyChecker__ProxyUnallowed();
  * @title ProxyCheckerUpgradeable
  * @dev Abstract contract for checking if a call was made by a proxy contract or an externally owned account.
  */
-abstract contract ProxyCheckerUpgradeable is Initializable {
+abstract contract ProxyCheckerUpgradeable {
     modifier onlyEOA() {
         _onlyEOA(msg.sender);
         _;
@@ -27,8 +25,8 @@ abstract contract ProxyCheckerUpgradeable is Initializable {
         _onlyEOA(sender_, _txOrigin());
     }
 
-    function _onlyEOA(address msgSender_, address txOrigin_) internal view {
-        if (_isProxyCall(msgSender_, txOrigin_) || _isProxy(msgSender_))
+    function _onlyEOA(address msgSender_, address txOrigin_) internal pure {
+        if (_isProxyCall(msgSender_, txOrigin_))
             revert ProxyChecker__ProxyUnallowed();
     }
 

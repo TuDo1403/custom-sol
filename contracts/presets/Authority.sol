@@ -39,6 +39,7 @@ abstract contract Authority is
         _grantRole(Roles.OPERATOR_ROLE, admin_);
         _grantRole(Roles.UPGRADER_ROLE, admin_);
         _grantRole(Roles.PROXY_ROLE, address(this));
+        _grantRole(Roles.OPERATOR_ROLE, address(this));
 
         uint256 length = operators_.length;
         if (length != roles_.length) revert Authority__LengthMismatch();
@@ -55,23 +56,6 @@ abstract contract Authority is
         address vault_
     ) external override onlyRole(DEFAULT_ADMIN_ROLE) {
         _changeVault(vault_);
-    }
-
-    /**
-     * @dev Grants the specified role to the specified account.
-     * Only the admin of the role being granted can call this function.
-     * @param role_ bytes32 representing the role being granted
-     * @param account_ address of the account receiving the role
-     */
-    function grantRole(
-        bytes32 role_,
-        address account_
-    )
-        public
-        override(AccessControl, IAccessControl)
-        onlyRole(getRoleAdmin(role_))
-    {
-        AccessControl.grantRole(role_, account_);
     }
 
     /// @inheritdoc IBlacklistable
@@ -105,6 +89,14 @@ abstract contract Authority is
         returns (bool isPaused)
     {
         return Pausable.paused();
+    }
+
+    function supportsInterface(
+        bytes4 interfaceId_
+    ) public view override returns (bool) {
+        return
+            interfaceId_ == type(IAuthority).interfaceId ||
+            super.supportsInterface(interfaceId_);
     }
 
     /// @inheritdoc IAuthority

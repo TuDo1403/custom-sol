@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import {ProxyChecker} from "./ProxyChecker.sol";
 import {FundForwarder, IFundForwarder} from "./FundForwarder.sol";
 
 import {ICommandGate} from "./interfaces/ICommandGate.sol";
@@ -10,7 +9,7 @@ import {BitMaps} from "../oz/utils/structs/BitMaps.sol";
 import {ErrorHandler} from "../libraries/ErrorHandler.sol";
 import {Bytes32Address} from "../libraries/Bytes32Address.sol";
 
-abstract contract CommandGate is ICommandGate, FundForwarder, ProxyChecker {
+abstract contract CommandGate is ICommandGate, FundForwarder {
     using ErrorHandler for bool;
     using Bytes32Address for address;
     using BitMaps for BitMaps.BitMap;

@@ -154,9 +154,6 @@ abstract contract ERC20 is Context, IERC20 {
             mstore(0, spender_)
             allowanceKey := keccak256(0, 64)
             allowed := sload(allowanceKey)
-            // if eq(allowed, 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff) {
-            //     revert(0, 0)
-            // }
         }
 
         if (allowed == ~uint256(0)) return;

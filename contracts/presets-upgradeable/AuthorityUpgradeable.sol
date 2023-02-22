@@ -83,6 +83,14 @@ abstract contract AuthorityUpgradeable is
         return PausableUpgradeable.paused();
     }
 
+    function supportsInterface(
+        bytes4 interfaceId_
+    ) public view override returns (bool) {
+        return
+            interfaceId_ == type(IAuthority).interfaceId ||
+            super.supportsInterface(interfaceId_);
+    }
+
     function setUserStatus(
         address account_,
         bool status_

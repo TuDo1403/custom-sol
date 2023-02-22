@@ -27,4 +27,6 @@ interface ITreasury {
         address token_,
         uint256 tokenId_
     ) external view returns (bool);
+
+    function nonces(address account_) external view returns (uint256);
 }

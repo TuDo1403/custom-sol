@@ -164,6 +164,37 @@ contract UniversalCommandGate is
         return this.onERC1155BatchReceived.selector;
     }
 
+    function supportsInterface(
+        bytes4 interfaceId_
+    ) external pure override returns (bool) {
+        return
+            interfaceId_ == type(IERC165).interfaceId ||
+            interfaceId_ == type(ICommandGate).interfaceId ||
+            interfaceId_ == type(IERC1155Receiver).interfaceId ||
+            interfaceId_ == type(ERC721TokenReceiver).interfaceId ||
+            interfaceId_ == type(IUniversalCommandGate).interfaceId;
+    }
+
+    function safeRecoverHeader() public pure override returns (bytes memory) {
+        /// @dev value is equal keccak256("SAFE_RECOVER_HEADER")
+        return
+            bytes.concat(
+                bytes32(
+                    0x556d79614195ebefcc31ab1ee514b9953934b87d25857902370689cbd29b49de
+                )
+            );
+    }
+
+    function safeTransferHeader() public pure override returns (bytes memory) {
+        /// @dev value is equal keccak256("SAFE_TRANSFER")
+        return
+            bytes.concat(
+                bytes32(
+                    0xc9627ddb76e5ee80829319617b557cc79498bbbc5553d8c632749a7511825f5d
+                )
+            );
+    }
+
     function _handleERC20Deposit(
         address vault_,
         address mainVault_,
@@ -283,34 +314,9 @@ contract UniversalCommandGate is
         } else _checkRole(Roles.PROXY_ROLE, account_);
     }
 
-    function safeRecoverHeader() public pure override returns (bytes memory) {
-        /// @dev value is equal keccak256("SAFE_RECOVER_HEADER")
-        return
-            bytes.concat(
-                bytes32(
-                    0x556d79614195ebefcc31ab1ee514b9953934b87d25857902370689cbd29b49de
-                )
-            );
+    function _beforeRecover(bytes memory) internal view override {
+        _requirePaused();
     }
 
-    function safeTransferHeader() public pure override returns (bytes memory) {
-        /// @dev value is equal keccak256("SAFE_TRANSFER")
-        return
-            bytes.concat(
-                bytes32(
-                    0xc9627ddb76e5ee80829319617b557cc79498bbbc5553d8c632749a7511825f5d
-                )
-            );
-    }
-
-    function supportsInterface(
-        bytes4 interfaceId_
-    ) external pure override returns (bool) {
-        return
-            interfaceId_ == type(IERC165).interfaceId ||
-            interfaceId_ == type(ICommandGate).interfaceId ||
-            interfaceId_ == type(IERC1155Receiver).interfaceId ||
-            interfaceId_ == type(ERC721TokenReceiver).interfaceId ||
-            interfaceId_ == type(IUniversalCommandGate).interfaceId;
-    }
+    function _afterRecover(address, address, bytes memory) internal override {}
 }

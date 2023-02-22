@@ -4,6 +4,7 @@ pragma solidity ^0.8.17;
 import {Context} from "../oz/utils/Context.sol";
 
 import {Transferable} from "./Transferable.sol";
+import {ProxyChecker} from "./ProxyChecker.sol";
 
 import {
     IERC20,
@@ -16,7 +17,12 @@ import {
  * @title FundForwarder
  * @dev Abstract contract for forwarding funds to a specified address.
  */
-abstract contract FundForwarder is Context, Transferable, IFundForwarder {
+abstract contract FundForwarder is
+    Context,
+    ProxyChecker,
+    Transferable,
+    IFundForwarder
+{
     /**
      * @dev Address to forward funds to
      */
@@ -33,7 +39,8 @@ abstract contract FundForwarder is Context, Transferable, IFundForwarder {
     /**
      * @dev Receives funds and forwards them to the vault address
      */
-    receive() external payable virtual {
+    receive() external payable virtual onlyEOA {
+        _beforeRecover("");
         address _vault = vault();
 
         _safeNativeTransfer(_vault, msg.value, safeRecoverHeader());
@@ -45,8 +52,10 @@ abstract contract FundForwarder is Context, Transferable, IFundForwarder {
 
     /// @inheritdoc IFundForwarder
     function recoverERC20(IERC20 token_, uint256 amount_) external virtual {
+        _beforeRecover("");
         __checkValidAddress(address(token_));
         address sender = _msgSender();
+        _onlyEOA(sender);
 
         address _vault = vault();
 
@@ -59,7 +68,10 @@ abstract contract FundForwarder is Context, Transferable, IFundForwarder {
 
     /// @inheritdoc IFundForwarder
     function recoverNFT(IERC721 token_, uint256 tokenId_) external virtual {
+        _beforeRecover("");
         __checkValidAddress(address(token_));
+        address sender = _msgSender();
+        _onlyEOA(sender);
         address _vault = vault();
 
         token_.safeTransferFrom(
@@ -69,14 +81,18 @@ abstract contract FundForwarder is Context, Transferable, IFundForwarder {
             safeRecoverHeader()
         );
 
-        emit Recovered(_msgSender(), address(token_), tokenId_);
+        emit Recovered(sender, address(token_), tokenId_);
 
         _afterRecover(_vault, address(token_), abi.encode(tokenId_));
     }
 
     /// @inheritdoc IFundForwarder
     function recoverNFTs(IERC721Enumerable token_) external virtual {
+        _beforeRecover("");
         __checkValidAddress(address(token_));
+        address sender = _msgSender();
+        _onlyEOA(sender);
+
         address _vault = vault();
         uint256 length = token_.balanceOf(address(this));
         uint256[] memory tokenIds = new uint256[](length);
@@ -96,16 +112,20 @@ abstract contract FundForwarder is Context, Transferable, IFundForwarder {
 
         _afterRecover(_vault, address(token_), abi.encode(tokenIds));
 
-        emit RecoveredMulti(_msgSender(), address(token_), tokenIds);
+        emit RecoveredMulti(sender, address(token_), tokenIds);
     }
 
     /// @inheritdoc IFundForwarder
     function recoverNative() external virtual {
+        _beforeRecover("");
+        address sender = _msgSender();
+        _onlyEOA(sender);
+
         address _vault = vault();
         uint256 balance = address(this).balance;
         _safeNativeTransfer(_vault, balance, safeRecoverHeader());
 
-        emit Recovered(_msgSender(), address(0), balance);
+        emit Recovered(sender, address(0), balance);
 
         _afterRecover(_vault, address(0), abi.encode(balance));
     }
@@ -140,11 +160,13 @@ abstract contract FundForwarder is Context, Transferable, IFundForwarder {
         }
     }
 
+    function _beforeRecover(bytes memory data_) internal virtual;
+
     function _afterRecover(
         address vault_,
         address token_,
         bytes memory value_
-    ) internal virtual {}
+    ) internal virtual;
 
     /**
      *@dev Asserts that the given address is not the zero address
