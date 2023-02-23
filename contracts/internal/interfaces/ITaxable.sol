@@ -31,5 +31,7 @@ interface ITaxable {
 
     function percentageFraction() external pure returns (uint256);
 
+    function isTaxEnabled() external view returns (bool);
+
     function taxEnabledDuration() external pure returns (uint256);
 }

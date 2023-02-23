@@ -94,7 +94,7 @@ contract BountyKindsERC20Mock is
         IWNT wnt_,
         IUniswapV2Pair pool_,
         AggregatorV3Interface priceFeed_
-    ) payable ERC20Permit(name_, symbol_, 18) Pausable() Taxable(admin_) {
+    ) payable Pausable() Taxable(admin_) ERC20Permit(name_, symbol_, 18) {
         wnt = wnt_;
         priceFeed = priceFeed_;
 
