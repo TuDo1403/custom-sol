@@ -25,7 +25,7 @@ interface ITaxable {
     function tax(
         address token_,
         uint256 amount_
-    ) external pure returns (uint256);
+    ) external view returns (uint256);
 
     function taxFraction(address token_) external pure returns (uint256);
 

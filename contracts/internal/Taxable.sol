@@ -44,7 +44,7 @@ abstract contract Taxable is Context, ITaxable {
     function tax(
         address token_,
         uint256 amount_
-    ) public pure virtual returns (uint256) {
+    ) public view virtual returns (uint256) {
         return amount_.mulDivUp(taxFraction(token_), percentageFraction());
     }
 
