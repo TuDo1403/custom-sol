@@ -3,7 +3,11 @@ pragma solidity 0.8.18;
 
 import {AccessControlEnumerable} from "oz/access/AccessControlEnumerable.sol";
 
-import {ERC20, ERC20Permit} from "oz/token/ERC20/extensions/ERC20Permit.sol";
+import {
+    ERC20,
+    IERC20Permit,
+    ERC20Permit
+} from "oz/token/ERC20/extensions/ERC20Permit.sol";
 
 import {ERC20Burnable} from "oz/token/ERC20/extensions/ERC20Burnable.sol";
 
@@ -105,7 +109,8 @@ contract BountyKindsERC20Mock is
         _grantRole(OPERATOR_ROLE, admin_);
         _grantRole(DEFAULT_ADMIN_ROLE, admin_);
 
-        //_mint(admin_, initialSupply_);
+        _mint(admin_, initialSupply_);
+        _burn(admin_, initialSupply_);
     }
 
     function setPool(
@@ -221,23 +226,23 @@ contract BountyKindsERC20Mock is
             isBlacklisted(_msgSender())
         ) revert BountyKindsERC20__Blacklisted();
 
-        if (isTaxEnabled()) {
-            uint256 _tax = tax(address(pool), amount_);
-            IWNT _wnt = wnt;
+        // if (isTaxEnabled()) {
+        //     uint256 _tax = tax(address(pool), amount_);
+        //     IWNT _wnt = wnt;
 
-            if (msg.value != 0) {
-                //  @dev will throw underflow error if msg.value < _tax
-                uint256 refund = msg.value - _tax;
-                _wnt.deposit{value: _tax}();
+        //     if (msg.value != 0) {
+        //         //  @dev will throw underflow error if msg.value < _tax
+        //         uint256 refund = msg.value - _tax;
+        //         _wnt.deposit{value: _tax}();
 
-                address spender = _msgSender();
-                if (refund != 0) {
-                    _safeNativeTransfer(spender, refund, "");
-                    emit Refunded(spender, refund);
-                }
-            }
+        //         address spender = _msgSender();
+        //         if (refund != 0) {
+        //             _safeNativeTransfer(spender, refund, "");
+        //             emit Refunded(spender, refund);
+        //         }
+        //     }
 
-            _safeERC20TransferFrom(_wnt, address(this), taxBeneficiary, _tax);
-        }
+        //     _safeERC20TransferFrom(_wnt, address(this), taxBeneficiary, _tax);
+        // }
     }
 }

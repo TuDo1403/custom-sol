@@ -46,10 +46,6 @@ contract BountyKindsERC20Test is DSTestPlus {
     }
 
     function invariantMetadata() public {
-        console.logString(token.name());
-        console.logString(token.symbol());
-        console.logUint(token.decimals());
-
         assertEq(token.name(), "Token");
         assertEq(token.symbol(), "TKN");
         assertEq(token.decimals(), 18);
