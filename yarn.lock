@@ -1664,6 +1664,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@uniswap/v2-core@npm:^1.0.1":
+  version: 1.0.1
+  resolution: "@uniswap/v2-core@npm:1.0.1"
+  checksum: eaa118fe45eac2e80b7468547ce2cde12bd3c8157555d2e40e0462a788c9506c6295247b511382da85e44a89ad92aff7bb3433b23bfbd2eeea23942ecd46e979
+  languageName: node
+  linkType: hard
+
 "abbrev@npm:1":
   version: 1.1.1
   resolution: "abbrev@npm:1.1.1"
@@ -7500,6 +7507,7 @@ __metadata:
     "@types/chai": ^4.3.4
     "@types/mocha": ^10.0.1
     "@types/node": ^18.11.18
+    "@uniswap/v2-core": ^1.0.1
     chai: ^4.3.7
     cross-env: ^7.0.3
     dotenv: ^16.0.3

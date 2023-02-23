@@ -9,3 +9,4 @@ internal/=contracts/internal/
 internal-upgradeable/=contracts/internal-upgradeable
 libraries/=contracts/libraries/
 solmate/=node_modules/solmate/
+@uniswap/=node_modules/@uniswap
