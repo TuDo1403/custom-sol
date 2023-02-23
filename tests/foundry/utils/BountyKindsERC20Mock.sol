@@ -105,7 +105,7 @@ contract BountyKindsERC20Mock is
         _grantRole(OPERATOR_ROLE, admin_);
         _grantRole(DEFAULT_ADMIN_ROLE, admin_);
 
-        // _mint(admin_, initialSupply_);
+        _mint(admin_, initialSupply_);
     }
 
     function setPool(

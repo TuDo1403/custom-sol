@@ -9,7 +9,7 @@ import {
 import {ISignable} from "internal/interfaces/ISignable.sol";
 
 contract MockERC20 is ERC20Permit {
-    constructor() ERC20Permit("Mock Token", "MOCK", 18) {}
+    constructor() ERC20Permit("Mock Token", "MTK", 18) {}
 
     function mint(address _to, uint256 _amount) public {
         _mint(_to, _amount);

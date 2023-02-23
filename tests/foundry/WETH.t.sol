@@ -12,7 +12,7 @@ contract WETHTest is DSTestPlus, Transferable {
     WNT wnt;
 
     function setUp() public {
-        wnt = new WNT("WrappedEther", "WETH");
+        wnt = new WNT("WrappedEther", "WNT");
     }
 
     function testFallbackDeposit() public {
