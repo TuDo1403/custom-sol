@@ -39,7 +39,7 @@ abstract contract ERC20 is Context, IERC20, IERC20Metadata {
     /*//////////////////////////////////////////////////////////////
                                ERC20 LOGIC
     //////////////////////////////////////////////////////////////*/
-    function decimals() public virtual pure returns (uint8) {
+    function decimals() public pure virtual returns (uint8) {
         return 18;
     }
 
@@ -100,7 +100,16 @@ abstract contract ERC20 is Context, IERC20, IERC20Metadata {
             _balanceOf[to] += amount;
         }
 
-        emit Transfer(from, to, amount);
+        assembly {
+            mstore(0, amount)
+            log3(
+                0,
+                0x20,
+                0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef,
+                from,
+                to
+            )
+        }
 
         _afterTokenTransfer(from, to, amount);
         return true;
@@ -178,7 +187,16 @@ abstract contract ERC20 is Context, IERC20, IERC20Metadata {
             _balanceOf[to] += amount;
         }
 
-        emit Transfer(address(0), to, amount);
+        assembly {
+            mstore(0, amount)
+            log3(
+                0,
+                0x20,
+                0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef,
+                0,
+                to
+            )
+        }
 
         _afterTokenTransfer(address(0), to, amount);
     }
@@ -194,7 +212,16 @@ abstract contract ERC20 is Context, IERC20, IERC20Metadata {
             totalSupply -= amount;
         }
 
-        emit Transfer(from, address(0), amount);
+        assembly {
+            mstore(0, amount)
+            log3(
+                0,
+                0x20,
+                0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef,
+                amount,
+                0
+            )
+        }
 
         _afterTokenTransfer(from, address(0), amount);
     }
