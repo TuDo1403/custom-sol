@@ -12,12 +12,6 @@ import {IERC20Metadata} from "./extensions/IERC20Metadata.sol";
 /// @dev Do not manually set balances without updating totalSupply, as the sum of all user balances must not exceed it.
 abstract contract ERC20 is Context, IERC20, IERC20Metadata {
     /*//////////////////////////////////////////////////////////////
-                            METADATA STORAGE
-    //////////////////////////////////////////////////////////////*/
-
-    uint8 public immutable decimals;
-
-    /*//////////////////////////////////////////////////////////////
                               ERC20 STORAGE
     //////////////////////////////////////////////////////////////*/
 
@@ -34,23 +28,20 @@ abstract contract ERC20 is Context, IERC20, IERC20Metadata {
                                CONSTRUCTOR
     //////////////////////////////////////////////////////////////*/
 
-    constructor(
-        string memory name_,
-        string memory symbol_,
-        uint8 decimals_
-    ) payable {
+    constructor(string memory name_, string memory symbol_) payable {
         if (bytes(symbol_).length > 32 || bytes(name_).length > 32)
             revert ERC20__StringTooLong();
 
         name = name_;
         symbol = symbol_;
-
-        decimals = decimals_;
     }
 
     /*//////////////////////////////////////////////////////////////
                                ERC20 LOGIC
     //////////////////////////////////////////////////////////////*/
+    function decimals() public virtual pure returns (uint8) {
+        return 18;
+    }
 
     function approve(
         address spender,

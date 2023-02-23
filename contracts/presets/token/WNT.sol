@@ -16,7 +16,7 @@ contract WNT is IWNT, ERC20Permit, Transferable {
     constructor(
         string memory name_,
         string memory symbol_
-    ) payable ERC20Permit(name_, symbol_, 18) {}
+    ) payable ERC20Permit(name_, symbol_) {}
 
     function deposit() public payable virtual {
         address sender = _msgSender();

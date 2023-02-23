@@ -13,7 +13,7 @@ contract ERC20Test is DSTestPlus {
         keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
 
     function setUp() public {
-        token = new MockERC20("Token", "TKN", 18);
+        token = new MockERC20("Token",  "TKN");
     }
 
     function invariantMetadata() public {
@@ -484,7 +484,7 @@ contract ERC20Invariants is DSTestPlus, DSInvariantTest {
     MockERC20 token;
 
     function setUp() public {
-        token = new MockERC20("Token", "TKN", 18);
+        token = new MockERC20("Token", "TKN");
         balanceSum = new BalanceSum(token);
 
         addTargetContract(address(balanceSum));

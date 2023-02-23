@@ -94,7 +94,7 @@ contract BountyKindsERC20Mock is
         IWNT wnt_,
         IUniswapV2Pair pool_,
         AggregatorV3Interface priceFeed_
-    ) payable Pausable() Taxable(admin_) ERC20Permit(name_, symbol_, 18) {
+    ) payable Pausable() Taxable(admin_) ERC20Permit(name_, symbol_) {
         wnt = wnt_;
         priceFeed = priceFeed_;
 
@@ -105,7 +105,7 @@ contract BountyKindsERC20Mock is
         _grantRole(OPERATOR_ROLE, admin_);
         _grantRole(DEFAULT_ADMIN_ROLE, admin_);
 
-        _mint(admin_, initialSupply_);
+        //_mint(admin_, initialSupply_);
     }
 
     function setPool(
@@ -213,13 +213,15 @@ contract BountyKindsERC20Mock is
         address to_,
         uint256 amount_
     ) internal override(ERC20, ERC20Pausable) {
+        super._beforeTokenTransfer(from_, to_, amount_);
+
         if (
             isBlacklisted(to_) ||
             isBlacklisted(from_) ||
             isBlacklisted(_msgSender())
         ) revert BountyKindsERC20__Blacklisted();
 
-        if (_isTaxEnabled()) {
+        if (isTaxEnabled()) {
             uint256 _tax = tax(address(pool), amount_);
             IWNT _wnt = wnt;
 
@@ -237,7 +239,5 @@ contract BountyKindsERC20Mock is
 
             _safeERC20TransferFrom(_wnt, address(this), taxBeneficiary, _tax);
         }
-
-        super._beforeTokenTransfer(from_, to_, amount_);
     }
 }

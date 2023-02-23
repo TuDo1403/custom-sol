@@ -46,9 +46,8 @@ abstract contract ERC20PresetMinterPauser is
      */
     constructor(
         string memory name_,
-        string memory symbol_,
-        uint8 decimals_
-    ) payable ERC20(name_, symbol_, decimals_) {
+        string memory symbol_
+    ) payable ERC20(name_, symbol_) {
         address sender = _msgSender();
 
         _grantRole(MINTER_ROLE, sender);

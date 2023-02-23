@@ -15,8 +15,7 @@ import {
 contract MockERC20 is BountyKindsERC20Mock {
     constructor(
         string memory name_,
-        string memory symbol_,
-        uint8 decimals_
+        string memory symbol_
     )
         BountyKindsERC20Mock(
             "Token",
@@ -43,14 +42,14 @@ contract BountyKindsERC20Test is DSTestPlus {
         );
 
     function setUp() public {
-        token = new MockERC20("Token", "TKN", 18);
+        token = new MockERC20("Token", "TKN");
     }
 
     function invariantMetadata() public {
         console.logString(token.name());
         console.logString(token.symbol());
         console.logUint(token.decimals());
-        
+
         assertEq(token.name(), "Token");
         assertEq(token.symbol(), "TKN");
         assertEq(token.decimals(), 18);
@@ -64,7 +63,8 @@ contract BountyKindsERC20Test is DSTestPlus {
     }
 
     function testBurn() public {
-        token.mint(address(0xBEEF), 1e18);
+        token.mint(address(0xBEEF), 1 ether);
+        console.logUint(token.balanceOf(address(0xBEEF)));
         token.burn(address(0xBEEF), 0.9e18);
 
         assertEq(token.totalSupply(), 1e18 - 0.9e18);
@@ -520,7 +520,7 @@ contract ERC20Invariants is DSTestPlus, DSInvariantTest {
     MockERC20 token;
 
     function setUp() public {
-        token = new MockERC20("Token", "TKN", 18);
+        token = new MockERC20("Token", "TKN");
         balanceSum = new BalanceSum(token);
 
         addTargetContract(address(balanceSum));

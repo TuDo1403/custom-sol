@@ -9,5 +9,5 @@ contract PMT is ERC20Permit {
     constructor(
         string memory name_,
         string memory symbol_
-    ) payable ERC20Permit(name_, symbol_, 18) {}
+    ) payable ERC20Permit(name_, symbol_) {}
 }
