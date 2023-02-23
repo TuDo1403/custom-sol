@@ -14,7 +14,7 @@ abstract contract Taxable is Context, ITaxable {
     uint256 public taxEnabledTimestamp;
 
     modifier whenTaxEnabled() virtual {
-        __checkTaxEnabled();
+        _checkTaxEnabled();
         _;
     }
 
@@ -54,11 +54,11 @@ abstract contract Taxable is Context, ITaxable {
 
     function taxEnabledDuration() public pure virtual returns (uint256);
 
-    function __checkTaxEnabled() private view {
-        if (!__isTaxEnabled()) revert Taxable__TaxDisabled();
+    function _checkTaxEnabled() internal view {
+        if (!_isTaxEnabled()) revert Taxable__TaxDisabled();
     }
 
-    function __isTaxEnabled() private view returns (bool) {
+    function _isTaxEnabled() internal view virtual returns (bool) {
         return taxEnabledTimestamp + taxEnabledDuration() > block.timestamp;
     }
 }
