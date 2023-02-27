@@ -48,20 +48,30 @@ abstract contract ERC721Upgradeable is
         uint256 id
     ) public view virtual override returns (address owner) {
         assembly {
-            mstore(0, id)
-            mstore(32, _ownerOf.slot)
-            owner := sload(keccak256(0, 64))
+            mstore(0x00, id)
+            mstore(0x20, _ownerOf.slot)
+            owner := sload(keccak256(0x00, 0x40))
+            if iszero(owner) {
+                // Store the function selector of `ERC721__NotMinted()`.
+                // Revert with (offset, size).
+                mstore(0x00, 0xf2c8ced6)
+                revert(0x1c, 0x04)
+            }
         }
-
-        if (owner == address(0)) revert ERC721__NotMinted();
     }
 
     function balanceOf(
         address owner
     ) public view virtual returns (uint256 balance_) {
-        if (owner == address(0)) revert ERC721__NonZeroAddress();
-
         assembly {
+            if iszero(owner) {
+                // Store the function selector of `ERC721__NonZeroAddress()`.
+                // Revert with (offset, size).
+                mstore(0, 0xf8a06d80)
+                revert(0x1c, 0x04)
+            }
+
+            // balance_ = _balanceOf[owner]
             mstore(0, owner)
             mstore(32, _balanceOf.slot)
             balance_ := sload(keccak256(0, 64))
