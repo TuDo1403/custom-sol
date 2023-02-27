@@ -166,7 +166,7 @@ abstract contract Initializable {
     }
 
     function __beforeReinitialized(uint8 version) private {
-        if (__initializing != 1 || __initialized >= version)
+        if (__initialized >= version || __initializing != 1)
             revert Initializable__AlreadyInitialized();
         __initialized = version;
         __initializing = 2;

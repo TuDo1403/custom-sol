@@ -12,12 +12,12 @@ interface IPausable {
     /**
      * @dev Emitted when the pause is triggered by `account`.
      */
-    event Paused(address account);
+    event Paused(address indexed account);
 
     /**
      * @dev Emitted when the pause is lifted by `account`.
      */
-    event Unpaused(address account);
+    event Unpaused(address indexed account);
 
     /**
      * @dev Pauses all functions in the contract. Only callable by accounts with the PAUSER_ROLE.
@@ -48,7 +48,9 @@ abstract contract Pausable is Context, IPausable {
      * @dev Initializes the contract in unpaused state.
      */
     constructor() payable {
-        __paused = 1;
+        assembly {
+            sstore(__paused.slot, 1)
+        }
     }
 
     /**
@@ -88,14 +90,24 @@ abstract contract Pausable is Context, IPausable {
      * @dev Throws if the contract is paused.
      */
     function _requireNotPaused() internal view virtual {
-        if (paused()) revert Pausable__Paused();
+        assembly {
+            if eq(2, sload(__paused.slot)) {
+                mstore(0x00, 0x059519da)
+                revert(0x1c, 0x04)
+            }
+        }
     }
 
     /**
      * @dev Throws if the contract is not paused.
      */
     function _requirePaused() internal view virtual {
-        if (!paused()) revert Pausable__NotPaused();
+        assembly {
+            if eq(1, sload(__paused.slot)) {
+                mstore(0x00, 0x59488a5a)
+                revert(0x1c, 0x04)
+            }
+        }
     }
 
     /**
@@ -106,8 +118,17 @@ abstract contract Pausable is Context, IPausable {
      * - The contract must not be paused.
      */
     function _pause() internal virtual whenNotPaused {
-        __paused = 2;
-        emit Paused(_msgSender());
+        address sender = _msgSender();
+        assembly {
+            sstore(__paused.slot, 2)
+            log2(
+                0,
+                0,
+                /// @dev value is equal to keccak256("Paused(address)")
+                0x62e78cea01bee320cd4e420270b5ea74000d11b0c9f74754ebdbfc544b05a258,
+                sender
+            )
+        }
     }
 
     /**
@@ -118,7 +139,16 @@ abstract contract Pausable is Context, IPausable {
      * - The contract must be paused.
      */
     function _unpause() internal virtual whenPaused {
-        __paused = 1;
-        emit Unpaused(_msgSender());
+        address sender = _msgSender();
+        assembly {
+            sstore(__paused.slot, 1)
+            log2(
+                0,
+                0,
+                /// @dev value is equal to keccak256("Unpaused(address)")
+                0x5db9ee0a495bf2e6ff9c91a7834c1ba4fdd244a5e8aa4e537bd38aeae4b073aa,
+                sender
+            )
+        }
     }
 }

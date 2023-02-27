@@ -228,8 +228,18 @@ abstract contract AccessControl is Context, IAccessControl, ERC165 {
      * Emits a {RoleAdminChanged} event.
      */
     function _setRoleAdmin(bytes32 role, bytes32 adminRole) internal virtual {
-        emit RoleAdminChanged(role, getRoleAdmin(role), adminRole);
+        bytes32 roleAdminOf = getRoleAdmin(role);
         assembly {
+            log4(
+                0,
+                0,
+                /// @dev value is equal to keccak256("RoleAdminChanged(bytes32,bytes32,bytes32)")
+                0xbd79b86ffe0ab8e8776151514217cd7cacd52c909f66475c3af44e129f0b00ff,
+                role,
+                roleAdminOf,
+                adminRole
+            )
+
             mstore(0, role)
             mstore(32, _adminRoles.slot)
             sstore(keccak256(0, 64), adminRole)

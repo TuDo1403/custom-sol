@@ -7,7 +7,6 @@ pragma solidity ^0.8.0;
  * @dev Interface of the ERC20 standard as defined in the EIP.
  */
 interface IERC20 {
-    error ERC20__Expired();
     error ERC20__StringTooLong();
     /**
      * @dev Emitted when `value` tokens are moved from one account (`from`) to

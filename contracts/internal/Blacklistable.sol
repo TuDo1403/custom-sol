@@ -31,8 +31,13 @@ abstract contract Blacklistable is Context, IBlacklistable {
         address[] calldata accounts_
     ) public view virtual returns (bool) {
         uint256 length = accounts_.length;
+        address[] memory memAccounts_ = accounts_;
+        uint256[] memory uintAccounts;
+        assembly {
+            uintAccounts := memAccounts_
+        }
         for (uint256 i; i < length; ) {
-            if (__blacklisted.get(accounts_[i].fillLast96Bits())) return true;
+            if (__blacklisted.get(uintAccounts[i])) return true;
             unchecked {
                 ++i;
             }

@@ -9,7 +9,7 @@ test = 'tests/foundry'
 cache_path = 'forge-cache'
 gas_reports = ["RiskyContract"]
 bytecode_hash = 'none'
-solc_version = '0.8.18'
+solc_version = '0.8.19'
 
 [profile.ci]
 verbosity = 4
