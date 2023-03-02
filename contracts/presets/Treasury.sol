@@ -14,7 +14,6 @@ import {
     IERC1155Receiver
 } from "@openzeppelin/contracts/token/ERC1155/ERC1155.sol"; // TODO: update oz-custom
 
-import {BitMaps} from "../oz/utils/structs/BitMaps.sol";
 import {ERC165Checker} from "../oz/utils/introspection/ERC165Checker.sol";
 
 contract Treasury is
@@ -26,7 +25,6 @@ contract Treasury is
     ERC721TokenReceiver
 {
     using ERC165Checker for address;
-    using BitMaps for BitMaps.BitMap;
     using Bytes32Address for address;
 
     ///@dev value is equal to keccak256("Permit(address token,address to,uint256 value,uint256 amount,uint256 nonce,uint256 deadline)")
@@ -38,7 +36,7 @@ contract Treasury is
     mapping(address => uint256) public erc20Balances;
     mapping(address => mapping(uint256 => uint256)) public erc1155Balances;
 
-    mapping(address => BitMaps.BitMap) private __erc721Balances;
+    mapping(address => mapping(uint256 => bool)) public erc721Balances;
 
     constructor(
         IAuthority authority_,
@@ -156,7 +154,7 @@ contract Treasury is
         _checkBlacklist(operator_);
         __checkInterface(token, type(IERC721).interfaceId);
 
-        __erc721Balances[token].set(tokenId_);
+        erc721Balances[token][tokenId_] = true;
 
         emit Received(operator_, token, abi.encode(tokenId_), data_);
 
@@ -256,10 +254,10 @@ contract Treasury is
             safeReceivedNativeBalance -= value_;
             _safeNativeTransfer(to_, value_, "SAFE_WITHDRAW");
         } else if (token_.supportsInterface(type(IERC721).interfaceId)) {
-            if (!__erc721Balances[token_].get(value_))
+            if (!erc721Balances[token_][value_])
                 revert Treasury__UnauthorizedWithdrawal();
 
-            __erc721Balances[token_].unset(value_);
+            delete erc721Balances[token_][value_];
 
             IERC721(token_).safeTransferFrom(
                 address(this),
@@ -304,13 +302,6 @@ contract Treasury is
         /// @dev value is equal keccak256("SAFE_TRANSFER")
         return
             0xc9627ddb76e5ee80829319617b557cc79498bbbc5553d8c632749a7511825f5d;
-    }
-
-    function ownerOf(
-        address token_,
-        uint256 tokenId_
-    ) external view returns (bool) {
-        return __erc721Balances[token_].get(tokenId_);
     }
 
     function supportsInterface(

@@ -9,7 +9,7 @@ interface IERC721Rentable is IERC721 {
 
     struct UserInfo {
         address user; // address of user role
-        uint64 expires; // unix timestamp, user expires
+        uint96 expires; // unix timestamp, user expires
     }
 
     // Logged when the user of an NFT is changed or expires is changed

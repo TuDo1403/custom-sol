@@ -55,6 +55,7 @@ abstract contract ERC20Permit is ERC20, IERC20Permit, Signable {
                 mstore(0x00, 0x614fe41d)
                 revert(0x1c, 0x04)
             }
+
             mstore(0x00, owner)
             mstore(0x20, _nonces.slot)
             let nonceKey := keccak256(0x00, 0x40)

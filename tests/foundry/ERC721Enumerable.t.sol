@@ -179,7 +179,10 @@ contract ERC721EnumerableTest is Test {
         //         ++i;
         //     }
         // }
-
-        nft.mint(owner, 988888);
+        IMockERC721Enumerable _nft = nft;
+        address _owner = owner;
+        _nft.mint(_owner, 988888);
+        _nft.mint(_owner, 534534534);
+        _nft.mint(_owner, 534534523);
     }
 }

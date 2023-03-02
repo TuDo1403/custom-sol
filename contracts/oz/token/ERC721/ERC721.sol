@@ -7,8 +7,6 @@ import {BitMaps} from "../../utils/structs/BitMaps.sol";
 import {IERC721} from "./IERC721.sol";
 import {IERC721Metadata} from "./extensions/IERC721Metadata.sol";
 
-import {Bytes32Address} from "../../../libraries/Bytes32Address.sol";
-
 /// @notice Modern, minimalist, and gas efficient ERC-721 implementation.
 /// @author Solmate (https://github.com/transmissions11/solmate/blob/main/src/tokens/ERC721.sol)
 abstract contract ERC721 is Context, ERC165, IERC721, IERC721Metadata {
@@ -37,6 +35,7 @@ abstract contract ERC721 is Context, ERC165, IERC721, IERC721Metadata {
             mstore(0x00, id)
             mstore(0x20, _ownerOf.slot)
             owner := sload(keccak256(0x00, 0x40))
+
             if iszero(owner) {
                 // Store the function selector of `ERC721__NotMinted()`.
                 // Revert with (offset, size).
@@ -53,14 +52,14 @@ abstract contract ERC721 is Context, ERC165, IERC721, IERC721Metadata {
             if iszero(owner) {
                 // Store the function selector of `ERC721__NonZeroAddress()`.
                 // Revert with (offset, size).
-                mstore(0, 0xf8a06d80)
+                mstore(0x00, 0xf8a06d80)
                 revert(0x1c, 0x04)
             }
 
             // balance_ = _balanceOf[owner]
-            mstore(0, owner)
-            mstore(32, _balanceOf.slot)
-            balance_ := sload(keccak256(0, 64))
+            mstore(0x00, owner)
+            mstore(0x20, _balanceOf.slot)
+            balance_ := sload(keccak256(0x00, 0x40))
         }
     }
 
@@ -125,13 +124,14 @@ abstract contract ERC721 is Context, ERC165, IERC721, IERC721Metadata {
             sstore(keccak256(0x00, 0x40), spender)
 
             // emit Approval(owner, spender, id)
-            log3(
+            log4(
                 0x00,
-                0x20,
+                0x00,
                 /// @dev value is equal to keccak256("Approval(address,address,uint256)")
                 0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925,
                 owner,
-                spender
+                spender,
+                id
             )
         }
     }
@@ -166,9 +166,10 @@ abstract contract ERC721 is Context, ERC165, IERC721, IERC721Metadata {
 
             //  emit ApprovalForAll(sender, operator, approved)
             mstore(0x00, approved)
+
             log3(
-                0x18,
-                0x08,
+                0x00,
+                0x20,
                 /// @dev value is equal to keccak256("ApprovalForAll(address,address,bool)")
                 0x17307eab39ab6107e8899845ad3d59bd9653f200f220920489ca2b5937696c31,
                 sender,
@@ -206,42 +207,43 @@ abstract contract ERC721 is Context, ERC165, IERC721, IERC721Metadata {
     function _isApprovedOrOwner(
         address spender,
         uint256 tokenId
-    ) internal view virtual returns (bool isApprovedOrOwner) {
+    ) internal view virtual returns (bool isApprovedOrOwner_) {
         address owner = ownerOf(tokenId);
         assembly {
             // if spender is owner
             if eq(spender, owner) {
-                isApprovedOrOwner := true
-                stop()
+                isApprovedOrOwner_ := true
             }
 
-            // if _getApproved[tokenId] == spender
-            mstore(0x00, tokenId)
-            mstore(0x20, _getApproved.slot)
-            let approved := sload(keccak256(0x00, 0x40))
-            if eq(approved, spender) {
-                isApprovedOrOwner := true
-                stop()
-            }
+            if iszero(isApprovedOrOwner_) {
+                // if _getApproved[tokenId] == spender
+                mstore(0x00, tokenId)
+                mstore(0x20, _getApproved.slot)
+                let approved := sload(keccak256(0x00, 0x40))
+                if eq(approved, spender) {
+                    isApprovedOrOwner_ := true
+                }
 
-            // if _isApprovedForAll[owner][spender] == true
-            mstore(0x00, owner)
-            mstore(0x20, _isApprovedForAll.slot)
-            // store _isApprovedForAll[owner] key at 0x20
-            mstore(0x20, keccak256(0x00, 0x40))
+                if iszero(isApprovedOrOwner_) {
+                    // if _isApprovedForAll[owner][spender] == true
+                    mstore(0x00, owner)
+                    mstore(0x20, _isApprovedForAll.slot)
+                    // store _isApprovedForAll[owner] key at 0x20
+                    mstore(0x20, keccak256(0x00, 0x40))
 
-            // store last 248 bit of spender as index
-            mstore(0x00, shr(0x08, spender))
+                    // store last 248 bit of spender as index
+                    mstore(0x00, shr(0x08, spender))
 
-            // check if the bit is turned in the bitmap
-            approved := and(
-                sload(keccak256(0, 64)),
-                shl(and(spender, 0xff), 1)
-            )
+                    // check if the bit is turned in the bitmap
+                    approved := and(
+                        sload(keccak256(0x00, 0x40)),
+                        shl(and(spender, 0xff), 1)
+                    )
 
-            if eq(approved, spender) {
-                isApprovedOrOwner := true
-                stop()
+                    if approved {
+                        isApprovedOrOwner_ := true
+                    }
+                }
             }
         }
     }
@@ -388,14 +390,14 @@ abstract contract ERC721 is Context, ERC165, IERC721, IERC721Metadata {
             sstore(approvedKey, 0)
 
             // emit Transfer(from, to, id);
-            mstore(0x00, id)
-            log3(
+            log4(
                 0x00,
-                0x20,
+                0x00,
                 /// @dev value is equal to keccak256("Transfer(address,address,uint256)")
                 0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef,
                 from,
-                to
+                to,
+                id
             )
         }
 
@@ -473,13 +475,14 @@ abstract contract ERC721 is Context, ERC165, IERC721, IERC721Metadata {
             sstore(key, to)
 
             //  emit Transfer(from, to, tokenId);
-            log3(
+            log4(
                 0x00,
-                0x20,
+                0x00,
                 /// @dev value is equal to keccak256("Transfer(address,address,uint256)")
                 0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef,
                 from,
-                to
+                to,
+                tokenId
             )
 
             // delete _getApproved[tokenId];
@@ -542,13 +545,14 @@ abstract contract ERC721 is Context, ERC165, IERC721, IERC721Metadata {
             }
 
             /// @dev emit Transfer(address(0), to, id)
-            log3(
+            log4(
                 0x00,
-                0x20,
+                0x00,
                 /// @dev value is equal to keccak256("Transfer(address,address,uint256)")
                 0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef,
                 0,
-                to
+                to,
+                id
             )
 
             /// @dev _ownerOf[id] = to
@@ -593,13 +597,14 @@ abstract contract ERC721 is Context, ERC165, IERC721, IERC721Metadata {
             sstore(keccak256(0x00, 0x40), 0)
 
             //  emit Transfer(owner, address(0), id);
-            log3(
+            log4(
                 0x00,
-                0x20,
+                0x00,
                 /// @dev value is equal to keccak256("Transfer(address,address,uint256)")
                 0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef,
                 owner,
-                0
+                0,
+                id
             )
 
             // Ownership check above ensures no underflow.

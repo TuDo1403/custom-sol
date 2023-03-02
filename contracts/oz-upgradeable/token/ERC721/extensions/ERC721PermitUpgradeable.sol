@@ -49,38 +49,45 @@ abstract contract ERC721PermitUpgradeable is
         uint256 deadline_,
         bytes calldata signature_
     ) external override {
-        if (block.timestamp > deadline_) revert ERC721Permit__Expired();
-
         address owner = ownerOf(tokenId_);
-        if (spender_ == owner) revert ERC721Permit__SelfApproving();
 
         bytes32 digest;
         assembly {
+            // if (block.timestamp > deadline_) revert ERC721Permit__Expired();
+            if lt(deadline_, timestamp()) {
+                mstore(0x00, 0x7b860b42)
+                revert(0x1c, 0x04)
+            }
+            //  if (spender_ == owner) revert ERC721Permit__SelfApproving();
+            if eq(spender_, owner) {
+                mstore(0x00, 0x6916b4d5)
+                revert(0x1c, 0x04)
+            }
+
             let freeMemPtr := mload(0x40)
-
             mstore(freeMemPtr, __PERMIT_TYPEHASH)
-            mstore(add(freeMemPtr, 32), spender_)
+            mstore(add(freeMemPtr, 0x20), spender_)
 
-            mstore(add(freeMemPtr, 64), tokenId_)
-
-            mstore(add(freeMemPtr, 96), _nonces.slot)
+            mstore(add(freeMemPtr, 0x40), tokenId_)
+            let nonceMemPtr := add(freeMemPtr, 0x60)
+            mstore(nonceMemPtr, _nonces.slot)
 
             // increment nonce
-            let nonceKey := keccak256(64, 64)
+            let nonceKey := keccak256(add(freeMemPtr, 0x40), 0x40)
             let nonce := sload(nonceKey)
             sstore(nonceKey, add(1, nonce))
 
-            mstore(add(freeMemPtr, 96), nonce)
-            mstore(add(freeMemPtr, 128), deadline_)
-            digest := keccak256(freeMemPtr, 160)
+            mstore(nonceMemPtr, nonce)
+            mstore(add(freeMemPtr, 0x80), deadline_)
+            digest := keccak256(freeMemPtr, 0xa0)
         }
 
         _verify(owner, digest, signature_);
 
         assembly {
-            mstore(0, tokenId_)
-            mstore(32, _getApproved.slot)
-            sstore(keccak256(0, 64), spender_)
+            mstore(0x00, tokenId_)
+            mstore(0x20, _getApproved.slot)
+            sstore(keccak256(0x00, 0x40), spender_)
         }
     }
 

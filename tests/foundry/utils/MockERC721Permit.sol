@@ -1,24 +1,15 @@
-//SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.17;
 
 import {
-    ERC721Upgradeable,
-    ERC721RentableUpgradeable,
-    IERC721RentableUpgradeable
-} from "oz-upgradeable/token/ERC721/extensions/ERC721RentableUpgradeable.sol";
+    ERC721,
+    IERC721Permit,
+    ERC721Permit
+} from "oz/token/ERC721/extensions/ERC721Permit.sol";
+import {ISignable} from "internal/interfaces/ISignable.sol";
 
-contract MockERC721Rentable is ERC721RentableUpgradeable {
-    // constructor(
-    //     string memory _name,
-    //     string memory _symbol
-    // ) ERC721(_name, _symbol) {}
-
-    function initialize(
-        string calldata name_,
-        string calldata symbol_
-    ) external initializer {
-        __ERC721_init_unchained(name_, symbol_);
-    }
+contract MockERC721 is ERC721Permit {
+    constructor() ERC721Permit("Mock Token", "MTK") {}
 
     function tokenURI(
         uint256

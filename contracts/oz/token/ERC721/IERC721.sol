@@ -17,6 +17,7 @@ interface IERC721 is IERC165 {
     error ERC721__NonZeroAddress();
     error ERC721__UnsafeRecipient();
     error ERC721__InvalidRecipient();
+
     /**
      * @dev Emitted when `tokenId` token is transferred from `from` to `to`.
      */

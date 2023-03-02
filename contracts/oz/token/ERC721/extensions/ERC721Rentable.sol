@@ -4,17 +4,9 @@ pragma solidity ^0.8.17;
 import {IERC165, ERC721} from "../ERC721.sol";
 
 import {IERC721Rentable} from "./IERC721Rentable.sol";
-import "../../../../../lib/forge-std/src/console.sol";
 
 abstract contract ERC721Rentable is IERC721Rentable, ERC721 {
     mapping(uint256 => UserInfo) internal _users;
-
-    // constructor(
-    //     string memory name_,
-    //     string memory symbol_
-    // ) payable ERC721(name_, symbol_) {
-
-    // }
 
     function setUser(
         uint256 tokenId,
@@ -29,11 +21,11 @@ abstract contract ERC721Rentable is IERC721Rentable, ERC721 {
             mstore(0x20, _users.slot)
 
             sstore(keccak256(0x00, 0x40), or(shl(160, expires), user))
-            //sstore(_users.slot, or(shl(160, expires), user))
+
             mstore(0x00, expires)
             log3(
-                0x18,
-                0x08,
+                0x00,
+                0x20,
                 /// @dev value is equal to keccak256("UpdateUser(uint256,address,uint64)")
                 0x4e06b4e7000e659094299b3533b47b6aa8ad048e95e872d23d1f4ee55af89cfe,
                 tokenId,
@@ -90,23 +82,25 @@ abstract contract ERC721Rentable is IERC721Rentable, ERC721 {
                 let key := keccak256(0x00, 0x40)
                 let rentInfo := sload(key)
 
-                // if (user == address(0)) return;
                 if iszero(
-                    and(rentInfo, 0xffffffffffffffffffffffffffffffffffffffff)
+                    iszero(
+                        and(
+                            rentInfo,
+                            0xffffffffffffffffffffffffffffffffffffffff
+                        )
+                    )
                 ) {
-                    stop()
+                    sstore(key, 0)
+
+                    log3(
+                        0x00,
+                        0x20,
+                        /// @dev value is equal to keccak256("UpdateUser(uint256,address,uint64)")
+                        0x4e06b4e7000e659094299b3533b47b6aa8ad048e95e872d23d1f4ee55af89cfe,
+                        0,
+                        0
+                    )
                 }
-
-                sstore(key, 0)
-
-                log3(
-                    0x00,
-                    0x08,
-                    /// @dev value is equal to keccak256("UpdateUser(uint256,address,uint64)")
-                    0x4e06b4e7000e659094299b3533b47b6aa8ad048e95e872d23d1f4ee55af89cfe,
-                    0,
-                    0
-                )
             }
         }
     }

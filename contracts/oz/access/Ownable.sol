@@ -98,8 +98,8 @@ abstract contract Ownable is Context, IOwnable {
     function _transferOwnership(address newOwner) internal virtual {
         assembly {
             log3(
-                0,
-                0,
+                0x00,
+                0x00,
                 /// @dev value is equal to kecak256("OwnershipTransferred(address,address)");
                 0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0,
                 sload(__owner.slot),

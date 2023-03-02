@@ -14,8 +14,6 @@ import {
 
 import {BitMapsUpgradeable} from "../../utils/structs/BitMapsUpgradeable.sol";
 
-import "../../../../lib/forge-std/src/console.sol";
-
 /// @notice Modern, minimalist, and gas efficient ERC-721 implementation.
 /// @author Solmate (https://github.com/transmissions11/solmate/blob/main/src/tokens/ERC721.sol)
 abstract contract ERC721Upgradeable is
@@ -49,6 +47,7 @@ abstract contract ERC721Upgradeable is
             mstore(0x00, id)
             mstore(0x20, _ownerOf.slot)
             owner := sload(keccak256(0x00, 0x40))
+
             if iszero(owner) {
                 // Store the function selector of `ERC721__NotMinted()`.
                 // Revert with (offset, size).
@@ -150,13 +149,14 @@ abstract contract ERC721Upgradeable is
             sstore(keccak256(0x00, 0x40), spender)
 
             // emit Approval(owner, spender, id)
-            log3(
+            log4(
                 0x00,
-                0x20,
+                0x00,
                 /// @dev value is equal to keccak256("Approval(address,address,uint256)")
                 0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925,
                 owner,
-                spender
+                spender,
+                id
             )
         }
     }
@@ -191,9 +191,10 @@ abstract contract ERC721Upgradeable is
 
             //  emit ApprovalForAll(sender, operator, approved)
             mstore(0x00, approved)
+
             log3(
                 0x00,
-                0x08,
+                0x20,
                 /// @dev value is equal to keccak256("ApprovalForAll(address,address,bool)")
                 0x17307eab39ab6107e8899845ad3d59bd9653f200f220920489ca2b5937696c31,
                 sender,
@@ -231,78 +232,45 @@ abstract contract ERC721Upgradeable is
     function _isApprovedOrOwner(
         address spender,
         uint256 tokenId
-    ) internal view virtual returns (bool) {
+    ) internal view virtual returns (bool isApprovedOrOwner_) {
         address owner = ownerOf(tokenId);
-        // approved = true;
-        // if (
-        //     spender != owner &&
-        //     _getApproved[tokenId] != bytes32(bytes20(spender))
-        // ) approved = false;
         assembly {
+            // if spender is owner
             if eq(spender, owner) {
-                mstore(0x00, 0x01)
-                return(0x18, 0x08)
+                isApprovedOrOwner_ := true
             }
 
-            mstore(0x00, tokenId)
-            mstore(0x20, _getApproved.slot)
-            if eq(spender, sload(keccak256(0x00, 0x40))) {
-                mstore(0x00, 0x01)
-                return(0x18, 0x08)
+            if iszero(isApprovedOrOwner_) {
+                // if _getApproved[tokenId] == spender
+                mstore(0x00, tokenId)
+                mstore(0x20, _getApproved.slot)
+                let approved := sload(keccak256(0x00, 0x40))
+                if eq(approved, spender) {
+                    isApprovedOrOwner_ := true
+                }
+
+                if iszero(isApprovedOrOwner_) {
+                    // if _isApprovedForAll[owner][spender] == true
+                    mstore(0x00, owner)
+                    mstore(0x20, _isApprovedForAll.slot)
+                    // store _isApprovedForAll[owner] key at 0x20
+                    mstore(0x20, keccak256(0x00, 0x40))
+
+                    // store last 248 bit of spender as index
+                    mstore(0x00, shr(0x08, spender))
+
+                    // check if the bit is turned in the bitmap
+                    approved := and(
+                        sload(keccak256(0x00, 0x40)),
+                        shl(and(spender, 0xff), 1)
+                    )
+
+                    if approved {
+                        isApprovedOrOwner_ := true
+                    }
+                }
             }
         }
-
-        // address approved;
-        // assembly {
-        // }
-
-        // // address owner = ownerOf(tokenId);
-        // assembly {
-        //     mstore(0x00, tokenId)
-        //     mstore(0x20, _ownerOf.slot)
-        //     let owner := sload(keccak256(0x00, 0x40))
-        //     if iszero(owner) {
-        //         // Store the function selector of `ERC721__NotMinted()`.
-        //         // Revert with (offset, size).
-        //         mstore(0x00, 0xf2c8ced6)
-        //         revert(0x1c, 0x04)
-        //     }
-
-        //     // if spender is owner
-        //     if eq(spender, owner) {
-        //         isApprovedOrOwner := true
-        //         stop()
-        //     }
-
-        //     // if _getApproved[tokenId] == spender
-        //     // mstore(0x00, tokenId)
-        //     mstore(0x20, _getApproved.slot)
-        //     let approved := sload(keccak256(0x00, 0x40))
-        //     if eq(approved, spender) {
-        //         isApprovedOrOwner := true
-        //         return(0, 0)
-        //     }
-
-        //     // if _isApprovedForAll[owner][spender] == true
-        //     mstore(0x00, owner)
-        //     mstore(0x20, _isApprovedForAll.slot)
-        //     // store _isApprovedForAll[owner] key at 0x20
-        //     mstore(0x20, keccak256(0x00, 0x40))
-
-        //     // store last 248 bit of spender as index
-        //     mstore(0x00, shr(0x08, spender))
-
-        //     // check if the bit is turned in the bitmap
-        //     approved := and(
-        //         sload(keccak256(0, 64)),
-        //         shl(and(spender, 0xff), 1)
-        //     )
-
-        //     if eq(approved, spender) {
-        //         isApprovedOrOwner := true
-        //         return(0, 0)
-        //     }
-        // }
     }
 
     /**
@@ -447,14 +415,14 @@ abstract contract ERC721Upgradeable is
             sstore(approvedKey, 0)
 
             // emit Transfer(from, to, id);
-            mstore(0x00, id)
-            log3(
+            log4(
                 0x00,
                 0x20,
                 /// @dev value is equal to keccak256("Transfer(address,address,uint256)")
                 0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef,
                 from,
-                to
+                to,
+                id
             )
         }
 
@@ -512,13 +480,14 @@ abstract contract ERC721Upgradeable is
             sstore(key, to)
 
             //  emit Transfer(from, to, tokenId);
-            log3(
+            log4(
                 0x00,
-                0x20,
+                0x00,
                 /// @dev value is equal to keccak256("Transfer(address,address,uint256)")
                 0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef,
                 from,
-                to
+                to,
+                tokenId
             )
 
             // delete _getApproved[tokenId];
@@ -607,13 +576,14 @@ abstract contract ERC721Upgradeable is
             }
 
             /// @dev emit Transfer(address(0), to, id)
-            log3(
+            log4(
                 0x00,
-                0x20,
+                0x00,
                 /// @dev value is equal to keccak256("Transfer(address,address,uint256)")
                 0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef,
                 0,
-                to
+                to,
+                id
             )
 
             /// @dev _ownerOf[id] = to
@@ -658,13 +628,14 @@ abstract contract ERC721Upgradeable is
             sstore(keccak256(0x00, 0x40), 0)
 
             //  emit Transfer(owner, address(0), id);
-            log3(
+            log4(
                 0x00,
-                0x20,
+                0x00,
                 /// @dev value is equal to keccak256("Transfer(address,address,uint256)")
                 0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef,
                 owner,
-                0
+                0,
+                id
             )
 
             // Ownership check above ensures no underflow.
