@@ -23,12 +23,6 @@ abstract contract ERC20Upgradeable is
     IERC20MetadataUpgradeable
 {
     /*//////////////////////////////////////////////////////////////
-                            METADATA STORAGE
-    //////////////////////////////////////////////////////////////*/
-
-    uint8 public decimals;
-
-    /*//////////////////////////////////////////////////////////////
                               ERC20 STORAGE
     //////////////////////////////////////////////////////////////*/
 
@@ -47,25 +41,25 @@ abstract contract ERC20Upgradeable is
 
     function __ERC20_init(
         string calldata name_,
-        string calldata symbol_,
-        uint8 decimals_
+        string calldata symbol_
     ) internal onlyInitializing {
-        __ERC20_init_unchained(name_, symbol_, decimals_);
+        __ERC20_init_unchained(name_, symbol_);
     }
 
     function __ERC20_init_unchained(
         string memory name_,
-        string memory symbol_,
-        uint8 decimals_
+        string memory symbol_
     ) internal onlyInitializing {
         name = name_;
         symbol = symbol_;
-        decimals = decimals_;
     }
 
     /*//////////////////////////////////////////////////////////////
                                ERC20 LOGIC
     //////////////////////////////////////////////////////////////*/
+    function decimals() external pure returns (uint8) {
+        return 18;
+    }
 
     function approve(
         address spender,
@@ -74,13 +68,14 @@ abstract contract ERC20Upgradeable is
         address sender = _msgSender();
 
         assembly {
-            mstore(0, sender)
-            mstore(32, _allowance.slot)
-            mstore(32, keccak256(0, 64))
-            mstore(0, spender)
-            sstore(keccak256(0, 64), amount)
+            //  @dev _allowance[sender][spender] = amount
+            mstore(0x00, sender)
+            mstore(0x20, _allowance.slot)
+            mstore(0x20, keccak256(0x00, 0x40))
+            mstore(0x00, spender)
+            sstore(keccak256(0x00, 0x40), amount)
 
-            // emit Approval(sender, spender, amount);
+            //  @dev emit Approval(sender, spender, amount);
             mstore(0, amount)
             log3(
                 0,
@@ -104,9 +99,9 @@ abstract contract ERC20Upgradeable is
 
         assembly {
             //  _balanceOf[sender] -= amount;
-            mstore(0, sender)
-            mstore(32, _balanceOf.slot)
-            let balanceKey := keccak256(0, 64)
+            mstore(0x00, sender)
+            mstore(0x20, _balanceOf.slot)
+            let balanceKey := keccak256(0x00, 0x40)
             let balanceBefore := sload(balanceKey)
             //  underflow check
             if gt(amount, balanceBefore) {
@@ -115,15 +110,15 @@ abstract contract ERC20Upgradeable is
             sstore(balanceKey, sub(balanceBefore, amount))
 
             //  _balanceOf[to] += amount;
-            mstore(0, to)
-            balanceKey := keccak256(0, 64)
+            mstore(0x00, to)
+            balanceKey := keccak256(0x00, 0x40)
             balanceBefore := sload(balanceKey)
             sstore(balanceKey, add(balanceBefore, amount))
 
             // emit Transfer(sender, to, amount);
-            mstore(0, amount)
+            mstore(0x00, amount)
             log3(
-                0,
+                0x00,
                 0x20,
                 /// @dev value is equal to keccak256("Transfer(address,address,uint256)")
                 0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef,
@@ -164,10 +159,10 @@ abstract contract ERC20Upgradeable is
             balanceBefore := sload(balanceKey)
             sstore(balanceKey, add(balanceBefore, amount))
 
-            // fire Transfer event
+            //  @dev emit Transfer(from, to, amount)
             mstore(0, amount)
             log3(
-                0,
+                0x00,
                 0x20,
                 /// @dev value is equal to keccak256("Transfer(address,address,uint256)")
                 0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef,
@@ -198,9 +193,9 @@ abstract contract ERC20Upgradeable is
         address account
     ) external view override returns (uint256 _balance) {
         assembly {
-            mstore(0, account)
-            mstore(32, _balanceOf.slot)
-            _balance := sload(keccak256(0, 64))
+            mstore(0x00, account)
+            mstore(0x20, _balanceOf.slot)
+            _balance := sload(keccak256(0x00, 0x40))
         }
     }
 
@@ -209,11 +204,11 @@ abstract contract ERC20Upgradeable is
         address spender
     ) external view override returns (uint256 allowance_) {
         assembly {
-            mstore(0, owner)
-            mstore(32, _allowance.slot)
-            mstore(32, keccak256(0, 64))
-            mstore(0, spender)
-            allowance_ := sload(keccak256(0, 64))
+            mstore(0x00, owner)
+            mstore(0x20, _allowance.slot)
+            mstore(0x20, keccak256(0x00, 0x40))
+            mstore(0x00, spender)
+            allowance_ := sload(keccak256(0x00, 0x40))
         }
     }
 
@@ -226,11 +221,11 @@ abstract contract ERC20Upgradeable is
         uint256 amount_
     ) internal virtual {
         assembly {
-            mstore(0, owner_)
-            mstore(32, _allowance.slot)
-            mstore(32, keccak256(0, 64))
-            mstore(0, spender_)
-            let allowanceKey := keccak256(0, 64)
+            mstore(0x00, owner_)
+            mstore(0x20, _allowance.slot)
+            mstore(0x20, keccak256(0x00, 0x40))
+            mstore(0x00, spender_)
+            let allowanceKey := keccak256(0x00, 0x40)
             let allowed := sload(allowanceKey)
 
             if iszero(
@@ -264,27 +259,27 @@ abstract contract ERC20Upgradeable is
         _beforeTokenTransfer(address(0), to, amount);
 
         assembly {
-            //  totalSupply += amount;
+            //  @dev totalSupply += amount;
             let cachedVal := sload(totalSupply.slot)
             cachedVal := add(cachedVal, amount)
-            //  overflow check
+            //  @dev overflow check
             if lt(cachedVal, amount) {
                 revert(0, 0)
             }
             sstore(totalSupply.slot, cachedVal)
 
-            // Cannot overflow because the sum of all user
-            // balances can't exceed the max uint256 value.
-            //  _balanceOf[to] += amount;
-            mstore(0, to)
-            mstore(32, _balanceOf.slot)
-            cachedVal := keccak256(0, 64)
+            //  @dev Cannot overflow because the sum of all user
+            //  balances can't exceed the max uint256 value.
+            //  @dev _balanceOf[to] += amount;
+            mstore(0x00, to)
+            mstore(0x20, _balanceOf.slot)
+            cachedVal := keccak256(0x00, 0x40)
             sstore(cachedVal, add(sload(cachedVal), amount))
 
             //  emit Transfer(address(0), to, amount);
-            mstore(0, amount)
+            mstore(0x00, amount)
             log3(
-                0,
+                0x00,
                 0x20,
                 /// @dev value is equal to keccak256("Transfer(address,address,uint256)")
                 0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef,
@@ -300,12 +295,12 @@ abstract contract ERC20Upgradeable is
         _beforeTokenTransfer(from, address(0), amount);
 
         assembly {
-            //  _balanceOf[from] -= amount;
+            //  @dev _balanceOf[from] -= amount;
             mstore(0, from)
             mstore(32, _balanceOf.slot)
             let key := keccak256(0, 64)
             let cachedVal := sload(key)
-            // underflow check
+            // @dev underflow check
             if gt(amount, cachedVal) {
                 revert(0, 0)
             }
@@ -313,17 +308,17 @@ abstract contract ERC20Upgradeable is
             cachedVal := sub(cachedVal, amount)
             sstore(key, cachedVal)
 
-            //  totalSupply -= amount;
-            // Cannot underflow because a user's balance
-            // will never be larger than the total supply.
+            //  @dev totalSupply -= amount;
+            //  @dev Cannot underflow because a user's balance
+            //  @dev will never be larger than the total supply.
             key := totalSupply.slot
             cachedVal := sload(key)
             cachedVal := sub(cachedVal, amount)
             sstore(key, cachedVal)
 
-            mstore(0, amount)
+            mstore(0x00, amount)
             log3(
-                0,
+                0x00,
                 0x20,
                 /// @dev value is equal to keccak256("Transfer(address,address,uint256)")
                 0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef,
@@ -335,5 +330,5 @@ abstract contract ERC20Upgradeable is
         _afterTokenTransfer(from, address(0), amount);
     }
 
-    uint256[44] private __gap;
+    uint256[45] private __gap;
 }

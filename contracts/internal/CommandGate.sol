@@ -116,7 +116,7 @@ abstract contract CommandGate is ICommandGate, FundForwarder {
 
         // check asset vault
         if (
-            !(command_.vault != mainVault_ ||
+            !(command_.vault == mainVault_ ||
                 __whitelistedVaults.get(command_.vault.fillLast96Bits()))
         ) revert CommandGate__UnknownAddress();
     }
@@ -139,9 +139,9 @@ abstract contract CommandGate is ICommandGate, FundForwarder {
         bytes memory data_
     ) internal pure virtual returns (bytes memory) {
         assembly {
-            mstore(add(data_, 32), account_)
-            mstore(add(data_, 64), token_)
-            mstore(add(data_, 96), value_)
+            mstore(add(data_, 0x20), account_)
+            mstore(add(data_, 0x40), token_)
+            mstore(add(data_, 0x60), value_)
         }
         return data_;
     }

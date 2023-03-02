@@ -13,7 +13,7 @@ interface IProtocolFeeUpgradeable {
     event ProtocolFeeUpdated(
         address indexed operator,
         address indexed payment,
-        uint96 indexed royalty
+        uint256 indexed royalty
     );
 
     function setRoyalty(address token_, uint96 feeAmt_) external;

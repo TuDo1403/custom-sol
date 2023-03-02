@@ -1,16 +1,20 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import {IERC165Upgradeable, ERC721Upgradeable} from "../ERC721Upgradeable.sol";
+import {IERC165, ERC721} from "../ERC721.sol";
 
-import {IERC721RentableUpgradeable} from "./IERC721RentableUpgradeable.sol";
+import {IERC721Rentable} from "./IERC721Rentable.sol";
 import "../../../../../lib/forge-std/src/console.sol";
 
-abstract contract ERC721RentableUpgradeable is
-    ERC721Upgradeable,
-    IERC721RentableUpgradeable
-{
+abstract contract ERC721Rentable is IERC721Rentable, ERC721 {
     mapping(uint256 => UserInfo) internal _users;
+
+    // constructor(
+    //     string memory name_,
+    //     string memory symbol_
+    // ) payable ERC721(name_, symbol_) {
+
+    // }
 
     function setUser(
         uint256 tokenId,
@@ -65,15 +69,9 @@ abstract contract ERC721RentableUpgradeable is
 
     function supportsInterface(
         bytes4 interfaceId
-    )
-        public
-        view
-        virtual
-        override(IERC165Upgradeable, ERC721Upgradeable)
-        returns (bool)
-    {
+    ) public view virtual override(IERC165, ERC721) returns (bool) {
         return
-            interfaceId == type(IERC721RentableUpgradeable).interfaceId ||
+            interfaceId == type(IERC721Rentable).interfaceId ||
             super.supportsInterface(interfaceId);
     }
 
@@ -112,6 +110,4 @@ abstract contract ERC721RentableUpgradeable is
             }
         }
     }
-
-    uint256[49] private __gap;
 }

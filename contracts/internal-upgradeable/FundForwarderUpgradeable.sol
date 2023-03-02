@@ -6,6 +6,7 @@ import {
 } from "../oz-upgradeable/utils/ContextUpgradeable.sol";
 
 import {TransferableUpgradeable} from "./TransferableUpgradeable.sol";
+import {ProxyCheckerUpgradeable} from "./ProxyCheckerUpgradeable.sol";
 
 import {
     IERC20Upgradeable,
@@ -20,6 +21,7 @@ import {
  */
 abstract contract FundForwarderUpgradeable is
     ContextUpgradeable,
+    ProxyCheckerUpgradeable,
     TransferableUpgradeable,
     IFundForwarderUpgradeable
 {
@@ -31,7 +33,8 @@ abstract contract FundForwarderUpgradeable is
     /**
      * @dev Receives funds and forwards them to the vault address
      */
-    receive() external payable virtual {
+    receive() external payable virtual onlyEOA {
+        _beforeRecover("");
         address _vault = vault();
 
         _safeNativeTransfer(_vault, msg.value, safeRecoverHeader());
@@ -58,12 +61,16 @@ abstract contract FundForwarderUpgradeable is
         IERC20Upgradeable token_,
         uint256 amount_
     ) external virtual {
+        _beforeRecover("");
         __checkValidAddress(address(token_));
+        address sender = _msgSender();
+        _onlyEOA(sender);
+
         address _vault = vault();
 
         _safeERC20Transfer(token_, _vault, amount_);
 
-        emit Recovered(_msgSender(), address(token_), amount_);
+        emit Recovered(sender, address(token_), amount_);
 
         _afterRecover(_vault, address(token_), abi.encode(amount_));
     }
@@ -73,7 +80,10 @@ abstract contract FundForwarderUpgradeable is
         IERC721Upgradeable token_,
         uint256 tokenId_
     ) external virtual {
+        _beforeRecover("");
         __checkValidAddress(address(token_));
+        address sender = _msgSender();
+        _onlyEOA(sender);
         address _vault = vault();
 
         token_.safeTransferFrom(
@@ -83,7 +93,7 @@ abstract contract FundForwarderUpgradeable is
             safeRecoverHeader()
         );
 
-        emit Recovered(_msgSender(), address(token_), tokenId_);
+        emit Recovered(sender, address(token_), tokenId_);
 
         _afterRecover(_vault, address(token_), abi.encode(tokenId_));
     }
@@ -92,7 +102,11 @@ abstract contract FundForwarderUpgradeable is
     function recoverNFTs(
         IERC721EnumerableUpgradeable token_
     ) external virtual {
+        _beforeRecover("");
         __checkValidAddress(address(token_));
+        address sender = _msgSender();
+        _onlyEOA(sender);
+
         address _vault = vault();
         uint256 length = token_.balanceOf(address(this));
         uint256[] memory tokenIds = new uint256[](length);
@@ -112,16 +126,20 @@ abstract contract FundForwarderUpgradeable is
 
         _afterRecover(_vault, address(token_), abi.encode(tokenIds));
 
-        emit RecoveredMulti(_msgSender(), address(token_), tokenIds);
+        emit RecoveredMulti(sender, address(token_), tokenIds);
     }
 
     /// @inheritdoc IFundForwarderUpgradeable
     function recoverNative() external virtual {
+        _beforeRecover("");
+        address sender = _msgSender();
+        _onlyEOA(sender);
+
         address _vault = vault();
-
         uint256 balance = address(this).balance;
-
         _safeNativeTransfer(_vault, balance, safeRecoverHeader());
+
+        emit Recovered(sender, address(0), balance);
 
         _afterRecover(_vault, address(0), abi.encode(balance));
     }
@@ -141,13 +159,17 @@ abstract contract FundForwarderUpgradeable is
     function _changeVault(address vault_) internal virtual {
         __checkValidAddress(vault_);
 
-        address old;
         assembly {
-            old := sload(__vault.slot)
-        }
-        emit VaultUpdated(old, vault_);
+            log4(
+                0x00,
+                0x00,
+                /// @dev value is equal to keccak256("VaultUpdated(address,address,address)")
+                0x2afec66505e0ceed692012e3833f6609d4933ded34732135bc05f28423744065,
+                caller(),
+                sload(__vault.slot),
+                vault_
+            )
 
-        assembly {
             sstore(__vault.slot, vault_)
         }
     }
@@ -155,6 +177,8 @@ abstract contract FundForwarderUpgradeable is
     function safeRecoverHeader() public pure virtual returns (bytes memory);
 
     function safeTransferHeader() public pure virtual returns (bytes memory);
+
+    function _beforeRecover(bytes memory data_) internal virtual;
 
     function _afterRecover(
         address vault_,

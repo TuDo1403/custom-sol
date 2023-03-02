@@ -3,7 +3,7 @@
 
 pragma solidity ^0.8.17;
 
-import "./EnumerableSet.sol";
+import {EnumerableSet} from "./EnumerableSet.sol";
 
 /**
  * @dev Library for managing an enumerable variant of Solidity's

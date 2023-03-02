@@ -21,9 +21,6 @@ abstract contract ProtocolFeeUpgradeable is
     ContextUpgradeable,
     IProtocolFeeUpgradeable
 {
-    address internal constant _ANY_LABEL = address(1);
-    address internal constant _NATIVE_LABEL = address(0);
-
     FeeInfo public feeInfo;
 
     function __ProtocolFee_init(
@@ -46,11 +43,20 @@ abstract contract ProtocolFeeUpgradeable is
      * @param amount_ Fee amount
      */
     function _setRoyalty(address token_, uint96 amount_) internal virtual {
+        address sender = _msgSender();
         assembly {
-            sstore(feeInfo.slot, or(shl(160, amount_), token_))
-        }
+            sstore(feeInfo.slot, or(shl(0xa0, amount_), token_))
 
-        emit ProtocolFeeUpdated(_msgSender(), token_, amount_);
+            log4(
+                0x00,
+                0x00,
+                /// @dev value is equal to keccak256("ProtocolFeeUpdated(address,address,uint256)")
+                0x2e25af38da02ef39388b1eb731f19781b0bc2bd6d4eb7700732d0c0e6b910c67,
+                sender,
+                token_,
+                amount_
+            )
+        }
     }
 
     /**

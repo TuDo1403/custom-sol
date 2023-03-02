@@ -6,6 +6,7 @@ import {Context} from "../../oz/utils/Context.sol";
 import {ProxyChecker} from "../../internal/ProxyChecker.sol";
 
 import {IManager, IAuthority} from "./interfaces/IManager.sol";
+import {IPausable} from "../../oz/security/Pausable.sol";
 import {IAccessControl} from "../../oz/access/IAccessControl.sol";
 import {IBlacklistable} from "../../internal/interfaces/IBlacklistable.sol";
 
@@ -144,7 +145,7 @@ abstract contract Manager is Context, IManager, ProxyChecker {
 
     function _requirePaused() internal view {
         (bool ok, bytes memory returnOrRevertData) = _authority().staticcall(
-            abi.encodeCall(IAuthority.paused, ())
+            abi.encodeCall(IPausable.paused, ())
         );
 
         ok.handleRevertIfNotSuccess(returnOrRevertData);
@@ -155,7 +156,7 @@ abstract contract Manager is Context, IManager, ProxyChecker {
 
     function _requireNotPaused() internal view {
         (bool ok, bytes memory returnOrRevertData) = _authority().staticcall(
-            abi.encodeCall(IAuthority.paused, ())
+            abi.encodeCall(IPausable.paused, ())
         );
         ok.handleRevertIfNotSuccess(returnOrRevertData);
 

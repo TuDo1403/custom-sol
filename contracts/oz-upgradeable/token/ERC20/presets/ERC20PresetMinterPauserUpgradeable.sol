@@ -51,11 +51,10 @@ abstract contract ERC20PresetMinterPauserUpgradeable is
 
     function __ERC20PresetMinterPauser_init(
         string calldata name_,
-        string calldata symbol_,
-        uint8 decimals_
+        string calldata symbol_
     ) internal onlyInitializing {
         __ERC20PresetMinterPauser_init_unchained();
-        __ERC20_init_unchained(name_, symbol_, decimals_);
+        __ERC20_init_unchained(name_, symbol_);
     }
 
     function __ERC20PresetMinterPauser_init_unchained()

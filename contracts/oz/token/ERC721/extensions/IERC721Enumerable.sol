@@ -11,6 +11,8 @@ import {IERC721} from "../IERC721.sol";
  */
 interface IERC721Enumerable is IERC721 {
     error ERC721Enumerable__OutOfBounds();
+    error ERC721Enumerable__GlobalIndexOutOfBounds();
+    error ERC721Enumerable__ConsecutiveTransferNotSupported();
 
     /**
      * @dev Returns the total amount of tokens stored by the contract.

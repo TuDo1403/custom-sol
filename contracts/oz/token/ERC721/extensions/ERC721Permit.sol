@@ -47,14 +47,12 @@ abstract contract ERC721Permit is ERC721, IERC721Permit, Signable {
             let freeMemPtr := mload(0x40)
 
             mstore(freeMemPtr, __PERMIT_TYPEHASH)
-            mstore(add(freeMemPtr, 32), spender_)
-
-            mstore(add(freeMemPtr, 64), tokenId_)
-
-            mstore(add(freeMemPtr, 96), _nonces.slot)
+            mstore(add(freeMemPtr, 0x20), spender_)
+            mstore(add(freeMemPtr, 0x40), tokenId_)
+            mstore(add(freeMemPtr, 0x60), _nonces.slot)
 
             // increment nonce
-            let nonceKey := keccak256(64, 64)
+            let nonceKey := keccak256(0x40, 0x40)
             let nonce := sload(nonceKey)
             sstore(nonceKey, add(1, nonce))
 
@@ -74,7 +72,11 @@ abstract contract ERC721Permit is ERC721, IERC721Permit, Signable {
 
     function nonces(
         uint256 tokenId_
-    ) external view override returns (uint256) {
-        return _nonces[bytes32(tokenId_)];
+    ) external view override returns (uint256 nonce) {
+        assembly {
+            mstore(0x00, tokenId_)
+            mstore(0x20, _nonces.slot)
+            nonce := sload(keccak256(0x00, 0x40))
+        }
     }
 }

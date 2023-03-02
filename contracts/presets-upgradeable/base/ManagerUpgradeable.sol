@@ -14,6 +14,9 @@ import {
 import {IManager, IAuthority} from "./interfaces/IManager.sol";
 
 import {
+    IPausableUpgradeable
+} from "../../oz-upgradeable/security/PausableUpgradeable.sol";
+import {
     IAccessControlUpgradeable
 } from "../../oz-upgradeable/access/IAccessControlUpgradeable.sol";
 import {
@@ -171,7 +174,7 @@ abstract contract ManagerUpgradeable is
 
     function _requirePaused() internal view {
         (bool ok, bytes memory returnOrRevertData) = _authority().staticcall(
-            abi.encodeCall(IAuthority.paused, ())
+            abi.encodeCall(IPausableUpgradeable.paused, ())
         );
 
         ok.handleRevertIfNotSuccess(returnOrRevertData);
@@ -182,7 +185,7 @@ abstract contract ManagerUpgradeable is
 
     function _requireNotPaused() internal view {
         (bool ok, bytes memory returnOrRevertData) = _authority().staticcall(
-            abi.encodeCall(IAuthority.paused, ())
+            abi.encodeCall(IPausableUpgradeable.paused, ())
         );
         ok.handleRevertIfNotSuccess(returnOrRevertData);
 

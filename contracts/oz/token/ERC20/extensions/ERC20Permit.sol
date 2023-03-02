@@ -47,38 +47,41 @@ abstract contract ERC20Permit is ERC20, IERC20Permit, Signable {
         bytes32 r,
         bytes32 s
     ) external virtual override {
-        if (block.timestamp > deadline) revert ERC20Permit__Expired();
-
         bytes32 digest;
         bytes32 allowanceKey;
         assembly {
-            mstore(0, owner)
-            mstore(32, _nonces.slot)
-            let nonceKey := keccak256(0, 64)
+            // if (block.timestamp > deadline) revert ERC20Permit__Expired();
+            if gt(timestamp(), deadline) {
+                mstore(0x00, 0x614fe41d)
+                revert(0x1c, 0x04)
+            }
+            mstore(0x00, owner)
+            mstore(0x20, _nonces.slot)
+            let nonceKey := keccak256(0x00, 0x40)
             let nonce := sload(nonceKey)
 
             let freeMemPtr := mload(0x40)
 
             mstore(freeMemPtr, __PERMIT_TYPEHASH)
-            mstore(add(freeMemPtr, 32), owner)
-            mstore(add(freeMemPtr, 64), spender)
-            mstore(add(freeMemPtr, 96), value)
-            mstore(add(freeMemPtr, 128), nonce)
-            mstore(add(freeMemPtr, 160), deadline)
-            digest := keccak256(freeMemPtr, 192)
+            mstore(add(freeMemPtr, 0x20), owner)
+            mstore(add(freeMemPtr, 0x40), spender)
+            mstore(add(freeMemPtr, 0x60), value)
+            mstore(add(freeMemPtr, 0x80), nonce)
+            mstore(add(freeMemPtr, 0xa0), deadline)
+            digest := keccak256(freeMemPtr, 0xc0)
 
             sstore(nonceKey, add(1, nonce))
 
-            mstore(32, _allowance.slot)
-            allowanceKey := keccak256(0, 64)
+            mstore(0x20, _allowance.slot)
+            allowanceKey := keccak256(0x00, 0x40)
         }
 
         _verify(owner, digest, v, r, s);
 
         assembly {
-            mstore(0, spender)
-            mstore(32, allowanceKey)
-            sstore(keccak256(0, 64), value)
+            mstore(0x00, spender)
+            mstore(0x20, allowanceKey)
+            sstore(keccak256(0x00, 0x40), value)
         }
     }
 
@@ -99,7 +102,11 @@ abstract contract ERC20Permit is ERC20, IERC20Permit, Signable {
         return _domainSeparatorV4();
     }
 
-    function nonces(address account_) external view returns (uint256) {
-        return _nonces[account_.fillLast12Bytes()];
+    function nonces(address account_) external view returns (uint256 nonce) {
+        assembly {
+            mstore(0x00, account_)
+            mstore(0x20, _nonces.slot)
+            nonce := sload(keccak256(0x00, 0x40))
+        }
     }
 }

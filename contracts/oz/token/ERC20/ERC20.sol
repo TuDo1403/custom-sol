@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: AGPL-3.0-only
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
 import {Context} from "../../utils/Context.sol";
@@ -39,6 +39,20 @@ abstract contract ERC20 is Context, IERC20, IERC20Metadata {
     /*//////////////////////////////////////////////////////////////
                                ERC20 LOGIC
     //////////////////////////////////////////////////////////////*/
+
+    /**
+     * @dev Returns the number of decimals used to get its user representation.
+     * For example, if `decimals` equals `2`, a balance of `505` tokens should
+     * be displayed to a user as `5.05` (`505 / 10 ** 2`).
+     *
+     * Tokens usually opt for a value of 18, imitating the relationship between
+     * Ether and Wei. This is the value {ERC20} uses, unless this function is
+     * overridden;
+     *
+     * NOTE: This information is only used for _display_ purposes: it in
+     * no way affects any of the arithmetic of the contract, including
+     * {IERC20-balanceOf} and {IERC20-transfer}.
+     */
     function decimals() public pure virtual returns (uint8) {
         return 18;
     }
@@ -50,17 +64,17 @@ abstract contract ERC20 is Context, IERC20, IERC20Metadata {
         address sender = _msgSender();
 
         assembly {
-            mstore(0, sender)
-            mstore(32, _allowance.slot)
-            mstore(32, keccak256(0, 64))
-            mstore(0, spender)
-            sstore(keccak256(0, 64), amount)
+            mstore(0x00, sender)
+            mstore(0x20, _allowance.slot)
+            mstore(0x20, keccak256(0x00, 0x40))
+            mstore(0x00, spender)
+            sstore(keccak256(0x00, 0x40), amount)
 
             // emit Approval(sender, spender, amount);
-            mstore(0, amount)
+            mstore(0x00, amount)
             log3(
-                0,
-                32,
+                0x00,
+                0x20,
                 /// @dev value is equal to keccak256("Approval(address,address,uint256)")
                 0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925,
                 sender,
@@ -80,9 +94,9 @@ abstract contract ERC20 is Context, IERC20, IERC20Metadata {
 
         assembly {
             //  _balanceOf[sender] -= amount;
-            mstore(0, sender)
-            mstore(32, _balanceOf.slot)
-            let balanceKey := keccak256(0, 64)
+            mstore(0x00, sender)
+            mstore(0x20, _balanceOf.slot)
+            let balanceKey := keccak256(0x00, 0x40)
             let balanceBefore := sload(balanceKey)
             //  underflow check
             if gt(amount, balanceBefore) {
@@ -91,15 +105,15 @@ abstract contract ERC20 is Context, IERC20, IERC20Metadata {
             sstore(balanceKey, sub(balanceBefore, amount))
 
             //  _balanceOf[to] += amount;
-            mstore(0, to)
-            balanceKey := keccak256(0, 64)
+            mstore(0x00, to)
+            balanceKey := keccak256(0x00, 0x40)
             balanceBefore := sload(balanceKey)
             sstore(balanceKey, add(balanceBefore, amount))
 
             // emit Transfer(sender, to, amount);
-            mstore(0, amount)
+            mstore(0x00, amount)
             log3(
-                0,
+                0x00,
                 0x20,
                 /// @dev value is equal to keccak256("Transfer(address,address,uint256)")
                 0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef,
@@ -122,28 +136,28 @@ abstract contract ERC20 is Context, IERC20, IERC20Metadata {
         _spendAllowance(from, _msgSender(), amount);
 
         assembly {
-            //  _balanceOf[from] -= amount;
-            mstore(0, from)
-            mstore(32, _balanceOf.slot)
-            let balanceKey := keccak256(0, 64)
+            //  @dev _balanceOf[from] -= amount;
+            mstore(0x00, from)
+            mstore(0x20, _balanceOf.slot)
+            let balanceKey := keccak256(0x00, 0x40)
             let balanceBefore := sload(balanceKey)
-            //  underflow check
+            //  @dev underflow check
             if gt(amount, balanceBefore) {
                 revert(0, 0)
             }
             sstore(balanceKey, sub(balanceBefore, amount))
 
-            // Cannot overflow because the sum of all user
-            // balances can't exceed the max uint256 value.
-            mstore(0, to)
-            balanceKey := keccak256(0, 64)
+            //  @dev Cannot overflow because the sum of all user
+            //  balances can't exceed the max uint256 value.
+            mstore(0x00, to)
+            balanceKey := keccak256(0x00, 0x40)
             balanceBefore := sload(balanceKey)
             sstore(balanceKey, add(balanceBefore, amount))
 
-            // fire Transfer event
-            mstore(0, amount)
+            //  @dev emit Transfer(from, to, amount)
+            mstore(0x00, amount)
             log3(
-                0,
+                0x00,
                 0x20,
                 /// @dev value is equal to keccak256("Transfer(address,address,uint256)")
                 0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef,
@@ -161,9 +175,9 @@ abstract contract ERC20 is Context, IERC20, IERC20Metadata {
         address account
     ) external view override returns (uint256 _balance) {
         assembly {
-            mstore(0, account)
-            mstore(32, _balanceOf.slot)
-            _balance := sload(keccak256(0, 64))
+            mstore(0x00, account)
+            mstore(0x20, _balanceOf.slot)
+            _balance := sload(keccak256(0x00, 0x40))
         }
     }
 
@@ -172,11 +186,11 @@ abstract contract ERC20 is Context, IERC20, IERC20Metadata {
         address spender
     ) external view override returns (uint256 allowance_) {
         assembly {
-            mstore(0, owner)
-            mstore(32, _allowance.slot)
-            mstore(32, keccak256(0, 64))
-            mstore(0, spender)
-            allowance_ := sload(keccak256(0, 64))
+            mstore(0x00, owner)
+            mstore(0x20, _allowance.slot)
+            mstore(0x20, keccak256(0x00, 0x40))
+            mstore(0x00, spender)
+            allowance_ := sload(keccak256(0x00, 0x40))
         }
     }
 
@@ -189,11 +203,11 @@ abstract contract ERC20 is Context, IERC20, IERC20Metadata {
         uint256 amount_
     ) internal virtual {
         assembly {
-            mstore(0, owner_)
-            mstore(32, _allowance.slot)
-            mstore(32, keccak256(0, 64))
-            mstore(0, spender_)
-            let allowanceKey := keccak256(0, 64)
+            mstore(0x00, owner_)
+            mstore(0x20, _allowance.slot)
+            mstore(0x20, keccak256(0x00, 0x40))
+            mstore(0x00, spender_)
+            let allowanceKey := keccak256(0x00, 0x40)
             let allowed := sload(allowanceKey)
 
             if iszero(
@@ -227,27 +241,27 @@ abstract contract ERC20 is Context, IERC20, IERC20Metadata {
         _beforeTokenTransfer(address(0), to, amount);
 
         assembly {
-            //  totalSupply += amount;
+            //  @dev totalSupply += amount;
             let cachedVal := sload(totalSupply.slot)
             cachedVal := add(cachedVal, amount)
-            //  overflow check
+            //  @dev overflow check
             if lt(cachedVal, amount) {
                 revert(0, 0)
             }
             sstore(totalSupply.slot, cachedVal)
 
-            // Cannot overflow because the sum of all user
-            // balances can't exceed the max uint256 value.
-            //  _balanceOf[to] += amount;
-            mstore(0, to)
-            mstore(32, _balanceOf.slot)
-            cachedVal := keccak256(0, 64)
+            //  @dev Cannot overflow because the sum of all user
+            //  balances can't exceed the max uint256 value.
+            //  @dev _balanceOf[to] += amount;
+            mstore(0x00, to)
+            mstore(0x20, _balanceOf.slot)
+            cachedVal := keccak256(0x00, 0x40)
             sstore(cachedVal, add(sload(cachedVal), amount))
 
             //  emit Transfer(address(0), to, amount);
-            mstore(0, amount)
+            mstore(0x00, amount)
             log3(
-                0,
+                0x00,
                 0x20,
                 /// @dev value is equal to keccak256("Transfer(address,address,uint256)")
                 0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef,
@@ -263,12 +277,12 @@ abstract contract ERC20 is Context, IERC20, IERC20Metadata {
         _beforeTokenTransfer(from, address(0), amount);
 
         assembly {
-            //  _balanceOf[from] -= amount;
+            //  @dev _balanceOf[from] -= amount;
             mstore(0, from)
             mstore(32, _balanceOf.slot)
             let key := keccak256(0, 64)
             let cachedVal := sload(key)
-            // underflow check
+            // @dev underflow check
             if gt(amount, cachedVal) {
                 revert(0, 0)
             }
@@ -276,17 +290,17 @@ abstract contract ERC20 is Context, IERC20, IERC20Metadata {
             cachedVal := sub(cachedVal, amount)
             sstore(key, cachedVal)
 
-            //  totalSupply -= amount;
-            // Cannot underflow because a user's balance
-            // will never be larger than the total supply.
+            //  @dev totalSupply -= amount;
+            //  @dev Cannot underflow because a user's balance
+            //  @dev will never be larger than the total supply.
             key := totalSupply.slot
             cachedVal := sload(key)
             cachedVal := sub(cachedVal, amount)
             sstore(key, cachedVal)
 
-            mstore(0, amount)
+            mstore(0x00, amount)
             log3(
-                0,
+                0x00,
                 0x20,
                 /// @dev value is equal to keccak256("Transfer(address,address,uint256)")
                 0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef,

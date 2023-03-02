@@ -149,13 +149,17 @@ abstract contract FundForwarder is
     function _changeVault(address vault_) internal virtual {
         __checkValidAddress(vault_);
 
-        address old;
         assembly {
-            old := sload(__vault.slot)
-        }
-        emit VaultUpdated(old, vault_);
+            log4(
+                0x00,
+                0x00,
+                /// @dev value is equal to keccak256("VaultUpdated(address,address,address)")
+                0x2afec66505e0ceed692012e3833f6609d4933ded34732135bc05f28423744065,
+                caller(),
+                sload(__vault.slot),
+                vault_
+            )
 
-        assembly {
             sstore(__vault.slot, vault_)
         }
     }

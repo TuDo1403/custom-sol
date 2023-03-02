@@ -78,10 +78,9 @@ abstract contract ERC2981 is IERC2981, ERC165 {
         address receiver,
         uint96 feeNumerator
     ) internal virtual {
+        __nonZeroAdress(receiver);
         if (feeNumerator > _feeDenominator())
             revert ERC2981__SalePriceExceeded();
-
-        __nonZeroAdress(receiver);
 
         assembly {
             sstore(

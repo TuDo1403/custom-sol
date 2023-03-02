@@ -81,16 +81,6 @@ abstract contract Authority is
         _unpause();
     }
 
-    /// @inheritdoc IAuthority
-    function paused()
-        public
-        view
-        override(IAuthority, Pausable)
-        returns (bool isPaused)
-    {
-        return Pausable.paused();
-    }
-
     function supportsInterface(
         bytes4 interfaceId_
     ) public view override returns (bool) {

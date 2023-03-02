@@ -3,11 +3,10 @@
 
 pragma solidity ^0.8.0;
 
-import {
-    Bytes32Address,
-    ERC721Upgradeable,
-    IERC165Upgradeable
-} from "../ERC721Upgradeable.sol";
+import {ERC721Upgradeable, IERC165Upgradeable} from "../ERC721Upgradeable.sol";
+
+import {Bytes32Address} from "../../../../libraries/Bytes32Address.sol";
+
 import {
     IERC721EnumerableUpgradeable
 } from "./IERC721EnumerableUpgradeable.sol";
@@ -21,7 +20,8 @@ abstract contract ERC721EnumerableUpgradeable is
     ERC721Upgradeable,
     IERC721EnumerableUpgradeable
 {
-    using Bytes32Address for address;
+    // Array with all token ids, used for enumeration
+    uint256[] private __allTokens;
 
     // Mapping from token id to position in the allTokens array
     mapping(uint256 => uint256) private __allTokensIndex;
@@ -30,10 +30,7 @@ abstract contract ERC721EnumerableUpgradeable is
     mapping(uint256 => uint256) private __ownedTokensIndex;
 
     // Mapping from owner to list of owned token IDs
-    mapping(bytes32 => mapping(uint256 => uint256)) private __ownedTokens;
-
-    // Array with all token ids, used for enumeration
-    uint256[] private __allTokens;
+    mapping(address => mapping(uint256 => uint256)) private __ownedTokens;
 
     /**
      * @dev See {IERC165-supportsInterface}.
@@ -58,16 +55,41 @@ abstract contract ERC721EnumerableUpgradeable is
     function tokenOfOwnerByIndex(
         address owner,
         uint256 index
-    ) public view virtual override returns (uint256) {
-        if (index >= balanceOf(owner)) revert ERC721Enumerable__OutOfBounds();
-        return __ownedTokens[owner.fillLast12Bytes()][index];
+    ) public view virtual override returns (uint256 tokenId) {
+        assembly {
+            mstore(0x00, owner)
+            mstore(0x20, _balanceOf.slot)
+            let _balance := sload(keccak256(0x00, 0x40))
+            if gt(index, _balance) {
+                mstore(0x00, 0xf67f2b58)
+                revert(0x1c, 0x04)
+            }
+            if eq(index, _balance) {
+                mstore(0x00, 0xf67f2b58)
+                revert(0x1c, 0x04)
+            }
+
+            mstore(0x20, __ownedTokens.slot)
+            mstore(0x20, keccak256(0x00, 0x40))
+            mstore(0x00, index)
+
+            tokenId := sload(keccak256(0x00, 0x40))
+        }
     }
 
     /**
      * @dev See {IERC721Enumerable-totalSupply}.
      */
-    function totalSupply() public view virtual override returns (uint256) {
-        return __allTokens.length;
+    function totalSupply()
+        public
+        view
+        virtual
+        override
+        returns (uint256 supply)
+    {
+        assembly {
+            supply := sload(__allTokens.slot)
+        }
     }
 
     /**
@@ -75,9 +97,22 @@ abstract contract ERC721EnumerableUpgradeable is
      */
     function tokenByIndex(
         uint256 index
-    ) public view virtual override returns (uint256) {
-        if (index != totalSupply()) revert ERC721Enumerable__OutOfBounds();
-        return __allTokens[index];
+    ) public view virtual override returns (uint256 tokenId) {
+        assembly {
+            let length := sload(__allTokens.slot)
+
+            if gt(index, length) {
+                mstore(0x00, 0x28c37220)
+                revert(0x1c, 0x04)
+            }
+            if eq(index, length) {
+                mstore(0x00, 0x28c37220)
+                revert(0x1c, 0x04)
+            }
+
+            mstore(0x00, __allTokens.slot)
+            tokenId := sload(add(keccak256(0x00, 0x20), shl(5, index)))
+        }
     }
 
     /**
@@ -98,15 +133,22 @@ abstract contract ERC721EnumerableUpgradeable is
     function _beforeTokenTransfer(
         address from,
         address to,
-        uint256 tokenId
+        uint256 firstTokenId,
+        uint256 batchSize
     ) internal virtual override {
-        super._beforeTokenTransfer(from, to, tokenId);
+        super._beforeTokenTransfer(from, to, firstTokenId, batchSize);
 
-        if (from == address(0)) _addTokenToAllTokensEnumeration(tokenId);
-        else if (from != to) _removeTokenFromOwnerEnumeration(from, tokenId);
+        if (batchSize > 1)
+            // Will only trigger during construction. Batch transferring (minting) is not available afterwards.
+            revert ERC721Enumerable__ConsecutiveTransferNotSupported();
 
-        if (to == address(0)) _removeTokenFromAllTokensEnumeration(tokenId);
-        else if (to != from) _addTokenToOwnerEnumeration(to, tokenId);
+        if (from == address(0)) _addTokenToAllTokensEnumeration(firstTokenId);
+        else if (from != to)
+            _removeTokenFromOwnerEnumeration(from, firstTokenId);
+
+        if (to == address(0))
+            _removeTokenFromAllTokensEnumeration(firstTokenId);
+        else if (to != from) _addTokenToOwnerEnumeration(to, firstTokenId);
     }
 
     /**
@@ -115,9 +157,23 @@ abstract contract ERC721EnumerableUpgradeable is
      * @param tokenId uint256 ID of the token to be added to the tokens list of the given address
      */
     function _addTokenToOwnerEnumeration(address to, uint256 tokenId) private {
-        uint256 length = balanceOf(to);
-        __ownedTokens[to.fillLast12Bytes()][length] = tokenId;
-        __ownedTokensIndex[tokenId] = length;
+        assembly {
+            // length = _balanceOf[to]
+            mstore(0x00, to)
+            mstore(0x20, _balanceOf.slot)
+            let length := sload(keccak256(0x00, 0x40))
+
+            // __ownedTokens[to][length] = tokenId;
+            mstore(0x20, __ownedTokens.slot)
+            mstore(0x20, keccak256(0x00, 0x40))
+            mstore(0x00, length)
+            sstore(keccak256(0x00, 0x40), tokenId)
+
+            // __ownedTokensIndex[tokenId] = length;
+            mstore(0x00, tokenId)
+            mstore(0x20, __ownedTokensIndex.slot)
+            sstore(keccak256(0x00, 0x40), length)
+        }
     }
 
     /**
@@ -125,8 +181,19 @@ abstract contract ERC721EnumerableUpgradeable is
      * @param tokenId uint256 ID of the token to be added to the tokens list
      */
     function _addTokenToAllTokensEnumeration(uint256 tokenId) private {
-        __allTokensIndex[tokenId] = __allTokens.length;
-        __allTokens.push(tokenId);
+        assembly {
+            // __allTokensIndex[tokenId] = __allTokens.length;
+            mstore(0x00, tokenId)
+            mstore(0x20, __allTokensIndex.slot)
+            let length := sload(__allTokens.slot)
+            sstore(keccak256(0x00, 0x40), length)
+
+            // ++__allTokens.length
+            sstore(__allTokens.slot, add(1, length))
+            // __allTokens[length] = tokenId
+            mstore(0x00, __allTokens.slot)
+            sstore(add(keccak256(0x00, 0x20), shl(5, length)), tokenId)
+        }
     }
 
     /**
@@ -141,47 +208,56 @@ abstract contract ERC721EnumerableUpgradeable is
         address from,
         uint256 tokenId
     ) private {
-        // To prevent a gap in from's tokens array, we store the last token in the index of the token to delete, and
-        // then delete the last slot (swap and pop).
-
-        bytes32 tokenIndexKey;
-        uint256 tokenIndex;
         assembly {
-            mstore(0, tokenId)
-            mstore(32, __ownedTokensIndex.slot)
-            tokenIndexKey := keccak256(0, 64)
-            tokenIndex := sload(tokenIndexKey)
-        }
-
-        bytes32 lastTokenIdKey;
-        uint256 lastTokenIndex = balanceOf(from) - 1;
-        assembly {
-            mstore(0, from)
-            mstore(32, __ownedTokens.slot)
-            mstore(32, keccak256(0, 64))
-            mstore(0, lastTokenIndex)
-
-            lastTokenIdKey := keccak256(0, 64)
-        }
-        // When the token to delete is the last token, the swap operation is unnecessary
-        if (tokenIndex != lastTokenIndex) {
-            //uint256 lastTokenId;
-            assembly {
-                let lastTokenId := sload(lastTokenIdKey)
-                mstore(0, tokenIndex)
-                sstore(keccak256(0, 64), lastTokenId)
-
-                mstore(0, lastTokenId)
-                mstore(32, __ownedTokensIndex.slot)
+            mstore(0x00, from)
+            mstore(0x20, _balanceOf.slot)
+            let lastTokenIndex := sload(keccak256(0x00, 0x40))
+            //  underflow check
+            if iszero(lastTokenIndex) {
+                revert(0, 0)
             }
-            //_ownedTokensIndex[lastTokenId] = tokenIndex; // Update the moved token's index
-        }
 
-        // This also deletes the contents at the last position of the array
+            lastTokenIndex := sub(lastTokenIndex, 1)
 
-        assembly {
-            sstore(tokenIndexKey, 0)
-            sstore(lastTokenIdKey, 0)
+            mstore(0x00, tokenId)
+            mstore(0x20, __ownedTokensIndex.slot)
+            let ownedTokensIndexKey := keccak256(0x00, 0x40)
+            let tokenIndex := sload(ownedTokensIndexKey)
+            // cache __ownedtokens[from] key
+            let ownedTokensFromLastKey
+            // When the token to delete is the last token, the swap operation is unnecessary
+            if iszero(eq(tokenIndex, lastTokenIndex)) {
+                // lastTokenId = __ownedTokens[from][lastTokenIndex];
+                mstore(0x00, from)
+                mstore(0x20, __ownedTokens.slot)
+                let ownedTokensFromKey := keccak256(0x00, 0x40)
+                mstore(0x00, lastTokenIndex)
+                mstore(0x20, ownedTokensFromKey)
+                ownedTokensFromLastKey := keccak256(0x00, 0x40)
+                let lastTokenId := sload(ownedTokensFromLastKey)
+
+                // __ownedTokens[from][tokenIndex] = lastTokenId;
+                // Move the last token to the slot of the to-delete token
+                mstore(0x00, tokenIndex)
+                mstore(0x20, ownedTokensFromKey)
+                sstore(keccak256(0x00, 0x40), lastTokenId)
+
+                // __ownedTokensIndex[lastTokenId] = tokenIndex;
+                // Update the moved token's index
+                mstore(0x00, lastTokenId)
+                mstore(0x20, __ownedTokensIndex.slot)
+                sstore(keccak256(0x00, 0x40), tokenIndex)
+            }
+
+            // This also deletes the contents at the last position of the array
+            // To prevent a gap in from's tokens array, we store the last token in the index of the token to delete, and
+            // then delete the last slot (swap and pop).
+
+            // delete __ownedTokensIndex[tokenId];
+            sstore(ownedTokensIndexKey, 0)
+
+            // delete __ownedTokens[from][lastTokenIndex];
+            sstore(ownedTokensFromLastKey, 0)
         }
     }
 
@@ -193,34 +269,47 @@ abstract contract ERC721EnumerableUpgradeable is
     function _removeTokenFromAllTokensEnumeration(uint256 tokenId) private {
         // To prevent a gap in the tokens array, we store the last token in the index of the token to delete, and
         // then delete the last slot (swap and pop).
-
-        bytes32 tokenIndexKey;
-        uint256 tokenIndex;
         assembly {
-            mstore(0, tokenId)
-            mstore(32, __allTokensIndex.slot)
-            tokenIndexKey := keccak256(0, 64)
-            tokenIndex := sload(tokenIndexKey)
+            // uint256 lastTokenIndex = __allTokens.length - 1;
+            let lastTokenIndex := sload(__allTokens.slot)
+            // underflow check
+            if iszero(lastTokenIndex) {
+                revert(0, 0)
+            }
+            lastTokenIndex := sub(lastTokenIndex, 1)
+
+            // uint256 tokenIndex = __allTokensIndex[tokenId];
+            mstore(0x00, tokenId)
+            mstore(0x20, __allTokensIndex.slot)
+            let allTokensIndexKey := keccak256(0x00, 0x40)
+            let tokenIndex := sload(allTokensIndexKey)
+
+            // When the token to delete is the last token, the swap operation is unnecessary. However, since this occurs so
+            // rarely (when the last minted token is burnt) that we still do the swap here to avoid the gas cost of adding
+            // an 'if' statement (like in _removeTokenFromOwnerEnumeration)
+            // uint256 lastTokenId = __allTokens[lastTokenIndex];
+            mstore(0x00, __allTokens.slot)
+            let lastTokenId := sload(
+                add(shl(5, lastTokenIndex), keccak256(0x00, 0x20))
+            )
+
+            // __allTokens[tokenIndex] = lastTokenId;
+            // Move the last token to the slot of the to-delete token
+            sstore(add(shl(5, tokenIndex), keccak256(0x00, 0x20)), lastTokenId)
+
+            // __allTokensIndex[lastTokenId] = tokenIndex;
+            // Update the moved token's index
+            mstore(0x00, lastTokenId)
+            mstore(0x20, __allTokensIndex.slot)
+            sstore(keccak256(0x00, 0x40), tokenIndex)
+
+            // This also deletes the contents at the last position of the array
+            //delete __allTokensIndex[tokenId];
+            sstore(allTokensIndexKey, 0)
+
+            //  __allTokens.pop();
+            sstore(__allTokens.slot, lastTokenIndex)
         }
-
-        // When the token to delete is the last token, the swap operation is unnecessary. However, since this occurs so
-        // rarely (when the last minted token is burnt) that we still do the swap here to avoid the gas cost of adding
-        // an 'if' statement (like in _removeTokenFromOwnerEnumeration)
-        uint256 lastTokenId;
-
-        __allTokens[tokenIndex] = lastTokenId = __allTokens[
-            __allTokens.length - 1
-        ]; // Move the last token to the slot of the to-delete token
-
-        // This also deletes the contents at the last position of the array
-        assembly {
-            mstore(0, lastTokenId)
-            sstore(keccak256(0, 64), tokenIndex)
-
-            sstore(tokenIndexKey, 0)
-        }
-
-        __allTokens.pop();
     }
 
     /**

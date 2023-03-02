@@ -18,7 +18,11 @@ interface IFundForwarderUpgradeable {
      * @param from Old vault address
      * @param to New vault address
      */
-    event VaultUpdated(address indexed from, address indexed to);
+    event VaultUpdated(
+        address indexed operator,
+        address indexed from,
+        address indexed to
+    );
 
     /**
      *@dev Emits when a single ERC721 token is recovered

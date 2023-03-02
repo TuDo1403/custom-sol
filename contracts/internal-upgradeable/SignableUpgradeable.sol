@@ -119,15 +119,24 @@ abstract contract SignableUpgradeable is
      * @return nonce The new nonce for the account
      */
     function _useNonce(bytes32 id_) internal virtual returns (uint256 nonce) {
+        address sender = _msgSender();
         assembly {
             mstore(0x00, id_)
             mstore(0x20, _nonces.slot)
             let key := keccak256(0x00, 0x40)
             nonce := sload(key)
             sstore(key, add(nonce, 1))
-        }
 
-        emit NonceIncremented(_msgSender(), id_, nonce);
+            log4(
+                0x00,
+                0x00,
+                /// @dev value is equal to keccak256("NonceIncremented(address,bytes32,uint256)")
+                0x81950aaf2c3573be1f953223448244747f16268d5a0573dea6bd6fa249a4c86e,
+                sender,
+                id_,
+                nonce
+            )
+        }
     }
 
     /// @inheritdoc ISignableUpgradeable

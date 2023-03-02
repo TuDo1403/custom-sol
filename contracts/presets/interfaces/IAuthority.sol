@@ -15,12 +15,6 @@ interface IAuthority {
     function setRoleAdmin(bytes32 role, bytes32 adminRole) external;
 
     /**
-     * @dev Returns true if all functions in the contract are paused, false otherwise.
-     * @return isPaused bool isPaused representing the paused state of the contract
-     */
-    function paused() external view returns (bool isPaused);
-
-    /**
      * @dev Allows a user to request access to the contract as a proxy.
      * Only callable by accounts with the OPERATOR_ROLE and only if the sender is a proxy of the caller.
      * Grants the PROXY_ROLE and the specified role to the sender.

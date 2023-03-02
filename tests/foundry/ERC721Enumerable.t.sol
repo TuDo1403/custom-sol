@@ -36,31 +36,150 @@ contract ERC721EnumerableTest is Test {
     }
 
     function setUp() public {
-        uint256[] memory idArr = new uint256[](100);
-
-        uint256 id;
-        for (uint256 i; i < 100; ) {
-            id = uint256(keccak256(abi.encode(i)));
-            idArr[i] = id;
-            nft.mint(alice, id);
-            unchecked {
-                ++i;
-            }
-        }
-
-        ids = idArr;
+        nft.mint(owner, 14321995);
+        nft.mint(owner, 225918748);
     }
 
-    function testMintWithCustomId() public {
-        nft.mint(alice, 14321995);
+    function testSupply() public {
+        assertEq(nft.totalSupply(), 2);
+    }
+
+    function testIndex() public {
+        assertEq(nft.tokenOfOwnerByIndex(owner, 0), 14321995);
+    }
+
+    function testIndexOutOfBound() public {
+        vm.expectRevert(
+            IERC721Enumerable.ERC721Enumerable__OutOfBounds.selector
+        );
+        nft.tokenOfOwnerByIndex(owner, 2);
+    }
+
+    function testInvalidOwner() public {
+        vm.expectRevert(
+            IERC721Enumerable.ERC721Enumerable__OutOfBounds.selector
+        );
+
+        nft.tokenOfOwnerByIndex(alice, 0);
+    }
+
+    // function testMintWithCustomId() public {
+    //     nft.mint(alice, 14321995);
+
+    //     assertEq(nft.totalSupply(), 101);
+    // }
+
+    function beforeEach() internal {
+        vm.startPrank(owner);
+        nft.approve(alice, 14321995);
+        nft.approve(alice, 225918748);
+        vm.stopPrank();
+
+        vm.startPrank(alice);
+        nft.transferFrom(owner, alice, 14321995);
+        nft.transferFrom(owner, alice, 225918748);
+        vm.stopPrank();
+    }
+
+    function testReturnCorrectTokenIdsForTarget() public {
+        beforeEach();
+
+        assertEq(nft.balanceOf(alice), 2);
+        assertEq(nft.tokenOfOwnerByIndex(alice, 0), 14321995);
+        assertEq(nft.tokenOfOwnerByIndex(alice, 1), 225918748);
+    }
+
+    function testEmptyCollectionForOriginalOwner() public {
+        beforeEach();
+
+        vm.expectRevert(
+            IERC721Enumerable.ERC721Enumerable__OutOfBounds.selector
+        );
+
+        nft.tokenOfOwnerByIndex(owner, 0);
+    }
+
+    function testTokensByIndex() public {
+        assertEq(nft.tokenByIndex(0), 14321995);
+        assertEq(nft.tokenByIndex(1), 225918748);
+    }
+
+    function testRevertIfIndexIsGreaterThanSupply() public {
+        vm.expectRevert(
+            IERC721Enumerable.ERC721Enumerable__GlobalIndexOutOfBounds.selector
+        );
+
+        nft.tokenByIndex(2);
+    }
+
+    function testReturnsAllTokensAfterBurningOldAndMintingNew() public {
+        uint256 newTokenId = 84931615531;
+        uint256 anotherNewTokenId = 84972183064;
+
+        address paul = cheats.addr(3);
+
+        nft.burn(14321995);
+        nft.mint(paul, newTokenId);
+        nft.mint(paul, anotherNewTokenId);
+
+        assertEq(nft.totalSupply(), 3);
+
+        uint256 id1 = nft.tokenByIndex(0);
+        uint256 id2 = nft.tokenByIndex(1);
+        uint256 id3 = nft.tokenByIndex(2);
+
+        if (id1 == 14321995 || id2 == 14321995 || id3 == 14321995) revert();
+
+        console.logUint(id1);
+        console.logUint(id2);
+        console.logUint(id3);
     }
 
     function testMint() public {
-        vm.prank(owner);
-        nft.mint(alice);
+        vm.expectRevert(IERC721.ERC721__InvalidRecipient.selector);
+        nft.mint(address(0), 222222);
+
+        assertEq(nft.tokenOfOwnerByIndex(owner, 0), 14321995);
+        assertEq(nft.tokenByIndex(0), 14321995);
     }
 
-    function testBurn() public {
-        nft.burn(ids[0]);
+    function testBurnUnexistedToken() public {
+        vm.expectRevert(IERC721.ERC721__NotMinted.selector);
+        nft.burn(2423423432423);
+    }
+
+    function testRemoveTokenFromTheTokenListOfOwner() public {
+        nft.burn(14321995);
+        assertEq(nft.tokenOfOwnerByIndex(owner, 0), 225918748);
+    }
+
+    function testAdjustAllTokenList() public {
+        nft.burn(14321995);
+        assertEq(nft.tokenByIndex(0), 225918748);
+    }
+
+    function testBurnAllTokens() public {
+        nft.burn(14321995);
+        nft.burn(225918748);
+
+        assertEq(nft.totalSupply(), 0);
+
+        vm.expectRevert(
+            IERC721Enumerable.ERC721Enumerable__GlobalIndexOutOfBounds.selector
+        );
+        nft.tokenByIndex(0);
+    }
+
+    function testStressMint() public {
+        // address _owner = owner;
+        // IMockERC721Enumerable _nft = nft;
+        // for (uint256 i; i < 100; ) {
+        //     _nft.mint(_owner, i);
+        //     unchecked {
+        //         ++i;
+        //     }
+        // }
+
+        nft.mint(owner, 988888);
     }
 }

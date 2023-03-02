@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import {IERC721Upgradeable} from "../IERC721Upgradeable.sol";
+import {IERC721} from "../IERC721.sol";
 
-interface IERC721RentableUpgradeable is IERC721Upgradeable {
+interface IERC721Rentable is IERC721 {
     error ERC721Rentable__NotValidTransfer();
     error ERC721Rentable__OnlyOwnerOrApproved();
 

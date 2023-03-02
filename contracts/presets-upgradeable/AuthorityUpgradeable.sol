@@ -31,7 +31,6 @@ abstract contract AuthorityUpgradeable is
     IAuthority,
     UUPSUpgradeable,
     PausableUpgradeable,
-    ProxyCheckerUpgradeable,
     FundForwarderUpgradeable,
     BlacklistableUpgradeable,
     AccessControlEnumerableUpgradeable
@@ -74,15 +73,6 @@ abstract contract AuthorityUpgradeable is
         _unpause();
     }
 
-    function paused()
-        public
-        view
-        override(IAuthority, PausableUpgradeable)
-        returns (bool)
-    {
-        return PausableUpgradeable.paused();
-    }
-
     function supportsInterface(
         bytes4 interfaceId_
     ) public view override returns (bool) {
@@ -105,21 +95,23 @@ abstract contract AuthorityUpgradeable is
         address[] calldata operators_
     ) internal virtual onlyInitializing {
         __Pausable_init_unchained();
-        __Authority_init_unchained(admin_, operators_, roles_);
+        __Authority_init_unchained(admin_, roles_, operators_);
         __FundForwarder_init_unchained(_deployDefaultTreasury(admin_, data_));
     }
 
     function __Authority_init_unchained(
         address admin_,
-        address[] calldata operators_,
-        bytes32[] calldata roles_
+        bytes32[] calldata roles_,
+        address[] calldata operators_
     ) internal virtual onlyInitializing {
         _grantRole(Roles.PAUSER_ROLE, admin_);
         _grantRole(Roles.SIGNER_ROLE, admin_);
         _grantRole(DEFAULT_ADMIN_ROLE, admin_);
         _grantRole(Roles.OPERATOR_ROLE, admin_);
         _grantRole(Roles.UPGRADER_ROLE, admin_);
+        _grantRole(Roles.TREASURER_ROLE, admin_);
         _grantRole(Roles.PROXY_ROLE, address(this));
+        _grantRole(Roles.TREASURER_ROLE, address(this));
 
         uint256 length = operators_.length;
         if (length != roles_.length) revert Authority__LengthMismatch();

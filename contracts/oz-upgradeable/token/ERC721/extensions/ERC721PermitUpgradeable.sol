@@ -86,8 +86,12 @@ abstract contract ERC721PermitUpgradeable is
 
     function nonces(
         uint256 tokenId_
-    ) external view override returns (uint256) {
-        return _nonces[bytes32(tokenId_)];
+    ) external view override returns (uint256 nonce) {
+        assembly {
+            mstore(0x00, tokenId_)
+            mstore(0x20, _nonces.slot)
+            nonce := sload(keccak256(0x00, 0x40))
+        }
     }
 
     /// @notice Query if a contract implements an interface

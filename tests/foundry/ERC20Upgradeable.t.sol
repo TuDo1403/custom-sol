@@ -16,7 +16,7 @@ contract ERC20Test is DSTestPlus {
 
     function setUp() public {
         token = new MockERC20Upgradeable();
-        token.initialize("Token", "TKN", 18);
+        token.initialize("Token", "TKN");
     }
 
     function invariantMetadata() public {
@@ -490,7 +490,7 @@ contract ERC20Invariants is DSTestPlus, DSInvariantTest {
 
     function setUp() public {
         token = new MockERC20Upgradeable();
-        token.initialize("Token", "TKN", 18);
+        token.initialize("Token", "TKN");
         balanceSum = new BalanceSum(token);
 
         addTargetContract(address(balanceSum));

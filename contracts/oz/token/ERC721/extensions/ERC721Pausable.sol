@@ -24,8 +24,9 @@ abstract contract ERC721Pausable is ERC721, Pausable {
     function _beforeTokenTransfer(
         address from,
         address to,
-        uint256 tokenId
+        uint256 tokenId,
+        uint256 batchSize
     ) internal virtual override whenNotPaused {
-        super._beforeTokenTransfer(from, to, tokenId);
+        super._beforeTokenTransfer(from, to, tokenId, batchSize);
     }
 }

@@ -167,7 +167,7 @@ abstract contract ERC721 is Context, ERC165, IERC721, IERC721Metadata {
             //  emit ApprovalForAll(sender, operator, approved)
             mstore(0x00, approved)
             log3(
-                0x00,
+                0x18,
                 0x08,
                 /// @dev value is equal to keccak256("ApprovalForAll(address,address,bool)")
                 0x17307eab39ab6107e8899845ad3d59bd9653f200f220920489ca2b5937696c31,
@@ -181,9 +181,9 @@ abstract contract ERC721 is Context, ERC165, IERC721, IERC721Metadata {
         uint256 tokenId
     ) external view returns (address approval) {
         assembly {
-            mstore(0, tokenId)
-            mstore(32, _getApproved.slot)
-            approval := sload(keccak256(0, 64))
+            mstore(0x00, tokenId)
+            mstore(0x20, _getApproved.slot)
+            approval := sload(keccak256(0x00, 0x40))
         }
     }
 
@@ -246,16 +246,75 @@ abstract contract ERC721 is Context, ERC165, IERC721, IERC721Metadata {
         }
     }
 
+    /**
+     * @dev Hook that is called before any token transfer. This includes minting and burning. If {ERC721Consecutive} is
+     * used, the hook may be called as part of a consecutive (batch) mint, as indicated by `batchSize` greater than 1.
+     *
+     * Calling conditions:
+     *
+     * - When `from` and `to` are both non-zero, ``from``'s tokens will be transferred to `to`.
+     * - When `from` is zero, the tokens will be minted for `to`.
+     * - When `to` is zero, ``from``'s tokens will be burned.
+     * - `from` and `to` are never both zero.
+     * - `batchSize` is non-zero.
+     *
+     * To learn more about hooks, head to xref:ROOT:extending-contracts.adoc#using-hooks[Using Hooks].
+     */
     function _beforeTokenTransfer(
         address from,
         address to,
-        uint256 tokenId
-    ) internal virtual {}
+        uint256 /* firstTokenId */,
+        uint256 batchSize
+    ) internal virtual {
+        assembly {
+            if gt(batchSize, 1) {
+                mstore(0x20, _balanceOf.slot)
+                let key
+                let balanceBefore
+                if iszero(iszero(from)) {
+                    mstore(0x00, from)
+                    key := keccak256(0x00, 0x40)
+                    balanceBefore := sload(key)
+                    //  underflow check
+                    if gt(balanceBefore, batchSize) {
+                        revert(0, 0)
+                    }
+                    sstore(key, sub(balanceBefore, batchSize))
+                }
+                if iszero(iszero(to)) {
+                    mstore(0x00, to)
+                    key := keccak256(0x00, 0x40)
+                    balanceBefore := sload(key)
+                    //  overflow check
+                    balanceBefore := add(balanceBefore, batchSize)
+                    if lt(balanceBefore, batchSize) {
+                        revert(0, 0)
+                    }
+                    sstore(key, balanceBefore)
+                }
+            }
+        }
+    }
 
+    /**
+     * @dev Hook that is called after any token transfer. This includes minting and burning. If {ERC721Consecutive} is
+     * used, the hook may be called as part of a consecutive (batch) mint, as indicated by `batchSize` greater than 1.
+     *
+     * Calling conditions:
+     *
+     * - When `from` and `to` are both non-zero, ``from``'s tokens were transferred to `to`.
+     * - When `from` is zero, the tokens were minted for `to`.
+     * - When `to` is zero, ``from``'s tokens were burned.
+     * - `from` and `to` are never both zero.
+     * - `batchSize` is non-zero.
+     *
+     * To learn more about hooks, head to xref:ROOT:extending-contracts.adoc#using-hooks[Using Hooks].
+     */
     function _afterTokenTransfer(
         address from,
         address to,
-        uint256 tokenId
+        uint256 firstTokenId,
+        uint256 batchSize
     ) internal virtual {}
 
     function transferFrom(
@@ -263,7 +322,7 @@ abstract contract ERC721 is Context, ERC165, IERC721, IERC721Metadata {
         address to,
         uint256 id
     ) public virtual {
-        _beforeTokenTransfer(from, to, id);
+        _beforeTokenTransfer(from, to, id, 1);
 
         address sender = _msgSender();
         assembly {
@@ -340,7 +399,7 @@ abstract contract ERC721 is Context, ERC165, IERC721, IERC721Metadata {
             )
         }
 
-        _afterTokenTransfer(from, to, id);
+        _afterTokenTransfer(from, to, id, 1);
     }
 
     function safeTransferFrom(
@@ -387,7 +446,7 @@ abstract contract ERC721 is Context, ERC165, IERC721, IERC721Metadata {
         address to,
         uint256 tokenId
     ) internal virtual {
-        _beforeTokenTransfer(from, to, tokenId);
+        _beforeTokenTransfer(from, to, tokenId, 1);
 
         assembly {
             // if to == address(0) revert
@@ -440,7 +499,7 @@ abstract contract ERC721 is Context, ERC165, IERC721, IERC721Metadata {
             sstore(key, sub(sload(key), 1))
         }
 
-        _afterTokenTransfer(from, to, tokenId);
+        _afterTokenTransfer(from, to, tokenId, 1);
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -461,7 +520,7 @@ abstract contract ERC721 is Context, ERC165, IERC721, IERC721Metadata {
     //////////////////////////////////////////////////////////////*/
 
     function _mint(address to, uint256 id) internal virtual {
-        _beforeTokenTransfer(address(0), to, id);
+        _beforeTokenTransfer(address(0), to, id, 1);
 
         assembly {
             if iszero(to) {
@@ -503,7 +562,7 @@ abstract contract ERC721 is Context, ERC165, IERC721, IERC721Metadata {
             sstore(key, cachedVal)
         }
 
-        _afterTokenTransfer(address(0), to, id);
+        _afterTokenTransfer(address(0), to, id, 1);
     }
 
     function _burn(uint256 id) internal virtual {
@@ -522,7 +581,7 @@ abstract contract ERC721 is Context, ERC165, IERC721, IERC721Metadata {
             }
         }
 
-        _beforeTokenTransfer(owner, address(0), id);
+        _beforeTokenTransfer(owner, address(0), id, 1);
 
         assembly {
             // delete _ownerOf[id]
@@ -551,7 +610,7 @@ abstract contract ERC721 is Context, ERC165, IERC721, IERC721Metadata {
             sstore(key, sub(sload(key), 1))
         }
 
-        _afterTokenTransfer(owner, address(0), id);
+        _afterTokenTransfer(owner, address(0), id, 1);
     }
 
     /*//////////////////////////////////////////////////////////////

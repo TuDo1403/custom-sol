@@ -7,6 +7,7 @@ import {
 } from "oz/token/ERC721/presets/ERC721PresetMinterPauserAutoId.sol";
 
 import {
+    IERC721,
     IERC721Enumerable
 } from "oz/token/ERC721/extensions/IERC721Enumerable.sol";
 
