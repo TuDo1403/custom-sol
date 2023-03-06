@@ -7,8 +7,13 @@ dotenv.config();
 
 const config: HardhatUserConfig = {
     solidity: {
-        version: "0.8.18",
+        version: "0.8.19",
+
         settings: {
+            evmVersion: "paris",
+            metadata: {
+                bytecodeHash: "ipfs",
+            },
             optimizer: {
                 enabled: true,
                 runs: 1_000_000,
@@ -27,27 +32,41 @@ const config: HardhatUserConfig = {
         fuji: {
             url: "https://api.avax-test.network/ext/bc/C/rpc",
             chainId: 43113,
-            accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+            accounts:
+                process.env.PRIVATE_KEY !== undefined
+                    ? [process.env.PRIVATE_KEY]
+                    : [],
         },
-        bsc: {
-            url: "https://bsc-dataseed1.binance.org/",
-            chainId: 56,
-            accounts: process.env.MAINTAINER_KEY !== undefined ? [process.env.MAINTAINER_KEY] : [],
-        },
+        // bsc: {
+        //     url: "https://bsc-dataseed1.binance.org/",
+        //     chainId: 56,
+        //     accounts:
+        //         process.env.MAINTAINER_KEY !== undefined
+        //             ? [process.env.MAINTAINER_KEY]
+        //             : [],
+        // },
         bscTest: {
-            url: "https://data-seed-prebsc-1-s1.binance.org:8545/",
+            url: "https://data-seed-prebsc-1-s2.binance.org:8545/",
             chainId: 97,
-            accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+            accounts: [
+                "d2e8272301fed486c54b71ebb9ee9220df040636ac9dad691f3bf06573c05648",
+            ],
         },
         goerli: {
             url: "https://goerli.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
             chainId: 5,
-            accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+            accounts:
+                process.env.PRIVATE_KEY !== undefined
+                    ? [process.env.PRIVATE_KEY]
+                    : [],
         },
         tomoTest: {
             url: "https://rpc.testnet.tomochain.com",
             chainId: 89,
-            accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+            accounts:
+                process.env.PRIVATE_KEY !== undefined
+                    ? [process.env.PRIVATE_KEY]
+                    : [],
         },
     },
     contractSizer: {

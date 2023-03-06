@@ -78,12 +78,12 @@ abstract contract MultiDelegatecall is Context, ReentrancyGuard {
     }
 
     function __onlyDelegateCall() private view {
-        if (address(this) != __original)
+        if (address(this) == __original)
             revert MultiDelegatecall__OnlyDelegatecall();
     }
 
     function __nonDelegatecall() private view {
-        if (address(this) == __original)
+        if (address(this) != __original)
             revert MultiDelegatecall__DelegatecallNotAllowed();
     }
 }

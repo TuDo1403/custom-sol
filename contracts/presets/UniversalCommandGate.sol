@@ -6,11 +6,12 @@ import {ReentrancyGuard} from "../oz/security/ReentrancyGuard.sol";
 import {CommandGate} from "../internal/CommandGate.sol";
 import {Roles, IAuthority, Manager} from "./base/Manager.sol";
 
-import {IERC20, IERC721, IFundForwarder} from "../internal/FundForwarder.sol";
+import {IFundForwarder} from "../internal/FundForwarder.sol";
 import {
+    IERC20,
     IERC20Permit
-} from "../oz/token/ERC20/extensions/draft-IERC20Permit.sol";
-import {ERC721TokenReceiver} from "../oz/token/ERC721/ERC721.sol";
+} from "../oz/token/ERC20/extensions/IERC20Permit.sol";
+import {IERC721, ERC721TokenReceiver} from "../oz/token/ERC721/ERC721.sol";
 import {IWithdrawable} from "../internal/interfaces/IWithdrawable.sol";
 import {IERC1155} from "@openzeppelin/contracts/token/ERC1155/IERC1155.sol"; //  TODO: update oz-custom import
 import {
@@ -318,5 +319,10 @@ contract UniversalCommandGate is
         _requirePaused();
     }
 
-    function _afterRecover(address, address, bytes memory) internal override {}
+    function _afterRecover(
+        address,
+        address,
+        uint256,
+        bytes memory
+    ) internal override {}
 }

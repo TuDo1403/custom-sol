@@ -8,30 +8,18 @@ library ErrorHandler {
         bool ok_,
         bytes memory revertData_
     ) internal pure {
-        if (!ok_)
-            if (revertData_.length != 0)
-                assembly {
-                    revert(
-                        // Start of revert data bytes. The 0x20 offset is always the same.
-                        add(revertData_, 0x20),
-                        // Length of revert data.
-                        mload(revertData_)
-                    )
+        assembly {
+            if iszero(ok_) {
+                let revertLength := mload(revertData_)
+                if iszero(iszero(revertLength)) {
+                    // Start of revert data bytes. The 0x20 offset is always the same.
+                    revert(add(revertData_, 0x20), revertLength)
                 }
-            else revert ErrorHandler__ExecutionFailed();
 
-        // assembly {
-        //     if iszero(ok_) {
-        //         let revertLength := mload(revertData_)
-        //         if iszero(iszero(revertLength)) {
-        //             // Start of revert data bytes. The 0x20 offset is always the same.
-        //             revert(add(revertData_, 0x20), revertLength)
-        //         }
-
-        //         //  revert ErrorHandler__ExecutionFailed()
-        //         mstore(0x00, 0xa94eec76)
-        //         revert(0x1c, 0x04)
-        //     }
-        // }
+                //  revert ErrorHandler__ExecutionFailed()
+                mstore(0x00, 0xa94eec76)
+                revert(0x1c, 0x04)
+            }
+        }
     }
 }

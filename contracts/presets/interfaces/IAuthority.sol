@@ -5,6 +5,13 @@ interface IAuthority {
     error Authority__InvalidRole();
     error Authority__LengthMismatch();
 
+    event VaultMultiUpdated(
+        address indexed operator,
+        address indexed vault,
+        address[] proxies,
+        bool[] success
+    );
+
     event ProxyAccessGranted(address indexed operator, address indexed proxy);
 
     /**

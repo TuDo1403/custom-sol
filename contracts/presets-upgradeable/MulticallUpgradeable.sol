@@ -1,29 +1,39 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import {Context} from "../oz/utils/Context.sol";
-import {ReentrancyGuard} from "../oz/security/ReentrancyGuard.sol";
+import {
+    ContextUpgradeable
+} from "../oz-upgradeable/utils/ContextUpgradeable.sol";
+import {
+    ReentrancyGuardUpgradeable
+} from "../oz-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 
 import {IMulticall} from "./interfaces/IMulticall.sol";
 
 import {ErrorHandler} from "../libraries/ErrorHandler.sol";
 
-contract Multicall is Context, IMulticall, ReentrancyGuard {
+contract MulticallUpgradeable is
+    IMulticall,
+    ContextUpgradeable,
+    ReentrancyGuardUpgradeable
+{
     using ErrorHandler for bool;
     /**
      * @dev Address of the original contract
      */
-    address private immutable __original;
+    address private __original;
 
     modifier nonDelegatecall() virtual {
         __nonDelegatecall();
         _;
     }
 
-    /**
-     * @dev Constructor that saves the address of the original contract
-     */
-    constructor() payable ReentrancyGuard() {
+    function __Multicall_init() internal onlyInitializing {
+        __Multicall_init_unchained();
+        __ReentrancyGuard_init_unchained();
+    }
+
+    function __Multicall_init_unchained() internal onlyInitializing {
         __original = address(this);
     }
 

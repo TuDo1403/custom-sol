@@ -1,7 +1,18 @@
 import { Contract, ContractFactory } from "ethers";
-import { ethers } from "hardhat";
+import { ethers, run } from "hardhat";
 
 async function main() {
+    const Multicall = await ethers.getContractFactory("Multicall");
+
+    console.log({ Multicall });
+
+    const multicall = await Multicall.deploy();
+
+    await multicall.deployed();
+
+    await run(`verify:verify`, { address: await multicall.getAddress() });
+
+    console.log({ address: await multicall.getAddress() });
     // const Factory: ContractFactory = await ethers.getContractFactory("UniswapV3Factory");
     // console.log({ Factory });
     // const factory: Contract = await Factory.deploy();
@@ -31,7 +42,6 @@ async function main() {
     // const wbtc: Contract = await PMT.deploy("Wrapped Bitcoin", "WBTC");
 
     // console.log(`Wrapped Bitcoin deployed to: ${wbtc.address}`);
-    
 }
 
 // We recommend this pattern to be able to use async/await everywhere

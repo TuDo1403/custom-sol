@@ -7,7 +7,7 @@ import {AccessControl} from "./AccessControl.sol";
 
 import {IAccessControlEnumerable} from "./IAccessControlEnumerable.sol";
 
-import {EnumerableSet256} from "../../libraries/structs/EnumerableSet256.sol";
+import {EnumerableSet} from "../utils/structs/EnumerableSet.sol";
 
 /**
  * @dev Extension of {AccessControl} that allows enumerating the members of each role.
@@ -16,9 +16,9 @@ abstract contract AccessControlEnumerable is
     IAccessControlEnumerable,
     AccessControl
 {
-    using EnumerableSet256 for EnumerableSet256.AddressSet;
+    using EnumerableSet for EnumerableSet.AddressSet;
 
-    mapping(bytes32 => EnumerableSet256.AddressSet) internal _roleMembers;
+    mapping(bytes32 => EnumerableSet.AddressSet) internal _roleMembers;
 
     /**
      * @dev See {IERC165-supportsInterface}.

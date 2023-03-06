@@ -6,12 +6,9 @@ import {Context} from "../oz/utils/Context.sol";
 import {Transferable} from "./Transferable.sol";
 import {ProxyChecker} from "./ProxyChecker.sol";
 
-import {
-    IERC20,
-    IERC721,
-    IFundForwarder,
-    IERC721Enumerable
-} from "./interfaces/IFundForwarder.sol";
+import {IFundForwarder} from "./interfaces/IFundForwarder.sol";
+
+import {ErrorHandler} from "../libraries/ErrorHandler.sol";
 
 /**
  * @title FundForwarder
@@ -23,6 +20,7 @@ abstract contract FundForwarder is
     Transferable,
     IFundForwarder
 {
+    using ErrorHandler for bool;
     /**
      * @dev Address to forward funds to
      */
@@ -47,72 +45,46 @@ abstract contract FundForwarder is
 
         emit Forwarded(_msgSender(), msg.value);
 
-        _afterRecover(_vault, address(0), abi.encode(msg.value));
+        _afterRecover(_vault, address(0), msg.value, "");
     }
 
-    /// @inheritdoc IFundForwarder
-    function recoverERC20(IERC20 token_, uint256 amount_) external virtual {
+    function recover(RecoveryCallData[] calldata calldata_) external virtual {
         _beforeRecover("");
-        __checkValidAddress(address(token_));
-        address sender = _msgSender();
-        _onlyEOA(sender);
 
         address _vault = vault();
-
-        _safeERC20Transfer(token_, _vault, amount_);
-
-        emit Recovered(sender, address(token_), amount_);
-
-        _afterRecover(_vault, address(token_), abi.encode(amount_));
-    }
-
-    /// @inheritdoc IFundForwarder
-    function recoverNFT(IERC721 token_, uint256 tokenId_) external virtual {
-        _beforeRecover("");
-        __checkValidAddress(address(token_));
         address sender = _msgSender();
-        _onlyEOA(sender);
-        address _vault = vault();
+        uint256 length = calldata_.length;
+        bytes[] memory results = new bytes[](length);
 
-        token_.safeTransferFrom(
-            address(this),
-            _vault,
-            tokenId_,
-            safeRecoverHeader()
-        );
-
-        emit Recovered(sender, address(token_), tokenId_);
-
-        _afterRecover(_vault, address(token_), abi.encode(tokenId_));
-    }
-
-    /// @inheritdoc IFundForwarder
-    function recoverNFTs(IERC721Enumerable token_) external virtual {
-        _beforeRecover("");
-        __checkValidAddress(address(token_));
-        address sender = _msgSender();
-        _onlyEOA(sender);
-
-        address _vault = vault();
-        uint256 length = token_.balanceOf(address(this));
-        uint256[] memory tokenIds = new uint256[](length);
-        bytes memory recoverHeader = safeRecoverHeader();
+        bool ok;
+        bytes memory result;
         for (uint256 i; i < length; ) {
-            token_.safeTransferFrom(
-                address(this),
+            (ok, result) = calldata_[i].token.call{value: calldata_[i].value}(
+                abi.encodePacked(calldata_[i].fnSelector, calldata_[i].params)
+            );
+
+            ok.handleRevertIfNotSuccess(result);
+
+            results[i] = result;
+
+            _afterRecover(
                 _vault,
-                tokenIds[i] = token_.tokenOfOwnerByIndex(address(this), i),
-                recoverHeader
+                calldata_[i].token,
+                calldata_[i].value,
+                calldata_[i].params
+            );
+
+            emit Recovered(
+                sender,
+                calldata_[i].token,
+                calldata_[i].value,
+                calldata_[i].params
             );
 
             unchecked {
                 ++i;
             }
         }
-
-        _afterRecover(_vault, address(token_), abi.encode(tokenIds));
-
-        emit RecoveredMulti(sender, address(token_), tokenIds);
     }
 
     /// @inheritdoc IFundForwarder
@@ -125,9 +97,9 @@ abstract contract FundForwarder is
         uint256 balance = address(this).balance;
         _safeNativeTransfer(_vault, balance, safeRecoverHeader());
 
-        emit Recovered(sender, address(0), balance);
+        emit Recovered(sender, address(0), balance, "");
 
-        _afterRecover(_vault, address(0), abi.encode(balance));
+        _afterRecover(_vault, address(0), balance, "");
     }
 
     function vault() public view virtual returns (address vault_) {
@@ -169,7 +141,8 @@ abstract contract FundForwarder is
     function _afterRecover(
         address vault_,
         address token_,
-        bytes memory value_
+        uint256 value_,
+        bytes memory params_
     ) internal virtual;
 
     /**

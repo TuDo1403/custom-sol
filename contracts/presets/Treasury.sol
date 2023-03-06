@@ -34,9 +34,9 @@ contract Treasury is
     uint256 public safeReceivedNativeBalance;
 
     mapping(address => uint256) public erc20Balances;
-    mapping(address => mapping(uint256 => uint256)) public erc1155Balances;
 
     mapping(address => mapping(uint256 => bool)) public erc721Balances;
+    mapping(address => mapping(uint256 => uint256)) public erc1155Balances;
 
     constructor(
         IAuthority authority_,

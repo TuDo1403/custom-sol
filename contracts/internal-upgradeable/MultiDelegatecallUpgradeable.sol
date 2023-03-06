@@ -97,12 +97,12 @@ abstract contract MultiDelegatecallUpgradeable is
     }
 
     function __onlyDelegateCall(bytes32 originalBytes_) private view {
-        if (address(this).fillLast12Bytes() != originalBytes_)
+        if (address(this).fillLast12Bytes() == originalBytes_)
             revert MultiDelegatecall__OnlyDelegatecall();
     }
 
     function __nonDelegatecall(bytes32 originalBytes_) private view {
-        if (address(this).fillLast12Bytes() == originalBytes_)
+        if (address(this).fillLast12Bytes() != originalBytes_)
             revert MultiDelegatecall__DelegatecallNotAllowed();
     }
 

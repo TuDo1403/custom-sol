@@ -5,6 +5,8 @@ pragma solidity ^0.8.17;
 
 import {ArrayUtil, BitMap256} from "../ArrayUtil.sol";
 
+error EnumerableSet256__SlotOccupied();
+
 library EnumerableSet256 {
     using BitMap256 for *;
     using ArrayUtil for *;
@@ -12,14 +14,31 @@ library EnumerableSet256 {
     struct Set {
         uint8 length;
         // Storage of set values
-        uint256[256] _values;
         // Position of the value in the `values`
-        BitMap256.BitMap _indexes;
+        BitMap256.BitMap indexMap;
+        uint256[256] values;
+    }
+
+    /**
+     * @dev Returns true if the value is in the set. O(1).
+     */
+    function _contains(
+        Set storage set,
+        uint256 value
+    ) private view returns (uint256) {
+        uint256 index = value.index({shouldHash_: false});
+        uint256 slotVal;
+        if ((slotVal = set.values[index]) == 0) return 0x100;
+        if (slotVal == value) return index;
+
+        revert EnumerableSet256__SlotOccupied();
     }
 
     function _add(Set storage set, uint256 value) private returns (bool) {
-        if (!_contains(set, value)) {
-            set._values[value.index({shouldHash_: false})] = value;
+        uint256 index;
+        if ((index = _contains(set, value)) != 0x100) {
+            set.values[index] = value;
+            set.indexMap.set({value_: value, shouldHash_: false});
             unchecked {
                 ++set.length;
             }
@@ -37,25 +56,17 @@ library EnumerableSet256 {
     function _remove(Set storage set, uint256 value) private returns (bool) {
         // We read and store the value's index to prevent multiple reads from the same storage slot
         uint256 idx = value.index({shouldHash_: false});
-        uint256 valueIndex = set._values[idx] == value ? idx : 0;
+        uint256 valueIndex = set.values[idx] == value ? idx : 0;
 
         if (valueIndex == 0) return false;
 
-        delete set._values[valueIndex];
+        delete set.values[valueIndex];
         unchecked {
             --set.length;
         }
-        return true;
-    }
+        set.indexMap.unset({value_: value, shouldHash_: false});
 
-    /**
-     * @dev Returns true if the value is in the set. O(1).
-     */
-    function _contains(
-        Set storage set,
-        uint256 value
-    ) private view returns (bool) {
-        return set._values[value.index({shouldHash_: false})] == value;
+        return true;
     }
 
     /**
@@ -79,7 +90,7 @@ library EnumerableSet256 {
         Set storage set,
         uint256 index
     ) private view returns (uint256) {
-        return set._values[index];
+        return set.values[index];
     }
 
     /**
@@ -91,7 +102,7 @@ library EnumerableSet256 {
      * uncallable if the set grows to a point where copying to memory consumes too much gas to fit in a block.
      */
     function _values(Set storage set) private view returns (uint256[] memory) {
-        return set._values.trim(0);
+        return set.values.trim(0);
     }
 
     // Bytes32Set
@@ -145,7 +156,7 @@ library EnumerableSet256 {
         assembly {
             val := value
         }
-        return _contains(set._inner, val);
+        return _contains(set._inner, val) != 0x100;
     }
 
     /**
@@ -245,7 +256,7 @@ library EnumerableSet256 {
         assembly {
             store := value
         }
-        return _contains(set._inner, store);
+        return _contains(set._inner, store) != 0x100;
     }
 
     /**
@@ -330,7 +341,7 @@ library EnumerableSet256 {
         UintSet storage set,
         uint256 value
     ) internal view returns (bool) {
-        return _contains(set._inner, value);
+        return _contains(set._inner, value) != 0x100;
     }
 
     /**

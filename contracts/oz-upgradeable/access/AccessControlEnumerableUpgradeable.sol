@@ -7,7 +7,9 @@ import {AccessControlUpgradeable} from "./AccessControlUpgradeable.sol";
 import {
     IAccessControlEnumerableUpgradeable
 } from "./IAccessControlEnumerableUpgradeable.sol";
-import {EnumerableSet256} from "../../libraries/structs/EnumerableSet256.sol";
+import {
+    EnumerableSetUpgradeable
+} from "../utils/structs/EnumerableSetUpgradeable.sol";
 
 /**
  * @dev Extension of {AccessControl} that allows enumerating the members of each role.
@@ -16,9 +18,10 @@ abstract contract AccessControlEnumerableUpgradeable is
     AccessControlUpgradeable,
     IAccessControlEnumerableUpgradeable
 {
-    using EnumerableSet256 for EnumerableSet256.AddressSet;
+    using EnumerableSetUpgradeable for EnumerableSetUpgradeable.AddressSet;
 
-    mapping(bytes32 => EnumerableSet256.AddressSet) private _roleMembers;
+    mapping(bytes32 => EnumerableSetUpgradeable.AddressSet)
+        internal _roleMembers;
 
     /**
      * @dev See {IERC165-supportsInterface}.

@@ -11,6 +11,13 @@ import {
 interface IFundForwarder {
     error FundForwarder__InvalidArgument();
 
+    struct RecoveryCallData {
+        address token;
+        uint256 value;
+        bytes4 fnSelector;
+        bytes params;
+    }
+
     /**
      * @dev Emits when the vault address is updated
      * @param from Old vault address
@@ -27,19 +34,8 @@ interface IFundForwarder {
     event Recovered(
         address indexed operator,
         address indexed token,
-        uint256 indexed value
-    );
-
-    /**
-     *@dev Emits when multiple ERC721 tokens are recovered
-     *@param operator Address of the contract calling this function
-     *@param token Address of the token contract
-     *@param values Token IDs of the recovered tokens
-     */
-    event RecoveredMulti(
-        address indexed operator,
-        address indexed token,
-        uint256[] values
+        uint256 indexed value,
+        bytes params
     );
 
     /**
@@ -58,27 +54,9 @@ interface IFundForwarder {
     function vault() external view returns (address);
 
     /**
-     * @dev Recovers ERC20 token to the vault address
-     * @param token_ ERC20 token contract
-     * @param amount_ Amount of tokens to recover
-     */
-    function recoverERC20(IERC20 token_, uint256 amount_) external;
-
-    /**
-     *@dev Recovers ERC721 token to the vault address
-     *@param token_ ERC721 token contract
-     *@param tokenId_ ID of the token to recover
-     */
-    function recoverNFT(IERC721 token_, uint256 tokenId_) external;
-
-    /**
-     *@dev Recovers all ERC721 tokens of the contract to the vault address
-     *@param token_ ERC721Enumerable token contract
-     */
-    function recoverNFTs(IERC721Enumerable token_) external;
-
-    /**
      * @dev Recovers native currency to the vault address
      */
     function recoverNative() external;
+
+    function recover(RecoveryCallData[] calldata calldata_) external;
 }

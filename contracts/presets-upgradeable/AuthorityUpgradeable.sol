@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import {ITreasury, Treasury} from "./Treasury.sol";
+import {ITreasury} from "./Treasury.sol";
+
+import {MulticallUpgradeable} from "./MulticallUpgradeable.sol";
 
 import {
     UUPSUpgradeable
@@ -17,10 +19,12 @@ import {
     ProxyCheckerUpgradeable
 } from "../internal-upgradeable/ProxyCheckerUpgradeable.sol";
 import {
-    FundForwarderUpgradeable
+    FundForwarderUpgradeable,
+    IFundForwarderUpgradeable
 } from "../internal-upgradeable/FundForwarderUpgradeable.sol";
 import {
-    BlacklistableUpgradeable
+    BlacklistableUpgradeable,
+    IBlacklistableUpgradeable
 } from "../internal-upgradeable/BlacklistableUpgradeable.sol";
 
 import {IAuthority} from "./interfaces/IAuthority.sol";
@@ -31,6 +35,7 @@ abstract contract AuthorityUpgradeable is
     IAuthority,
     UUPSUpgradeable,
     PausableUpgradeable,
+    MulticallUpgradeable,
     FundForwarderUpgradeable,
     BlacklistableUpgradeable,
     AccessControlEnumerableUpgradeable
@@ -43,12 +48,27 @@ abstract contract AuthorityUpgradeable is
         address vault_
     ) external override onlyRole(DEFAULT_ADMIN_ROLE) {
         _changeVault(vault_);
+
+        address[] memory proxies = getAllRoleMembers(Roles.PROXY_ROLE);
+
+        uint256 length = proxies.length;
+        bool[] memory success = new bool[](length);
+        for (uint256 i; i < length; ) {
+            (success[i], ) = proxies[i].call(
+                abi.encodeCall(IFundForwarderUpgradeable.changeVault, (vault_))
+            );
+            unchecked {
+                ++i;
+            }
+        }
+
+        emit VaultMultiUpdated(_msgSender(), vault_, proxies, success);
     }
 
     function setRoleAdmin(
         bytes32 role_,
         bytes32 adminRole_
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    ) external onlyRole(getRoleAdmin(adminRole_)) {
         _setRoleAdmin(role_, adminRole_);
     }
 
@@ -81,6 +101,7 @@ abstract contract AuthorityUpgradeable is
             super.supportsInterface(interfaceId_);
     }
 
+    /// @inheritdoc IBlacklistableUpgradeable
     function setUserStatus(
         address account_,
         bool status_
@@ -90,13 +111,13 @@ abstract contract AuthorityUpgradeable is
 
     function __Authority_init(
         address admin_,
-        bytes calldata data_,
+        bytes calldata,
         bytes32[] calldata roles_,
         address[] calldata operators_
     ) internal virtual onlyInitializing {
+        __Multicall_init();
         __Pausable_init_unchained();
         __Authority_init_unchained(admin_, roles_, operators_);
-        __FundForwarder_init_unchained(_deployDefaultTreasury(admin_, data_));
     }
 
     function __Authority_init_unchained(
@@ -107,7 +128,11 @@ abstract contract AuthorityUpgradeable is
         _grantRole(Roles.PAUSER_ROLE, admin_);
         _grantRole(Roles.SIGNER_ROLE, admin_);
         _grantRole(DEFAULT_ADMIN_ROLE, admin_);
-        _grantRole(Roles.OPERATOR_ROLE, admin_);
+
+        bytes32 operatorRole = Roles.OPERATOR_ROLE;
+        _grantRole(operatorRole, admin_);
+        _grantRole(operatorRole, address(this));
+
         _grantRole(Roles.UPGRADER_ROLE, admin_);
         _grantRole(Roles.TREASURER_ROLE, admin_);
         _grantRole(Roles.PROXY_ROLE, address(this));
@@ -124,10 +149,19 @@ abstract contract AuthorityUpgradeable is
         }
     }
 
-    function _deployDefaultTreasury(
-        address admin_,
-        bytes memory data_
-    ) internal virtual returns (address);
+    function _multicall(
+        CallData[] calldata calldata_,
+        bytes calldata extraData_
+    )
+        internal
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        nonDelegatecall
+        nonReentrant
+        returns (bytes[] memory results)
+    {
+        return super._multicall(calldata_, extraData_);
+    }
 
     function _authorizeUpgrade(
         address newImplementation

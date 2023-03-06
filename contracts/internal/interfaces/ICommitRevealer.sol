@@ -6,10 +6,15 @@ interface ICommitRevealer {
 
     struct Commitment {
         bytes32 commitment;
-        uint256 blockNumber;
+        uint256 timePoint;
     }
 
-    event Commited(address indexed submitter, bytes32 indexed commiment);
+    event Commited(
+        address indexed submitter,
+        bytes32 indexed commiment,
+        uint256 indexed timePoint,
+        bytes extraData
+    );
 
-    function commit(bytes32 commitment_) external;
+    function commit(address from_, bytes32 commitment_) external;
 }

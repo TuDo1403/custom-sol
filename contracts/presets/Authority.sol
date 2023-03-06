@@ -6,11 +6,13 @@ import {
     AccessControl,
     AccessControlEnumerable
 } from "../oz/access/AccessControlEnumerable.sol";
+import {Multicall} from "./Multicall.sol";
 
 import {ProxyChecker} from "../internal/ProxyChecker.sol";
-import {FundForwarder} from "../internal/FundForwarder.sol";
+import {FundForwarder, IFundForwarder} from "../internal/FundForwarder.sol";
 import {IBlacklistable, Blacklistable} from "../internal/Blacklistable.sol";
 
+import {ITreasury} from "./interfaces/ITreasury.sol";
 import {IAuthority} from "./interfaces/IAuthority.sol";
 import {IAccessControl} from "../oz/access/IAccessControl.sol";
 
@@ -18,6 +20,7 @@ import {Roles} from "../libraries/Roles.sol";
 
 abstract contract Authority is
     Pausable,
+    Multicall,
     IAuthority,
     ProxyChecker,
     Blacklistable,
@@ -32,14 +35,19 @@ abstract contract Authority is
         address admin_,
         bytes32[] memory roles_,
         address[] memory operators_
-    ) payable Pausable() FundForwarder(_deployDefaultTreasury(admin_, "")) {
+    ) payable Pausable() {
         _grantRole(Roles.PAUSER_ROLE, admin_);
         _grantRole(Roles.SIGNER_ROLE, admin_);
         _grantRole(DEFAULT_ADMIN_ROLE, admin_);
-        _grantRole(Roles.OPERATOR_ROLE, admin_);
+
+        bytes32 operatorRole = Roles.OPERATOR_ROLE;
+        _grantRole(operatorRole, admin_);
+        _grantRole(operatorRole, address(this));
+
         _grantRole(Roles.UPGRADER_ROLE, admin_);
+        _grantRole(Roles.TREASURER_ROLE, admin_);
         _grantRole(Roles.PROXY_ROLE, address(this));
-        _grantRole(Roles.OPERATOR_ROLE, address(this));
+        _grantRole(Roles.TREASURER_ROLE, address(this));
 
         uint256 length = operators_.length;
         if (length != roles_.length) revert Authority__LengthMismatch();
@@ -52,14 +60,46 @@ abstract contract Authority is
         }
     }
 
+    function _multicall(
+        CallData[] calldata calldata_,
+        bytes calldata extraData_
+    )
+        internal
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+        nonDelegatecall
+        nonReentrant
+        returns (bytes[] memory results)
+    {
+        return super._multicall(calldata_, extraData_);
+    }
+
     function changeVault(
         address vault_
     ) external override onlyRole(DEFAULT_ADMIN_ROLE) {
         _changeVault(vault_);
+
+        address[] memory proxies = getAllRoleMembers(Roles.PROXY_ROLE);
+
+        uint256 length = proxies.length;
+        bool[] memory success = new bool[](length);
+        for (uint256 i; i < length; ) {
+            (success[i], ) = proxies[i].call(
+                abi.encodeCall(IFundForwarder.changeVault, (vault_))
+            );
+            unchecked {
+                ++i;
+            }
+        }
+
+        emit VaultMultiUpdated(_msgSender(), vault_, proxies, success);
     }
 
     /// @inheritdoc IBlacklistable
-    function setUserStatus(address account_, bool status_) external override {
+    function setUserStatus(
+        address account_,
+        bool status_
+    ) external override onlyRole(Roles.PAUSER_ROLE) {
         _setUserStatus(account_, status_);
     }
 
@@ -102,9 +142,4 @@ abstract contract Authority is
 
         emit ProxyAccessGranted(origin, sender);
     }
-
-    function _deployDefaultTreasury(
-        address admin_,
-        bytes memory data_
-    ) internal virtual returns (address);
 }

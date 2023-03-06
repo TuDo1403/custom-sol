@@ -15,6 +15,8 @@ import {
     IERC721EnumerableUpgradeable
 } from "./interfaces/IFundForwarderUpgradeable.sol";
 
+import {ErrorHandler} from "../libraries/ErrorHandler.sol";
+
 /**
  * @title FundForwarderUpgradeable
  * @dev Abstract contract for forwarding funds to a specified address.
@@ -25,6 +27,8 @@ abstract contract FundForwarderUpgradeable is
     TransferableUpgradeable,
     IFundForwarderUpgradeable
 {
+    using ErrorHandler for bool;
+
     /**
      * @dev Address to forward funds to
      */
@@ -41,7 +45,7 @@ abstract contract FundForwarderUpgradeable is
 
         emit Forwarded(_msgSender(), msg.value);
 
-        _afterRecover(_vault, address(0), abi.encode(msg.value));
+        _afterRecover(_vault, address(0), msg.value, "");
     }
 
     function __FundForwarder_init(
@@ -56,77 +60,43 @@ abstract contract FundForwarderUpgradeable is
         _changeVault(vault_);
     }
 
-    /// @inheritdoc IFundForwarderUpgradeable
-    function recoverERC20(
-        IERC20Upgradeable token_,
-        uint256 amount_
-    ) external virtual {
+    function recover(RecoveryCallData[] calldata calldata_) external virtual {
         _beforeRecover("");
-        __checkValidAddress(address(token_));
-        address sender = _msgSender();
-        _onlyEOA(sender);
 
         address _vault = vault();
-
-        _safeERC20Transfer(token_, _vault, amount_);
-
-        emit Recovered(sender, address(token_), amount_);
-
-        _afterRecover(_vault, address(token_), abi.encode(amount_));
-    }
-
-    /// @inheritdoc IFundForwarderUpgradeable
-    function recoverNFT(
-        IERC721Upgradeable token_,
-        uint256 tokenId_
-    ) external virtual {
-        _beforeRecover("");
-        __checkValidAddress(address(token_));
         address sender = _msgSender();
-        _onlyEOA(sender);
-        address _vault = vault();
+        uint256 length = calldata_.length;
+        bytes[] memory results = new bytes[](length);
 
-        token_.safeTransferFrom(
-            address(this),
-            _vault,
-            tokenId_,
-            safeRecoverHeader()
-        );
-
-        emit Recovered(sender, address(token_), tokenId_);
-
-        _afterRecover(_vault, address(token_), abi.encode(tokenId_));
-    }
-
-    /// @inheritdoc IFundForwarderUpgradeable
-    function recoverNFTs(
-        IERC721EnumerableUpgradeable token_
-    ) external virtual {
-        _beforeRecover("");
-        __checkValidAddress(address(token_));
-        address sender = _msgSender();
-        _onlyEOA(sender);
-
-        address _vault = vault();
-        uint256 length = token_.balanceOf(address(this));
-        uint256[] memory tokenIds = new uint256[](length);
-        bytes memory recoverHeader = safeRecoverHeader();
+        bool ok;
+        bytes memory result;
         for (uint256 i; i < length; ) {
-            token_.safeTransferFrom(
-                address(this),
+            (ok, result) = calldata_[i].token.call{value: calldata_[i].value}(
+                abi.encodePacked(calldata_[i].fnSelector, calldata_[i].params)
+            );
+
+            ok.handleRevertIfNotSuccess(result);
+
+            results[i] = result;
+
+            _afterRecover(
                 _vault,
-                tokenIds[i] = token_.tokenOfOwnerByIndex(address(this), i),
-                recoverHeader
+                calldata_[i].token,
+                calldata_[i].value,
+                calldata_[i].params
+            );
+
+            emit Recovered(
+                sender,
+                calldata_[i].token,
+                calldata_[i].value,
+                calldata_[i].params
             );
 
             unchecked {
                 ++i;
             }
         }
-
-        _afterRecover(_vault, address(token_), abi.encode(tokenIds));
-
-        emit RecoveredMulti(sender, address(token_), tokenIds);
     }
 
     /// @inheritdoc IFundForwarderUpgradeable
@@ -139,9 +109,9 @@ abstract contract FundForwarderUpgradeable is
         uint256 balance = address(this).balance;
         _safeNativeTransfer(_vault, balance, safeRecoverHeader());
 
-        emit Recovered(sender, address(0), balance);
+        emit Recovered(sender, address(0), balance, "");
 
-        _afterRecover(_vault, address(0), abi.encode(balance));
+        _afterRecover(_vault, address(0), balance, "");
     }
 
     function vault() public view virtual returns (address vault_) {
@@ -183,8 +153,9 @@ abstract contract FundForwarderUpgradeable is
     function _afterRecover(
         address vault_,
         address token_,
-        bytes memory value_
-    ) internal virtual {}
+        uint256 value_,
+        bytes memory params_
+    ) internal virtual;
 
     /**
      *@dev Asserts that the given address is not the zero address

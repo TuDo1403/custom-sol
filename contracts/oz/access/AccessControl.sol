@@ -131,9 +131,9 @@ abstract contract AccessControl is Context, IAccessControl, ERC165 {
         bytes32 role
     ) public view virtual override returns (bytes32 admin) {
         assembly {
-            mstore(0, role)
-            mstore(32, _adminRoles.slot)
-            admin := sload(keccak256(0, 64))
+            mstore(0x00, role)
+            mstore(0x20, _adminRoles.slot)
+            admin := sload(keccak256(0x00, 0x20))
         }
     }
 
@@ -152,7 +152,7 @@ abstract contract AccessControl is Context, IAccessControl, ERC165 {
     function grantRole(
         bytes32 role,
         address account
-    ) public virtual override onlyRole(getRoleAdmin(role)) {
+    ) public virtual onlyRole(getRoleAdmin(role)) {
         _grantRole(role, account);
     }
 
