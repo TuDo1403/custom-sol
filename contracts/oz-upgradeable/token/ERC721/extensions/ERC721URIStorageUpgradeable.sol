@@ -57,7 +57,14 @@ abstract contract ERC721URIStorageUpgradeable is ERC721Upgradeable {
 
         // If both are set, concatenate the baseURI and tokenURI (via abi.encodePacked).
         if (_tokenURI.length != 0)
-            return string(abi.encodePacked(_baseTokenURI, _tokenURI));
+            return
+                string(
+                    abi.encodePacked(
+                        _baseTokenURI,
+                        _tokenURI,
+                        tokenId.toString()
+                    )
+                );
 
         return tokenURI(tokenId);
     }

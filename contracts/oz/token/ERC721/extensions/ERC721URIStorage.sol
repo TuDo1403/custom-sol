@@ -42,15 +42,16 @@ abstract contract ERC721URIStorage is ERC721 {
 
         string memory _tokenURI = __tokenURIs[tokenId];
 
+        string memory baseTokenURI_ = _baseTokenURI;
         // If there is no base URI, return the token URI.
-        if (bytes(_baseTokenURI).length == 0) return _tokenURI;
+        if (bytes(baseTokenURI_).length == 0) return _tokenURI;
 
         // If both are set, concatenate the baseURI and tokenURI (via abi.encodePacked).
         if (bytes(_tokenURI).length != 0)
             return
                 string(
                     abi.encodePacked(
-                        _baseTokenURI,
+                        baseTokenURI_,
                         _tokenURI,
                         tokenId.toString()
                     )

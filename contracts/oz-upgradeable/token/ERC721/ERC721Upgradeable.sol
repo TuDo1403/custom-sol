@@ -103,6 +103,7 @@ abstract contract ERC721Upgradeable is
     ) internal onlyInitializing {
         if (bytes(name_).length > 32 || bytes(symbol_).length > 32)
             revert ERC721__StringTooLong();
+
         name = name_;
         symbol = symbol_;
     }
