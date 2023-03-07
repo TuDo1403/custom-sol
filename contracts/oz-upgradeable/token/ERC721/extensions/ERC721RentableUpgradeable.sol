@@ -15,7 +15,7 @@ abstract contract ERC721RentableUpgradeable is
         uint256 tokenId,
         address user,
         uint64 expires
-    ) external virtual {
+    ) public virtual {
         if (!_isApprovedOrOwner(_msgSender(), tokenId))
             revert ERC721Rentable__OnlyOwnerOrApproved();
 
@@ -39,7 +39,7 @@ abstract contract ERC721RentableUpgradeable is
 
     function userOf(
         uint256 tokenId
-    ) external view virtual override returns (address user) {
+    ) public view virtual override returns (address user) {
         assembly {
             mstore(0x00, tokenId)
             mstore(0x20, _users.slot)

@@ -40,12 +40,7 @@ contract Treasury is
     constructor(
         IAuthority authority_,
         string memory name_
-    )
-        payable
-        onlyProxy
-        Signable(name_, "1")
-        Manager(authority_, Roles.TREASURER_ROLE)
-    {
+    ) payable Signable(name_, "1") Manager(authority_, Roles.TREASURER_ROLE) {
         safeReceivedNativeBalance = msg.value;
         emit BalanceInitiated(_msgSender(), msg.value);
     }
