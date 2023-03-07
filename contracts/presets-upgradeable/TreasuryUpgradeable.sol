@@ -33,7 +33,7 @@ import {
     ERC165CheckerUpgradeable
 } from "../oz-upgradeable/utils/introspection/ERC165CheckerUpgradeable.sol";
 
-contract TreasuryUpgradeable is
+abstract contract TreasuryUpgradeable is
     ITreasury,
     ManagerUpgradeable,
     SignableUpgradeable,
@@ -54,10 +54,11 @@ contract TreasuryUpgradeable is
     mapping(address => mapping(uint256 => bool)) public erc721Balances;
     mapping(address => mapping(uint256 => uint256)) public erc1155Balances;
 
-    function initialize(
+    function __Treasury_init(
         IAuthority authority_,
         string calldata name_
-    ) external initializer {
+    ) internal onlyInitializing {
+        __Treasury_init_unchained();
         __Signable_init_unchained(name_, "1");
         __Manager_init_unchained(authority_, Roles.TREASURER_ROLE);
     }
