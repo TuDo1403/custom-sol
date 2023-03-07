@@ -60,13 +60,6 @@ interface IFundForwarderUpgradeable {
     function changeVault(address vault_) external;
 
     /**
-     * @dev Recovers ERC20 token to the vault address
-     * @param token_ ERC20 token contract
-     * @param amount_ Amount of tokens to recover
-     */
-    function recoverERC20(IERC20Upgradeable token_, uint256 amount_) external;
-
-    /**
      * @dev Recovers native currency to the vault address
      */
     function recoverNative() external;
