@@ -45,12 +45,7 @@ contract UniversalCommandGate is
     constructor(
         IAuthority authority_,
         address[] memory vaults_
-    )
-        payable
-        ReentrancyGuard()
-        Manager(authority_, 0)
-        CommandGate(IFundForwarder(address(authority_)).vault(), vaults_)
-    {}
+    ) payable ReentrancyGuard() Manager(authority_, 0) CommandGate(vaults_) {}
 
     function changeVault(
         address vault_

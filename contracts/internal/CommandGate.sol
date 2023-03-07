@@ -17,10 +17,7 @@ abstract contract CommandGate is ICommandGate, FundForwarder {
     BitMaps.BitMap private __isWhitelisted;
     BitMaps.BitMap private __whitelistedVaults;
 
-    constructor(
-        address mainVault_,
-        address[] memory vaults_
-    ) payable FundForwarder(mainVault_) {
+    constructor(address[] memory vaults_) payable {
         _whitelistVaults(vaults_);
     }
 
