@@ -1,31 +1,48 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import {Roles, Manager, IAuthority} from "./base/Manager.sol";
+import {
+    Roles,
+    ManagerUpgradeable,
+    IAuthority
+} from "./base/ManagerUpgradeable.sol";
 
-import {IWithdrawable, Withdrawable} from "../internal/Withdrawable.sol";
-import {Signable, Bytes32Address} from "../internal/Signable.sol";
+import {
+    IWithdrawableUpgradeable,
+    WithdrawableUpgradeable
+} from "../internal-upgradeable/WithdrawableUpgradeable.sol";
+import {
+    SignableUpgradeable,
+    Bytes32Address
+} from "../internal-upgradeable/SignableUpgradeable.sol";
 
 import {ITreasury} from "./interfaces/ITreasury.sol";
-import {IERC20} from "../oz/token/ERC20/IERC20.sol";
-import {IERC721, ERC721TokenReceiver} from "../oz/token/ERC721/ERC721.sol";
 import {
-    IERC1155,
-    IERC1155Receiver
-} from "@openzeppelin/contracts/token/ERC1155/ERC1155.sol"; // TODO: update oz-custom
+    IERC20Upgradeable
+} from "../oz-upgradeable/token/ERC20/IERC20Upgradeable.sol";
+import {
+    IERC721Upgradeable,
+    ERC721TokenReceiverUpgradeable
+} from "../oz-upgradeable/token/ERC721/ERC721Upgradeable.sol";
+import {
+    IERC1155Upgradeable,
+    IERC1155ReceiverUpgradeable
+} from "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol"; // TODO: update oz-custom
 
-import {ERC165Checker} from "../oz/utils/introspection/ERC165Checker.sol";
+import {
+    ERC165CheckerUpgradeable
+} from "../oz-upgradeable/utils/introspection/ERC165CheckerUpgradeable.sol";
 
-contract Treasury is
-    Manager,
-    Signable,
+contract TreasuryUpgradeable is
     ITreasury,
-    Withdrawable,
-    IERC1155Receiver,
-    ERC721TokenReceiver
+    ManagerUpgradeable,
+    SignableUpgradeable,
+    WithdrawableUpgradeable,
+    IERC1155ReceiverUpgradeable,
+    ERC721TokenReceiverUpgradeable
 {
-    using ERC165Checker for address;
     using Bytes32Address for address;
+    using ERC165CheckerUpgradeable for address;
 
     ///@dev value is equal to keccak256("Permit(address token,address to,uint256 value,uint256 amount,uint256 nonce,uint256 deadline)")
     bytes32 private constant __PERMIT_TYPE_HASH =
@@ -37,17 +54,18 @@ contract Treasury is
     mapping(address => mapping(uint256 => bool)) public erc721Balances;
     mapping(address => mapping(uint256 => uint256)) public erc1155Balances;
 
-    constructor(
+    function initialize(
         IAuthority authority_,
-        string memory name_
-    )
-        payable
-        onlyProxy
-        Signable(name_, "1")
-        Manager(authority_, Roles.TREASURER_ROLE)
-    {
-        safeReceivedNativeBalance = msg.value;
-        emit BalanceInitiated(_msgSender(), msg.value);
+        string calldata name_
+    ) external initializer {
+        __Signable_init_unchained(name_, "1");
+        __Manager_init_unchained(authority_, Roles.TREASURER_ROLE);
+    }
+
+    function __Treasury_init_unchained() internal onlyInitializing {
+        uint256 initialBalance = address(this).balance;
+        emit BalanceInitiated(_msgSender(), initialBalance);
+        safeReceivedNativeBalance = initialBalance;
     }
 
     receive() external payable virtual override onlyRole(Roles.PROXY_ROLE) {
@@ -78,18 +96,18 @@ contract Treasury is
             revert Treasury__InvalidArgument();
 
         if (_isRecoverHeader(data_))
-            return IERC1155Receiver.onERC1155Received.selector;
+            return IERC1155ReceiverUpgradeable.onERC1155Received.selector;
 
         address token = _msgSender();
         _onlyProxy(token);
         _checkBlacklist(operator_);
-        __checkInterface(token, type(IERC1155).interfaceId);
+        __checkInterface(token, type(IERC1155Upgradeable).interfaceId);
 
         erc1155Balances[token][id_] += value_;
 
         emit Received(operator_, token, abi.encode(id_, value_), data_);
 
-        return IERC1155Receiver.onERC1155Received.selector;
+        return IERC1155ReceiverUpgradeable.onERC1155Received.selector;
     }
 
     function onERC1155BatchReceived(
@@ -102,12 +120,12 @@ contract Treasury is
         uint256 length = ids_.length;
         if (length != values_.length) revert Treasury__LengthMismatch();
         if (_isRecoverHeader(data_))
-            return IERC1155Receiver.onERC1155BatchReceived.selector;
+            return IERC1155ReceiverUpgradeable.onERC1155BatchReceived.selector;
 
         address token = _msgSender();
         _onlyProxy(token);
         _checkBlacklist(operator_);
-        __checkInterface(token, type(IERC1155).interfaceId);
+        __checkInterface(token, type(IERC1155Upgradeable).interfaceId);
 
         // cache erc1155Balances[token] key
         assembly {
@@ -136,7 +154,7 @@ contract Treasury is
 
         emit Received(operator_, token, abi.encode(ids_, values_), data_);
 
-        return IERC1155Receiver.onERC1155BatchReceived.selector;
+        return IERC1155ReceiverUpgradeable.onERC1155BatchReceived.selector;
     }
 
     function onERC721Received(
@@ -146,18 +164,18 @@ contract Treasury is
         bytes calldata data_
     ) external override returns (bytes4) {
         if (_isRecoverHeader(data_))
-            return ERC721TokenReceiver.onERC721Received.selector;
+            return ERC721TokenReceiverUpgradeable.onERC721Received.selector;
 
         address token = _msgSender();
         _onlyProxy(token);
         _checkBlacklist(operator_);
-        __checkInterface(token, type(IERC721).interfaceId);
+        __checkInterface(token, type(IERC721Upgradeable).interfaceId);
 
         erc721Balances[token][tokenId_] = true;
 
         emit Received(operator_, token, abi.encode(tokenId_), data_);
 
-        return ERC721TokenReceiver.onERC721Received.selector;
+        return ERC721TokenReceiverUpgradeable.onERC721Received.selector;
     }
 
     function notifyERC20Transfer(
@@ -166,13 +184,13 @@ contract Treasury is
         bytes calldata data_
     ) external virtual override onlyRole(Roles.PROXY_ROLE) returns (bytes4) {
         if (_isRecoverHeader(data_))
-            return IWithdrawable.notifyERC20Transfer.selector;
+            return IWithdrawableUpgradeable.notifyERC20Transfer.selector;
 
         if (value_ == 0) revert Treasury__InvalidArgument();
         if (
             token_ == address(0) ||
             token_ == address(this) ||
-            token_.supportsInterface(type(IERC721).interfaceId)
+            token_.supportsInterface(type(IERC721Upgradeable).interfaceId)
         ) revert Treasury__InvalidTokenAddress();
 
         erc20Balances[token_] += value_;
@@ -184,7 +202,7 @@ contract Treasury is
             data_
         );
 
-        return IWithdrawable.notifyERC20Transfer.selector;
+        return IWithdrawableUpgradeable.notifyERC20Transfer.selector;
     }
 
     function withdraw(
@@ -221,10 +239,19 @@ contract Treasury is
 
         if (token_ == address(0)) {
             _safeNativeTransfer(to_, value_, "");
-        } else if (token_.supportsInterface(type(IERC721).interfaceId)) {
-            IERC721(token_).safeTransferFrom(address(this), to_, value_, "");
-        } else if (token_.supportsInterface(type(IERC1155).interfaceId)) {
-            IERC1155(token_).safeTransferFrom(
+        } else if (
+            token_.supportsInterface(type(IERC721Upgradeable).interfaceId)
+        ) {
+            IERC721Upgradeable(token_).safeTransferFrom(
+                address(this),
+                to_,
+                value_,
+                ""
+            );
+        } else if (
+            token_.supportsInterface(type(IERC1155Upgradeable).interfaceId)
+        ) {
+            IERC1155Upgradeable(token_).safeTransferFrom(
                 address(this),
                 to_,
                 value_,
@@ -232,7 +259,7 @@ contract Treasury is
                 ""
             );
         } else {
-            _safeERC20Transfer(IERC20(token_), to_, value_);
+            _safeERC20Transfer(IERC20Upgradeable(token_), to_, value_);
         }
 
         emit Withdrawn(token_, to_, value_);
@@ -247,31 +274,40 @@ contract Treasury is
         if (token_ == address(0)) {
             safeReceivedNativeBalance -= value_;
             _safeNativeTransfer(to_, value_, "");
-        } else if (token_.supportsInterface(type(IERC721).interfaceId)) {
+        } else if (
+            token_.supportsInterface(type(IERC721Upgradeable).interfaceId)
+        ) {
             if (!erc721Balances[token_][value_])
                 revert Treasury__UnauthorizedWithdrawal();
 
             delete erc721Balances[token_][value_];
 
-            IERC721(token_).safeTransferFrom(address(this), to_, value_, "");
-        } else if (token_.supportsInterface(type(IERC1155).interfaceId)) {
+            IERC721Upgradeable(token_).safeTransferFrom(
+                address(this),
+                to_,
+                value_,
+                ""
+            );
+        } else if (
+            token_.supportsInterface(type(IERC1155Upgradeable).interfaceId)
+        ) {
             uint256 amount = abi.decode(data_, (uint256));
 
             // will throw under flow if id balance < amount
             erc1155Balances[token_][value_] -= amount;
 
-            IERC1155(token_).safeTransferFrom(
+            IERC1155Upgradeable(token_).safeTransferFrom(
                 address(this),
                 to_,
                 value_,
                 amount,
-                "SAFE_WITHDRAW"
+                ""
             );
         } else {
             // will throw under flow if id balance < amount
             erc20Balances[token_] -= value_;
 
-            _safeERC20Transfer(IERC20(token_), to_, value_);
+            _safeERC20Transfer(IERC20Upgradeable(token_), to_, value_);
         }
 
         emit Withdrawn(token_, to_, value_);
@@ -298,8 +334,8 @@ contract Treasury is
     ) external pure virtual override returns (bool) {
         return
             interfaceId == type(ITreasury).interfaceId ||
-            interfaceId == type(IWithdrawable).interfaceId ||
-            interfaceId == type(IERC1155Receiver).interfaceId;
+            interfaceId == type(IWithdrawableUpgradeable).interfaceId ||
+            interfaceId == type(IERC1155ReceiverUpgradeable).interfaceId;
     }
 
     function _isRecoverHeader(
