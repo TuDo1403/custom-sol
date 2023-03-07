@@ -3,7 +3,6 @@ pragma solidity ^0.8.10;
 
 import {ERC721Upgradeable, IERC165Upgradeable} from "../ERC721Upgradeable.sol";
 import {
-    Bytes32Address,
     SignableUpgradeable
 } from "../../../../internal-upgradeable/SignableUpgradeable.sol";
 
@@ -16,8 +15,6 @@ abstract contract ERC721PermitUpgradeable is
     SignableUpgradeable,
     IERC721PermitUpgradeable
 {
-    using Bytes32Address for address;
-
     function __ERC721Permit_init(
         string calldata name_,
         string calldata symbol_

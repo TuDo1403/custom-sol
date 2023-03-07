@@ -27,14 +27,6 @@ abstract contract FundForwarder is
     bytes32 private __vault;
 
     /**
-     * @dev Constructor that sets the vault address
-     * @param vault_ Address to forward funds to
-     */
-    constructor(address vault_) payable {
-        _changeVault(vault_);
-    }
-
-    /**
      * @dev Receives funds and forwards them to the vault address
      */
     receive() external payable virtual onlyEOA {
