@@ -76,9 +76,28 @@ contract UniversalCommandGate is
             _handleNativeDeposit(command_.vault, operator_, asset_);
         else if (asset_.token.supportsInterface(type(IERC721).interfaceId))
             _handleERC721Deposit(command_.vault, asset_);
-            // else if (asset_.token.supportsInterface(type(IERC1155).interfaceId))
-            //     _handleERC1155Deposit(operator_, mainVault_, asset_);
-        else _handleERC20Deposit(command_.vault, mainVault_, asset_);
+        else if (asset_.token.supportsInterface(type(IERC1155).interfaceId)) {
+            if (asset_.extraData.length == 32) {
+                _handleERC1155Deposit(
+                    // amount
+                    abi.decode(asset_.extraData, (uint256)),
+                    command_.vault,
+                    asset_
+                );
+            } else {
+                (uint256[] memory ids, uint256[] memory amounts) = abi.decode(
+                    asset_.extraData,
+                    (uint256[], uint256[])
+                );
+
+                _handleERC1155BatchDeposit(
+                    command_.vault,
+                    asset_,
+                    ids,
+                    amounts
+                );
+            }
+        } else _handleERC20Deposit(command_.vault, mainVault_, asset_);
     }
 
     function onERC721Received(
@@ -292,7 +311,7 @@ contract UniversalCommandGate is
         uint256 refund = msg.value - asset_.value;
         if (refund == 0) return;
 
-        _safeNativeTransfer(operator_, refund, "REFUND");
+        _safeNativeTransfer(operator_, refund, "");
         emit Refunded(operator_, refund);
     }
 
@@ -310,9 +329,9 @@ contract UniversalCommandGate is
         } else _checkRole(Roles.PROXY_ROLE, account_);
     }
 
-    function _beforeRecover(bytes memory) internal view override {
-        _requirePaused();
-    }
+    function _beforeRecover(
+        bytes memory
+    ) internal view override whenPaused onlyRole(Roles.OPERATOR_ROLE) {}
 
     function _afterRecover(
         address,

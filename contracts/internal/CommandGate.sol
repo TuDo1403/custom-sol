@@ -88,6 +88,7 @@ abstract contract CommandGate is ICommandGate, FundForwarder {
                 asset_.account,
                 asset_.token,
                 asset_.value,
+                asset_.extraData,
                 command_.arguments
             )
         );
@@ -133,12 +134,21 @@ abstract contract CommandGate is ICommandGate, FundForwarder {
         address account_,
         address token_,
         uint256 value_,
+        bytes memory extraData_,
         bytes memory data_
     ) internal pure virtual returns (bytes memory) {
         assembly {
             mstore(add(data_, 0x20), account_)
             mstore(add(data_, 0x40), token_)
             mstore(add(data_, 0x60), value_)
+            let length := mload(extraData_)
+            if iszero(iszero(length)) {
+                calldatacopy(
+                    add(data_, 0x80),
+                    add(extraData_, 0x20),
+                    shr(3, length)
+                )
+            }
         }
         return data_;
     }
