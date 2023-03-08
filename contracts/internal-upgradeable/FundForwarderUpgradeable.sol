@@ -119,7 +119,7 @@ abstract contract FundForwarderUpgradeable is
             vault_ := sload(__vault.slot)
         }
 
-        __checkValidAddress(vault_);
+        _checkValidAddress(vault_);
     }
 
     /**
@@ -127,7 +127,7 @@ abstract contract FundForwarderUpgradeable is
      * @param vault_ New vault address
      */
     function _changeVault(address vault_) internal virtual {
-        __checkValidAddress(vault_);
+        _checkValidAddress(vault_);
 
         assembly {
             log4(
@@ -162,7 +162,7 @@ abstract contract FundForwarderUpgradeable is
      *@param addr_ The address to check
      *@custom:throws FundForwarder__InvalidArgument if the address is the zero address
      */
-    function __checkValidAddress(address addr_) private view {
+    function _checkValidAddress(address addr_) internal view virtual {
         if (addr_ == address(0) || addr_ == address(this))
             revert FundForwarder__InvalidArgument();
     }

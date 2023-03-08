@@ -37,11 +37,6 @@ abstract contract MultiDelegatecallUpgradeable is
         _;
     }
 
-    modifier nonDelegatecall() {
-        __nonDelegatecall(__original);
-        _;
-    }
-
     event BatchExecutionDelegated(
         address indexed operator,
         bytes[] callData,
@@ -73,7 +68,7 @@ abstract contract MultiDelegatecallUpgradeable is
     )
         internal
         virtual
-        nonDelegatecall
+        onlyDelegatecalll
         nonReentrant
         returns (bytes[] memory results)
     {
@@ -99,11 +94,6 @@ abstract contract MultiDelegatecallUpgradeable is
     function __onlyDelegateCall(bytes32 originalBytes_) private view {
         if (address(this).fillLast12Bytes() == originalBytes_)
             revert MultiDelegatecall__OnlyDelegatecall();
-    }
-
-    function __nonDelegatecall(bytes32 originalBytes_) private view {
-        if (address(this).fillLast12Bytes() != originalBytes_)
-            revert MultiDelegatecall__DelegatecallNotAllowed();
     }
 
     uint256[49] private __gap;

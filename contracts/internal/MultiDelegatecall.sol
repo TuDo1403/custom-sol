@@ -26,11 +26,6 @@ abstract contract MultiDelegatecall is Context, ReentrancyGuard {
         _;
     }
 
-    modifier nonDelegatecall() virtual {
-        __nonDelegatecall();
-        _;
-    }
-
     event BatchExecutionDelegated(
         address indexed operator,
         bytes[] callData,
@@ -54,7 +49,7 @@ abstract contract MultiDelegatecall is Context, ReentrancyGuard {
     )
         internal
         virtual
-        nonDelegatecall
+        onlyDelegatecalll
         nonReentrant
         returns (bytes[] memory results)
     {
@@ -80,10 +75,5 @@ abstract contract MultiDelegatecall is Context, ReentrancyGuard {
     function __onlyDelegateCall() private view {
         if (address(this) == __original)
             revert MultiDelegatecall__OnlyDelegatecall();
-    }
-
-    function __nonDelegatecall() private view {
-        if (address(this) != __original)
-            revert MultiDelegatecall__DelegatecallNotAllowed();
     }
 }
