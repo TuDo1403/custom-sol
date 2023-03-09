@@ -1,10 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
+error StringLib__LengthInsufiicient();
+
 /// @notice Efficient library for creating string representations of integers.
 /// @author Solmate (https://github.com/transmissions11/solmate/blob/main/src/utils/LibString.sol)
 /// @author Modified from Solady (https://github.com/Vectorized/solady/blob/main/src/utils/LibString.sol)
 library StringLib {
+    uint256 private constant __ADDRESS_LENGTH = 20;
+    bytes32 private constant __SYMBOLS = "0123456789abcdef";
+
     function toString(int256 value) internal pure returns (string memory str) {
         if (value >= 0) return toString(uint256(value));
 
@@ -24,6 +29,74 @@ library StringLib {
                 mstore(str, add(length, 1)) // Update the string length.
             }
         }
+    }
+
+    /**
+     * @dev Return the log in base 256, rounded down, of a positive value.
+     * Returns 0 if given 0.
+     *
+     * Adding one to the result gives the number of pairs of hex symbols needed to represent `value` as a hex string.
+     */
+    function log256(uint256 value) internal pure returns (uint256) {
+        uint256 result = 0;
+        unchecked {
+            if (value >> 128 > 0) {
+                value >>= 128;
+                result += 16;
+            }
+            if (value >> 64 > 0) {
+                value >>= 64;
+                result += 8;
+            }
+            if (value >> 32 > 0) {
+                value >>= 32;
+                result += 4;
+            }
+            if (value >> 16 > 0) {
+                value >>= 16;
+                result += 2;
+            }
+            if (value >> 8 > 0) {
+                result += 1;
+            }
+        }
+        return result;
+    }
+
+    /**
+     * @dev Converts a `uint256` to its ASCII `string` hexadecimal representation.
+     */
+    function toHexString(uint256 value) internal pure returns (string memory) {
+        unchecked {
+            return toHexString(value, log256(value) + 1);
+        }
+    }
+
+    /**
+     * @dev Converts a `uint256` to its ASCII `string` hexadecimal representation with fixed length.
+     */
+    function toHexString(
+        uint256 value,
+        uint256 length
+    ) internal pure returns (string memory) {
+        bytes memory buffer = new bytes((length << 1) + 2);
+        buffer[0] = "0";
+        buffer[1] = "x";
+        unchecked {
+            for (uint256 i = (length << 1) + 1; i > 1; --i) {
+                buffer[i] = __SYMBOLS[value & 0xf];
+                value >>= 4;
+            }
+        }
+        if (value != 0) revert StringLib__LengthInsufiicient();
+        return string(buffer);
+    }
+
+    /**
+     * @dev Converts an `address` with fixed length of 20 bytes to its not checksummed ASCII `string` hexadecimal representation.
+     */
+    function toHexString(address addr) internal pure returns (string memory) {
+        return toHexString(uint256(uint160(addr)), __ADDRESS_LENGTH);
     }
 
     function toString(
