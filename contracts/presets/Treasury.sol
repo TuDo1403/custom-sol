@@ -172,12 +172,7 @@ contract Treasury is
 
         erc20Balances[token_] += value_;
 
-        emit Received(
-            abi.decode(data_, (address)),
-            token_,
-            abi.encode(value_),
-            data_
-        );
+        emit Received(_msgSender(), token_, abi.encode(value_), data_);
 
         return IWithdrawable.notifyERC20Transfer.selector;
     }
@@ -260,7 +255,7 @@ contract Treasury is
                 to_,
                 value_,
                 amount,
-                "SAFE_WITHDRAW"
+                ""
             );
         } else {
             // will throw under flow if id balance < amount

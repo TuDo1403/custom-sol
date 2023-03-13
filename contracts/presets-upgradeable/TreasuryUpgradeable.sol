@@ -3,8 +3,8 @@ pragma solidity ^0.8.17;
 
 import {
     Roles,
-    ManagerUpgradeable,
-    IAuthority
+    IAuthority,
+    ManagerUpgradeable
 } from "./base/ManagerUpgradeable.sol";
 
 import {
@@ -12,8 +12,8 @@ import {
     WithdrawableUpgradeable
 } from "../internal-upgradeable/WithdrawableUpgradeable.sol";
 import {
-    SignableUpgradeable,
-    Bytes32Address
+    Bytes32Address,
+    SignableUpgradeable
 } from "../internal-upgradeable/SignableUpgradeable.sol";
 
 import {ITreasury} from "./interfaces/ITreasury.sol";
@@ -196,12 +196,7 @@ abstract contract TreasuryUpgradeable is
 
         erc20Balances[token_] += value_;
 
-        emit Received(
-            abi.decode(data_, (address)),
-            token_,
-            abi.encode(value_),
-            data_
-        );
+        emit Received(_msgSender(), token_, abi.encode(value_), data_);
 
         return IWithdrawableUpgradeable.notifyERC20Transfer.selector;
     }

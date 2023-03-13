@@ -47,13 +47,7 @@ contract MulticallUpgradeable is
     function _multicall(
         CallData[] calldata calldata_,
         bytes calldata
-    )
-        internal
-        virtual
-        nonDelegatecall
-        nonReentrant
-        returns (bytes[] memory results)
-    {
+    ) internal virtual nonReentrant returns (bytes[] memory results) {
         uint256 length = calldata_.length;
         results = new bytes[](length);
         bool ok;

@@ -3,8 +3,6 @@ pragma solidity ^0.8.17;
 
 import {ITreasury} from "./Treasury.sol";
 
-import {MulticallUpgradeable} from "./MulticallUpgradeable.sol";
-
 import {
     UUPSUpgradeable
 } from "../oz-upgradeable/proxy/utils/UUPSUpgradeable.sol";
@@ -15,9 +13,6 @@ import {
     AccessControlEnumerableUpgradeable
 } from "../oz-upgradeable/access/AccessControlEnumerableUpgradeable.sol";
 
-import {
-    ProxyCheckerUpgradeable
-} from "../internal-upgradeable/ProxyCheckerUpgradeable.sol";
 import {
     FundForwarderUpgradeable,
     IFundForwarderUpgradeable
@@ -35,7 +30,6 @@ abstract contract AuthorityUpgradeable is
     IAuthority,
     UUPSUpgradeable,
     PausableUpgradeable,
-    MulticallUpgradeable,
     FundForwarderUpgradeable,
     BlacklistableUpgradeable,
     AccessControlEnumerableUpgradeable
@@ -111,11 +105,9 @@ abstract contract AuthorityUpgradeable is
 
     function __Authority_init(
         address admin_,
-        bytes memory,
         bytes32[] calldata roles_,
         address[] calldata operators_
     ) internal virtual onlyInitializing {
-        __Multicall_init();
         __Pausable_init_unchained();
         __Authority_init_unchained(admin_, roles_, operators_);
     }
@@ -147,20 +139,6 @@ abstract contract AuthorityUpgradeable is
                 ++i;
             }
         }
-    }
-
-    function _multicall(
-        CallData[] calldata calldata_,
-        bytes calldata extraData_
-    )
-        internal
-        override
-        onlyRole(DEFAULT_ADMIN_ROLE)
-        nonDelegatecall
-        nonReentrant
-        returns (bytes[] memory results)
-    {
-        return super._multicall(calldata_, extraData_);
     }
 
     function _authorizeUpgrade(
