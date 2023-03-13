@@ -40,7 +40,7 @@ abstract contract AuthorityUpgradeable is
 
     function changeVault(
         address vault_
-    ) external override onlyRole(DEFAULT_ADMIN_ROLE) {
+    ) external override onlyRole(Roles.OPERATOR_ROLE) {
         _changeVault(vault_);
 
         address[] memory proxies = getAllRoleMembers(Roles.PROXY_ROLE);

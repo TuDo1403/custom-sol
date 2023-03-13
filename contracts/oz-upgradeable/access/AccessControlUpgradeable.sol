@@ -11,22 +11,6 @@ import {IAccessControlUpgradeable} from "./IAccessControlUpgradeable.sol";
 import {BitMap256} from "../../libraries/structs/BitMap256.sol";
 import {Bytes32Address} from "../../libraries/Bytes32Address.sol";
 
-interface IOwnableUpgradeable {
-    error Ownable__Unauthorized();
-    error Ownable__NonZeroAddress();
-
-    event OwnershipTransferred(
-        address indexed previousOwner,
-        address indexed newOwner
-    );
-
-    function renounceOwnership() external;
-
-    function transferOwnership(address newOwner) external;
-
-    function owner() external view returns (address _owner);
-}
-
 /**
  * @dev Contract module that allows children to implement role-based access
  * control mechanisms. This is a lightweight version that doesn't allow enumerating role
