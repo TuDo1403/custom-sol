@@ -493,7 +493,7 @@ abstract contract ERC721Upgradeable is
 
             // delete _getApproved[tokenId];
             mstore(0x20, _getApproved.slot)
-            mstore(keccak256(0x00, 0x40), 0)
+            sstore(keccak256(0x00, 0x40), 0)
 
             // ++_balanceOf[to]
             // cached _balanceOf slot for later use

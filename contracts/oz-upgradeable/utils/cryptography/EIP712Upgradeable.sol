@@ -83,12 +83,13 @@ abstract contract EIP712Upgradeable is Initializable {
         bytes32 versionHash
     ) internal view returns (bytes32 domainSeparatorV4) {
         assembly {
-            mstore(0, typeHash)
-            mstore(32, nameHash)
-            mstore(64, versionHash)
-            mstore(96, chainid())
-            mstore(128, address())
-            domainSeparatorV4 := keccak256(0, 160)
+            let freeMemPtr := mload(0x40)
+            mstore(freeMemPtr, typeHash)
+            mstore(add(freeMemPtr, 0x20), nameHash)
+            mstore(add(freeMemPtr, 0x40), versionHash)
+            mstore(add(freeMemPtr, 0x60), chainid())
+            mstore(add(freeMemPtr, 0x80), address())
+            domainSeparatorV4 := keccak256(freeMemPtr, 160)
         }
     }
 
