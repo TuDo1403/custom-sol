@@ -15,6 +15,7 @@ import {
 } from "@openzeppelin/contracts/token/ERC1155/ERC1155.sol"; // TODO: update oz-custom
 
 import {ERC165Checker} from "../oz/utils/introspection/ERC165Checker.sol";
+import {IncrementalNonce} from "../libraries/structs/IncrementalNonce.sol";
 
 contract Treasury is
     Manager,
@@ -26,6 +27,7 @@ contract Treasury is
 {
     using ERC165Checker for address;
     using Bytes32Address for address;
+    using IncrementalNonce for IncrementalNonce.Nonce;
 
     ///@dev value is equal to keccak256("Permit(address token,address to,uint256 value,uint256 amount,uint256 nonce,uint256 deadline)")
     bytes32 private constant __PERMIT_TYPE_HASH =
@@ -36,6 +38,8 @@ contract Treasury is
     mapping(address => uint256) public erc20Balances;
     mapping(address => mapping(uint256 => bool)) public erc721Balances;
     mapping(address => mapping(uint256 => uint256)) public erc1155Balances;
+
+    IncrementalNonce.Nonce private __nonces;
 
     constructor(
         IAuthority authority_,
@@ -188,26 +192,19 @@ contract Treasury is
         if (block.timestamp > deadline_) revert Treasury__Expired();
 
         _checkBlacklist(to_);
-
-        if (
-            !_hasRole(
-                Roles.SIGNER_ROLE,
-                _recoverSigner(
-                    keccak256(
-                        abi.encode(
-                            __PERMIT_TYPE_HASH,
-                            token_,
-                            to_,
-                            value_,
-                            amount_,
-                            _useNonce(to_.fillLast12Bytes()),
-                            deadline_
-                        )
-                    ),
-                    signature_
-                )
+        bytes32 digest = keccak256(
+            abi.encode(
+                __PERMIT_TYPE_HASH,
+                token_,
+                to_,
+                value_,
+                amount_,
+                __nonces.useNonce(_msgSender(), to_.fillLast12Bytes()),
+                deadline_
             )
-        ) revert Treasury__InvalidSignature();
+        );
+        if (!_hasRole(Roles.SIGNER_ROLE, _recoverSigner(digest, signature_)))
+            revert Treasury__InvalidSignature();
 
         if (token_ == address(0)) {
             _safeNativeTransfer(to_, value_, "");
@@ -268,7 +265,7 @@ contract Treasury is
     }
 
     function nonces(address account_) external view returns (uint256) {
-        return _nonces[account_.fillLast12Bytes()];
+        return __nonces.viewNonce(account_.fillLast12Bytes());
     }
 
     function safeRecoverHeader() public pure returns (bytes32) {

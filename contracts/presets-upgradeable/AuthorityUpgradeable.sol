@@ -43,20 +43,28 @@ abstract contract AuthorityUpgradeable is
     ) external override onlyRole(Roles.OPERATOR_ROLE) {
         _changeVault(vault_);
 
-        address[] memory proxies = getAllRoleMembers(Roles.PROXY_ROLE);
-
-        uint256 length = proxies.length;
+        bytes32 proxyRole = Roles.PROXY_ROLE;
+        uint256 length = getRoleMemberCount(proxyRole);
         bool[] memory success = new bool[](length);
+        address proxy;
         for (uint256 i; i < length; ) {
-            (success[i], ) = proxies[i].call(
-                abi.encodeCall(IFundForwarderUpgradeable.changeVault, (vault_))
-            );
+            proxy = getRoleMember(proxyRole, i);
+
+            if (!(proxy == address(this) || proxy.code.length == 0)) {
+                (success[i], ) = proxy.call(
+                    abi.encodeCall(
+                        IFundForwarderUpgradeable.changeVault,
+                        (vault_)
+                    )
+                );
+            }
+
             unchecked {
                 ++i;
             }
         }
 
-        emit VaultMultiUpdated(_msgSender(), vault_, proxies, success);
+        emit VaultMultiUpdated(_msgSender(), vault_, success);
     }
 
     function setRoleAdmin(

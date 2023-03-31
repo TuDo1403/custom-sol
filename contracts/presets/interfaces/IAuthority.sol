@@ -8,7 +8,6 @@ interface IAuthority {
     event VaultMultiUpdated(
         address indexed operator,
         address indexed vault,
-        address[] proxies,
         bool[] success
     );
 

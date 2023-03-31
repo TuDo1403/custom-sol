@@ -73,4 +73,6 @@ contract MulticallUpgradeable is
         if (address(this) != __original)
             revert Multicall__DelegatecallNotAllowed();
     }
+
+    uint256[49] private __gap;
 }

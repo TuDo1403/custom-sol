@@ -7,6 +7,10 @@ import {Signable, Bytes32Address} from "../../../../internal/Signable.sol";
 
 import {IERC20Permit} from "./IERC20Permit.sol";
 
+import {
+    IncrementalNonce
+} from "../../../../libraries/structs/IncrementalNonce.sol";
+
 /**
  * @dev Implementation of the ERC20 Permit extension allowing approvals to be made via signatures, as defined in
  * https://eips.ethereum.org/EIPS/eip-2612[EIP-2612].
@@ -19,6 +23,9 @@ import {IERC20Permit} from "./IERC20Permit.sol";
  */
 abstract contract ERC20Permit is ERC20, IERC20Permit, Signable {
     using Bytes32Address for address;
+    using IncrementalNonce for IncrementalNonce.Nonce;
+
+    IncrementalNonce.Nonce private __nonces;
 
     // solhint-disable-next-line var-name-mixedcase
     /// @dev value is equal to keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)")
@@ -57,7 +64,7 @@ abstract contract ERC20Permit is ERC20, IERC20Permit, Signable {
             }
 
             mstore(0x00, owner)
-            mstore(0x20, _nonces.slot)
+            mstore(0x20, __nonces.slot)
             let nonceKey := keccak256(0x00, 0x40)
             let nonce := sload(nonceKey)
 
@@ -106,7 +113,7 @@ abstract contract ERC20Permit is ERC20, IERC20Permit, Signable {
     function nonces(address account_) external view returns (uint256 nonce) {
         assembly {
             mstore(0x00, account_)
-            mstore(0x20, _nonces.slot)
+            mstore(0x20, __nonces.slot)
             nonce := sload(keccak256(0x00, 0x40))
         }
     }

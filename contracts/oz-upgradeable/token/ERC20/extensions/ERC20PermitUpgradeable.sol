@@ -11,6 +11,10 @@ import {
 
 import {IERC20PermitUpgradeable} from "./IERC20PermitUpgradeable.sol";
 
+import {
+    IncrementalNonce
+} from "../../../../libraries/structs/IncrementalNonce.sol";
+
 /**
  * @dev Implementation of the ERC20 Permit extension allowing approvals to be made via signatures, as defined in
  * https://eips.ethereum.org/EIPS/eip-2612[EIP-2612].
@@ -27,11 +31,14 @@ abstract contract ERC20PermitUpgradeable is
     IERC20PermitUpgradeable
 {
     using Bytes32Address for address;
+    using IncrementalNonce for IncrementalNonce.Nonce;
 
     // solhint-disable-next-line var-name-mixedcase
     /// @dev value is equal to keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)")
     bytes32 private constant __PERMIT_TYPEHASH =
         0x6e71edae12b1b97f4d1f60370fef10105fa2faae0126114a169c64845d6126c9;
+
+    IncrementalNonce.Nonce private __nonces;
 
     /**
      * @dev Initializes the {EIP712} domain separator using the `name` parameter, and setting `version` to `"1"`.
@@ -65,7 +72,7 @@ abstract contract ERC20PermitUpgradeable is
                 revert(0x1c, 0x04)
             }
             mstore(0x00, owner)
-            mstore(0x20, _nonces.slot)
+            mstore(0x20, __nonces.slot)
             let nonceKey := keccak256(0x00, 0x40)
             let nonce := sload(nonceKey)
 
@@ -112,7 +119,7 @@ abstract contract ERC20PermitUpgradeable is
     }
 
     function nonces(address account_) external view returns (uint256) {
-        return _nonces[account_.fillLast12Bytes()];
+        return __nonces.viewNonce(account_.fillLast12Bytes());
     }
 
     uint256[50] private __gap;

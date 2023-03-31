@@ -8,6 +8,10 @@ import {
 
 import {IERC721PermitUpgradeable} from "./IERC721PermitUpgradeable.sol";
 
+import {
+    IncrementalNonce
+} from "../../../../libraries/structs/IncrementalNonce.sol";
+
 /// @title ERC721 with permit
 /// @notice Nonfungible tokens that support an approve via signature, i.e. permit
 abstract contract ERC721PermitUpgradeable is
@@ -15,6 +19,10 @@ abstract contract ERC721PermitUpgradeable is
     SignableUpgradeable,
     IERC721PermitUpgradeable
 {
+    using IncrementalNonce for IncrementalNonce.Nonce;
+
+    IncrementalNonce.Nonce private __nonces;
+
     function __ERC721Permit_init(
         string calldata name_,
         string calldata symbol_
@@ -67,7 +75,7 @@ abstract contract ERC721PermitUpgradeable is
 
             mstore(add(freeMemPtr, 0x40), tokenId_)
             let nonceMemPtr := add(freeMemPtr, 0x60)
-            mstore(nonceMemPtr, _nonces.slot)
+            mstore(nonceMemPtr, __nonces.slot)
 
             // increment nonce
             let nonceKey := keccak256(add(freeMemPtr, 0x40), 0x40)
@@ -93,7 +101,7 @@ abstract contract ERC721PermitUpgradeable is
     ) external view override returns (uint256 nonce) {
         assembly {
             mstore(0x00, tokenId_)
-            mstore(0x20, _nonces.slot)
+            mstore(0x20, __nonces.slot)
             nonce := sload(keccak256(0x00, 0x40))
         }
     }

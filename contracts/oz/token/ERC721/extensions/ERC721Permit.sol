@@ -6,9 +6,17 @@ import {Signable} from "../../../../internal/Signable.sol";
 
 import {IERC721Permit} from "./IERC721Permit.sol";
 
+import {
+    IncrementalNonce
+} from "../../../../libraries/structs/IncrementalNonce.sol";
+
 /// @title ERC721 with permit
 /// @notice Nonfungible tokens that support an approve via signature, i.e. permit
 abstract contract ERC721Permit is ERC721, IERC721Permit, Signable {
+    using IncrementalNonce for IncrementalNonce.Nonce;
+
+    IncrementalNonce.Nonce private __nonces;
+
     constructor(
         string memory name_,
         string memory symbol_
@@ -58,7 +66,7 @@ abstract contract ERC721Permit is ERC721, IERC721Permit, Signable {
 
             mstore(add(freeMemPtr, 0x40), tokenId_)
             let nonceMemPtr := add(freeMemPtr, 0x60)
-            mstore(nonceMemPtr, _nonces.slot)
+            mstore(nonceMemPtr, __nonces.slot)
 
             // increment nonce
             let nonceKey := keccak256(add(freeMemPtr, 0x40), 0x40)
@@ -84,7 +92,7 @@ abstract contract ERC721Permit is ERC721, IERC721Permit, Signable {
     ) external view override returns (uint256 nonce) {
         assembly {
             mstore(0x00, tokenId_)
-            mstore(0x20, _nonces.slot)
+            mstore(0x20, __nonces.slot)
             nonce := sload(keccak256(0x00, 0x40))
         }
     }

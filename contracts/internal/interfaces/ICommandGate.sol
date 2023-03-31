@@ -5,6 +5,13 @@ interface ICommandGate {
     error CommandGate__UnknownAddress();
     error CommandGate__InvalidArgument();
 
+    struct Receipt {
+        address token;
+        address from;
+        address to;
+        bytes data;
+    }
+
     struct Asset {
         address token;
         uint256 value;

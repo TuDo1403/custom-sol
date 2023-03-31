@@ -33,6 +33,8 @@ import {
     ERC165CheckerUpgradeable
 } from "../oz-upgradeable/utils/introspection/ERC165CheckerUpgradeable.sol";
 
+import {IncrementalNonce} from "../libraries/structs/IncrementalNonce.sol";
+
 abstract contract TreasuryUpgradeable is
     ITreasury,
     ManagerUpgradeable,
@@ -43,6 +45,7 @@ abstract contract TreasuryUpgradeable is
 {
     using Bytes32Address for address;
     using ERC165CheckerUpgradeable for address;
+    using IncrementalNonce for IncrementalNonce.Nonce;
 
     ///@dev value is equal to keccak256("Permit(address token,address to,uint256 value,uint256 amount,uint256 nonce,uint256 deadline)")
     bytes32 private constant __PERMIT_TYPE_HASH =
@@ -53,6 +56,8 @@ abstract contract TreasuryUpgradeable is
     mapping(address => uint256) public erc20Balances;
     mapping(address => mapping(uint256 => bool)) public erc721Balances;
     mapping(address => mapping(uint256 => uint256)) public erc1155Balances;
+
+    IncrementalNonce.Nonce private __nonces;
 
     function __Treasury_init(
         IAuthority authority_,
@@ -224,7 +229,10 @@ abstract contract TreasuryUpgradeable is
                             to_,
                             value_,
                             amount_,
-                            _useNonce(to_.fillLast12Bytes()),
+                            __nonces.useNonce(
+                                _msgSender(),
+                                to_.fillLast12Bytes()
+                            ),
                             deadline_
                         )
                     ),
@@ -310,7 +318,7 @@ abstract contract TreasuryUpgradeable is
     }
 
     function nonces(address account_) external view returns (uint256) {
-        return _nonces[account_.fillLast12Bytes()];
+        return __nonces.viewNonce(account_.fillLast12Bytes());
     }
 
     function safeRecoverHeader() public pure returns (bytes32) {
@@ -348,4 +356,6 @@ abstract contract TreasuryUpgradeable is
         if (!token_.supportsInterface(interfaceId_))
             revert Treasury__InvalidFunctionCall();
     }
+
+    uint256[45] private __gap;
 }

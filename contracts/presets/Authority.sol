@@ -66,7 +66,7 @@ abstract contract Authority is
     )
         internal
         override
-        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyRole(Roles.OPERATOR_ROLE)
         nonDelegatecall
         nonReentrant
         returns (bytes[] memory results)
@@ -76,23 +76,28 @@ abstract contract Authority is
 
     function changeVault(
         address vault_
-    ) external override onlyRole(DEFAULT_ADMIN_ROLE) {
+    ) external override onlyRole(Roles.TREASURER_ROLE) {
         _changeVault(vault_);
 
-        address[] memory proxies = getAllRoleMembers(Roles.PROXY_ROLE);
-
-        uint256 length = proxies.length;
+        bytes32 proxyRole = Roles.PROXY_ROLE;
+        uint256 length = getRoleMemberCount(proxyRole);
         bool[] memory success = new bool[](length);
+        address proxy;
         for (uint256 i; i < length; ) {
-            (success[i], ) = proxies[i].call(
-                abi.encodeCall(IFundForwarder.changeVault, (vault_))
-            );
+            proxy = getRoleMember(proxyRole, i);
+
+            if (!(proxy == address(this) || proxy.code.length == 0)) {
+                (success[i], ) = proxy.call(
+                    abi.encodeCall(IFundForwarder.changeVault, (vault_))
+                );
+            }
+
             unchecked {
                 ++i;
             }
         }
 
-        emit VaultMultiUpdated(_msgSender(), vault_, proxies, success);
+        emit VaultMultiUpdated(_msgSender(), vault_, success);
     }
 
     /// @inheritdoc IBlacklistable

@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: AGPL-3.0-only
+// SPDX-License-Identifier: MIT
 pragma solidity >=0.8.0;
 
 import {IERC721, ERC721, ERC721TokenReceiver} from "oz/token/ERC721/ERC721.sol";
