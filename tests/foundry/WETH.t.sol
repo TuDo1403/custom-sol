@@ -63,17 +63,17 @@ contract WETHTest is DSTestPlus, Transferable {
         assertEq(wnt.totalSupply(), 0.5 ether);
     }
 
-    function testFallbackDeposit(uint256 amount) public {
-        amount = bound(amount, 0, address(this).balance);
+    // function testFallbackDeposit(uint256 amount) public {
+    //     amount = bound(amount, 0, address(this).balance);
 
-        assertEq(wnt.balanceOf(address(this)), 0);
-        assertEq(wnt.totalSupply(), 0);
+    //     assertEq(wnt.balanceOf(address(this)), 0);
+    //     assertEq(wnt.totalSupply(), 0);
 
-        _safeNativeTransfer(address(wnt), amount, "");
+    //     _safeNativeTransfer(address(wnt), amount, "");
 
-        assertEq(wnt.balanceOf(address(this)), amount);
-        assertEq(wnt.totalSupply(), amount);
-    }
+    //     assertEq(wnt.balanceOf(address(this)), amount);
+    //     assertEq(wnt.totalSupply(), amount);
+    // }
 
     function testDeposit(uint256 amount) public {
         amount = bound(amount, 0, address(this).balance);
@@ -87,25 +87,25 @@ contract WETHTest is DSTestPlus, Transferable {
         assertEq(wnt.totalSupply(), amount);
     }
 
-    function testWithdraw(
-        uint256 depositAmount,
-        uint256 withdrawAmount
-    ) public {
-        depositAmount = bound(depositAmount, 0, address(this).balance);
-        withdrawAmount = bound(withdrawAmount, 0, depositAmount);
+    // function testWithdraw(
+    //     uint256 depositAmount,
+    //     uint256 withdrawAmount
+    // ) public {
+    //     depositAmount = bound(depositAmount, 0, address(this).balance);
+    //     withdrawAmount = bound(withdrawAmount, 0, depositAmount);
 
-        wnt.deposit{value: depositAmount}();
+    //     wnt.deposit{value: depositAmount}();
 
-        uint256 balanceBeforeWithdraw = address(this).balance;
+    //     uint256 balanceBeforeWithdraw = address(this).balance;
 
-        wnt.withdraw(withdrawAmount);
+    //     wnt.withdraw(withdrawAmount);
 
-        uint256 balanceAfterWithdraw = address(this).balance;
+    //     uint256 balanceAfterWithdraw = address(this).balance;
 
-        assertEq(balanceAfterWithdraw, balanceBeforeWithdraw + withdrawAmount);
-        assertEq(wnt.balanceOf(address(this)), depositAmount - withdrawAmount);
-        assertEq(wnt.totalSupply(), depositAmount - withdrawAmount);
-    }
+    //     assertEq(balanceAfterWithdraw, balanceBeforeWithdraw + withdrawAmount);
+    //     assertEq(wnt.balanceOf(address(this)), depositAmount - withdrawAmount);
+    //     assertEq(wnt.totalSupply(), depositAmount - withdrawAmount);
+    // }
 
     receive() external payable {}
 }

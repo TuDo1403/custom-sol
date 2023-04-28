@@ -92,6 +92,7 @@ abstract contract ERC721Rentable is IERC721Rentable, ERC721 {
                 ) {
                     sstore(key, 0)
 
+                    mstore(0x00, 0)
                     log3(
                         0x00,
                         0x20,

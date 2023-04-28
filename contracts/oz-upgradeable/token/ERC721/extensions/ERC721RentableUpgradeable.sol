@@ -101,9 +101,10 @@ abstract contract ERC721RentableUpgradeable is
                 ) {
                     sstore(key, 0)
 
+                    mstore(0x00, 0)
                     log3(
                         0x00,
-                        0x08,
+                        0x20,
                         /// @dev value is equal to keccak256("UpdateUser(uint256,address,uint64)")
                         0x4e06b4e7000e659094299b3533b47b6aa8ad048e95e872d23d1f4ee55af89cfe,
                         0,

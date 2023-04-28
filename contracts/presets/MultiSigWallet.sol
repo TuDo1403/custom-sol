@@ -1,6 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
+import {Signable} from "../internal/Signable.sol";
+import {Executable} from "../internal/Executable.sol";
+
+import {NonceBitMaps} from "../libraries/structs/NonceBitMaps.sol";
+import {MerkleProof} from "../oz/utils/cryptography/MerkleProof.sol";
+
 // import "../internal/ProxyChecker.sol";
 // import "../internal/FundForwarder.sol";
 
@@ -8,6 +14,30 @@ pragma solidity ^0.8.17;
 
 // import "../libraries/SSTORE2.sol";
 // import "../oz/utils/structs/BitMaps.sol";
+
+// contract MultiSigWallet is Executable {
+//     using MerkleProof for bytes32[];
+//     using NonceBitMaps for NonceBitMaps.NonceBitMap;
+
+//     bytes32 public root;
+
+//     NonceBitMaps.NonceBitMap private __nonces;
+
+//     constructor(string memory name_) payable Signable(name_, "1") {}
+
+//     function execute(
+//         bytes calldata data_,
+//         CallParams calldata callParams_
+//     ) external {
+//         _exec(_msgSender(), data_, callParams_);
+//     }
+
+//     function _beforeExec(
+//         address sender_,
+//         bytes calldata data_,
+//         CallParams calldata callParams_
+//     ) internal view override {}
+// }
 
 // contract MultiSigWallet is ProxyChecker, FundForwarder, IMultiSigWallet {
 //     using SSTORE2 for *;

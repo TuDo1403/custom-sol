@@ -1,8 +1,8 @@
 {
-  "name": "oz-custom",
+  "name": "solit",
   "version": "1.1.9-alpha-1",
-  "description": "Custom OpenZeppelin Contracts for minimal gas cost",
-  "author": "tudo <[minhtu@bacoor.co](mailto:minhtu@bacoor.co)>",
+  "description": "A Selection of Modified Internal and External Modules for Cost-Efficient Smart Contract Development sourced from @openzeppelin and solmate Libraries",
+  "author": "tudo <[tudo.dev@gmail.com](mailto:tudo.dev@gmail.com)>",
   "license": "MIT",
   "packageManager": "yarn@3.2.3",
   "files": [
